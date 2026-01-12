@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  companyName   String?
+  firstName     String?
+  lastName      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  documents     Document[]
+  clients       Client[]
+  subscriptions Subscription[]
+  
+  @@map("users")
+}
+
+model Client {
+  id          String    @id @default(uuid())
+  userId      String
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  postalCode  String?
+  country     String?
+  vatNumber   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents   Document[]
+  
+  @@map("clients")
+}
+
+model Document {
+  id              String    @id @default(uuid())
+  userId          String
+  clientId        String?
+  documentNumber  String    @unique
+  title           String
+  type            DocumentType @default(INVOICE)
+  status          DocumentStatus @default(DRAFT)
+  
+  // Document data (JSON structure)
+  // Structure: { title, description, issueDate, dueDate, lineItems, windows?, doors?, shutters?, companyInfo?, clientInfo? }
+  data            Json
+  
+  // Technical specifications (conditional flags for quick filtering)
+  hasWindows      Boolean   @default(false)
+  hasDoors        Boolean   @default(false)
+  hasShutters     Boolean   @default(false)
+  
+  // Financial fields (calculated from data)
+  subtotal        Decimal   @default(0) @db.Decimal(10, 2)
+  vatRate         Decimal   @default(0) @db.Decimal(5, 2)
+  vatAmount       Decimal   @default(0) @db.Decimal(10, 2)
+  total           Decimal   @default(0) @db.Decimal(10, 2)
+  currency        String    @default("EUR")
+  
+  // PDF and SVG
+  pdfUrl          String?
+  svgData         Json?     // Structure: { windows?, doors?, shutters?, combined? }
+  
+  // Public viewing token (for client-facing pages)
+  publicToken     String?   @unique
+  
+  // Audit trail
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sentAt          DateTime?
+  viewedAt        DateTime?
+  paidAt          DateTime?
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client          Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  auditLogs       AuditLog[]
+  
+  @@index([userId, status])
+  @@index([userId, type])
+  @@index([publicToken])
+  @@map("documents")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  documentId  String
+  action      String    // "created", "sent", "viewed", "downloaded"
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+  
+  // Relations
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  
+  @@map("audit_logs")
+}
+
+model Subscription {
+  id                String    @id @default(uuid())
+  userId            String
+  stripeCustomerId  String?   @unique
+  stripeSubscriptionId String? @unique
+  status            SubscriptionStatus @default(TRIAL)
+  plan              SubscriptionPlan @default(BASIC)
+  currentPeriodEnd  DateTime?
+  trialEndsAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+enum DocumentType {
+  INVOICE
+  QUOTE
+  PROFORMA
+}
+
+enum DocumentStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
