@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: myvision-postgres
+    environment:
+      POSTGRES_DB: myvision
+      POSTGRES_USER: myvision
+      POSTGRES_PASSWORD: myvision
+    ports:
+      - "5432:5432"
+    volumes:
+      - myvision-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  myvision-postgres-data:
+
