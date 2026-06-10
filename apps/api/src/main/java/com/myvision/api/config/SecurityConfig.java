@@ -1,8 +1,16 @@
 package com.myvision.api.config;
 
+import com.myvision.api.controller.*;
+import com.myvision.api.dto.*;
+import com.myvision.api.entity.*;
+import com.myvision.api.exception.*;
+import com.myvision.api.repository.*;
+import com.myvision.api.service.*;
+import com.myvision.api.util.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myvision.api.auth.JwtAuthenticationFilter;
-import com.myvision.api.common.ApiError;
+import com.myvision.api.util.JwtAuthenticationFilter;
+import com.myvision.api.dto.ApiError;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +50,15 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers("/api/health", "/api/auth/register", "/api/auth/login").permitAll()
+            .requestMatchers(
+                "/api/health",
+                "/api/auth/register",
+                "/api/auth/login",
+                "/api/auth/refresh",
+                "/api/auth/forgot-password",
+                "/api/auth/reset-password",
+                "/api/auth/verify-email"
+            ).permitAll()
             .requestMatchers("/docs", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
             .permitAll()
             .anyRequest().authenticated()
@@ -95,4 +111,3 @@ public class SecurityConfig {
     return source;
   }
 }
-

@@ -38,3 +38,11 @@ jwt:
   secret: ${JWT_SECRET:replace-this-with-a-long-random-secret-for-local-dev-only}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
+auth:
+  refresh-token-expiration-ms: ${AUTH_REFRESH_TOKEN_EXPIRATION_MS:2592000000}
+  password-reset-expiration-ms: ${AUTH_PASSWORD_RESET_EXPIRATION_MS:3600000}
+  email-verification-expiration-ms: ${AUTH_EMAIL_VERIFICATION_EXPIRATION_MS:86400000}
+  return-sensitive-tokens: ${AUTH_RETURN_SENSITIVE_TOKENS:false}
+  rate-limit:
+    max-attempts: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:5}
+    window-ms: ${AUTH_RATE_LIMIT_WINDOW_MS:900000}

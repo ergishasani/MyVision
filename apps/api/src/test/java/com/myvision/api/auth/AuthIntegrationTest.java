@@ -96,6 +96,7 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
     mockMvc.perform(get("/api/auth/me")
             .header("Authorization", "Bearer " + token))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").isNotEmpty())
         .andExpect(jsonPath("$.user.email").value("me-test@myvision.dev"))
         .andExpect(jsonPath("$.company.name").value("Me Co"));
   }

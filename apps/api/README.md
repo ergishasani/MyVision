@@ -65,3 +65,20 @@ Current user:
 GET http://localhost:8080/api/auth/me
 Authorization: Bearer YOUR_TOKEN
 ```
+
+## Package Structure
+
+The backend uses a layer-based Spring Boot structure:
+
+```txt
+com.myvision.api
+  config       Spring/OpenAPI/security configuration
+  controller   REST API endpoints
+  service      Business logic
+  repository   Spring Data database access
+  entity       JPA entities and enums
+  dto          Request/response DTOs
+  exception    API errors and global exception handling
+  util         Security/helper infrastructure
+  mapper       Reserved for DTO/entity mappers
+```

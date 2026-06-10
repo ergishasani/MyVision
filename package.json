@@ -1,0 +1,15 @@
+{
+  "name": "myvision",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@myvision/web",
+    "dev:web": "npm run dev --workspace=@myvision/web",
+    "build": "npm run build --workspace=@myvision/web",
+    "build:web": "npm run build --workspace=@myvision/web",
+    "lint": "npm run lint --workspace=@myvision/web",
+    "start:web": "npm run start --workspace=@myvision/web"
+  }
+}
