@@ -10,7 +10,25 @@ services:
       - "5432:5432"
     volumes:
       - myvision-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myvision -d myvision"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./apps/api
+    container_name: myvision-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/myvision
+      DATABASE_USERNAME: myvision
+      DATABASE_PASSWORD: myvision
+      JWT_SECRET: ${JWT_SECRET:-replace-this-with-a-long-random-secret-for-local-dev-only}
+    ports:
+      - "8080:8080"
 
 volumes:
   myvision-postgres-data:
-

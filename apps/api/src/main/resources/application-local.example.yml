@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db.toyrbakpcbcishmaulbg.supabase.co:5432/postgres
+    username: postgres
+    password: ${SUPABASE_DB_PASSWORD:YOUR_SUPABASE_DB_PASSWORD}
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:replace-this-with-a-long-random-secret}
+  expiration-ms: 86400000

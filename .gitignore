@@ -16,6 +16,7 @@ build/
 .env
 .env.local
 .env.*.local
+application-local.yml
 
 # IDE
 .idea/
@@ -24,4 +25,3 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-
