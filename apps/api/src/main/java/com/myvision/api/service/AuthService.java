@@ -21,6 +21,8 @@ import com.myvision.api.entity.CompanySettings;
 import com.myvision.api.repository.CompanySettingsRepository;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,9 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final TokenService tokenService;
+  private final EmailService emailService;
   private final boolean returnSensitiveTokens;
+  private final String frontendBaseUrl;
 
   public AuthService(
       UserRepository userRepository,
@@ -46,7 +50,9 @@ public class AuthService {
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
       TokenService tokenService,
-      @Value("${auth.return-sensitive-tokens:false}") boolean returnSensitiveTokens
+      EmailService emailService,
+      @Value("${auth.return-sensitive-tokens:false}") boolean returnSensitiveTokens,
+      @Value("${auth.frontend-base-url}") String frontendBaseUrl
   ) {
     this.userRepository = userRepository;
     this.companyRepository = companyRepository;
@@ -55,7 +61,9 @@ public class AuthService {
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.tokenService = tokenService;
+    this.emailService = emailService;
     this.returnSensitiveTokens = returnSensitiveTokens;
+    this.frontendBaseUrl = frontendBaseUrl.replaceAll("/+$", "");
   }
 
   @Transactional
@@ -86,7 +94,10 @@ public class AuthService {
     member.setCompany(company);
     member.setRole(CompanyMemberRole.owner);
     companyMemberRepository.save(member);
-    tokenService.issueEmailVerificationToken(user);
+    String verificationToken = tokenService.issueEmailVerificationToken(user);
+    emailService.sendEmailVerificationEmail(
+        user.getEmail(),
+        frontendBaseUrl + "/verify-email?token=" + urlEncode(verificationToken));
 
     return responseWithToken(user, company);
   }
@@ -141,6 +152,9 @@ public class AuthService {
     return userRepository.findByEmail(email)
         .map(user -> {
           String token = tokenService.issuePasswordResetToken(user);
+          emailService.sendPasswordResetEmail(
+              user.getEmail(),
+              frontendBaseUrl + "/reset-password?token=" + urlEncode(token));
           return returnSensitiveTokens
               ? MessageResponse.withToken("If that email exists, a reset link will be sent.", token)
               : MessageResponse.of("If that email exists, a reset link will be sent.");
@@ -187,5 +201,9 @@ public class AuthService {
 
   private String normalizeEmail(String email) {
     return email.trim().toLowerCase();
+  }
+
+  private String urlEncode(String value) {
+    return URLEncoder.encode(value, StandardCharsets.UTF_8);
   }
 }

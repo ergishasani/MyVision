@@ -26,6 +26,16 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 springdoc:
   swagger-ui:
     path: /docs
@@ -43,6 +53,33 @@ auth:
   password-reset-expiration-ms: ${AUTH_PASSWORD_RESET_EXPIRATION_MS:3600000}
   email-verification-expiration-ms: ${AUTH_EMAIL_VERIFICATION_EXPIRATION_MS:86400000}
   return-sensitive-tokens: ${AUTH_RETURN_SENSITIVE_TOKENS:false}
+  frontend-base-url: ${AUTH_FRONTEND_BASE_URL:http://localhost:3000}
   rate-limit:
     max-attempts: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:5}
     window-ms: ${AUTH_RATE_LIMIT_WINDOW_MS:900000}
+
+mail:
+  provider: ${MAIL_PROVIDER:log}
+  from: ${MAIL_FROM:MyVision <no-reply@myvision.visionbau.de>}
+  resend:
+    api-key: ${RESEND_API_KEY:}
+    endpoint: ${RESEND_ENDPOINT:https://api.resend.com/emails}
+
+storage:
+  provider: ${STORAGE_PROVIDER:local}
+  local-root: ${STORAGE_LOCAL_ROOT:.myvision-storage}
+  public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:8080/files}
+  supabase:
+    url: ${SUPABASE_URL:}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+    documents-bucket: ${SUPABASE_DOCUMENTS_BUCKET:myvision-documents}
+    public-bucket: ${SUPABASE_PUBLIC_BUCKET:myvision-public}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+compliance:
+  invoice-country: ${COMPLIANCE_INVOICE_COUNTRY:DE}
+  xrechnung:
+    enabled: ${COMPLIANCE_XRECHNUNG_ENABLED:true}

@@ -1,16 +1,16 @@
-# Graph Report - MyVision  (2026-06-10)
+# Graph Report - MyVision  (2026-06-11)
 
 ## Corpus Check
-- 159 files · ~23,416 words
+- 175 files · ~27,270 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1403 nodes · 2662 edges · 70 communities (62 shown, 8 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 236 edges (avg confidence: 0.8)
+- 1560 nodes · 2993 edges · 84 communities (75 shown, 9 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 267 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4ff09976`
+- Built from commit: `de2d4467`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -81,6 +81,16 @@
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 92|Community 92]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -96,6 +106,8 @@
 10. `String` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `Client` --inherits--> `BaseEntity`  [EXTRACTED]
+  apps/api/src/main/java/com/myvision/api/entity/Client.java → apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java
 - `Company` --inherits--> `BaseEntity`  [EXTRACTED]
   apps/api/src/main/java/com/myvision/api/entity/Company.java → apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java
 - `Invoice` --inherits--> `BaseEntity`  [EXTRACTED]
@@ -104,10 +116,8 @@
   apps/api/src/main/java/com/myvision/api/entity/Project.java → apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java
 - `Quote` --inherits--> `BaseEntity`  [EXTRACTED]
   apps/api/src/main/java/com/myvision/api/entity/Quote.java → apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java
-- `User` --inherits--> `BaseEntity`  [EXTRACTED]
-  apps/api/src/main/java/com/myvision/api/entity/User.java → apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java
 
-## Communities (70 total, 8 thin omitted)
+## Communities (84 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
@@ -118,8 +128,8 @@ Cohesion: 0.06
 Nodes (42): Optional, UUID, List, QuoteItem, UUID, Client, ClientRepository, ClientRequest (+34 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.05
-Nodes (24): Invoice, InvoiceItem, InvoiceResponse, List, BigDecimal, InvoiceStatus, LocalDate, OffsetDateTime (+16 more)
+Cohesion: 0.07
+Nodes (13): Invoice, InvoiceItem, InvoiceResponse, List, BigDecimal, InvoiceStatus, LocalDate, OffsetDateTime (+5 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.21
@@ -130,23 +140,23 @@ Cohesion: 0.07
 Nodes (21): Project, ProjectResponse, BigDecimal, LocalDate, ProjectStatus, String, UUID, ClientService (+13 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.05
-Nodes (4): CompanyResponse, Exception, AuditLogRepository, CompanySettingsRepository
+Cohesion: 0.06
+Nodes (3): Exception, AuditLogRepository, CompanySettingsRepository
 
 ### Community 6 - "Community 6"
-Cohesion: 0.06
-Nodes (13): Client, ClientResponse, OffsetDateTime, PrePersist, PreUpdate, UUID, OffsetDateTime, String (+5 more)
+Cohesion: 0.09
+Nodes (8): Client, ClientResponse, OffsetDateTime, String, UUID, ClientType, from(), Client
 
 ### Community 7 - "Community 7"
-Cohesion: 0.14
-Nodes (14): String, User, UUID, HttpServletRequest, HttpServletResponse, JwtService, Override, Claims (+6 more)
+Cohesion: 0.13
+Nodes (23): AccessDeniedException, CompanyAccessService, CompanyRepository, CurrentUserPrincipal, FileStorageService, PostMapping, String, ApiError (+15 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.06
 Nodes (38): OffsetDateTime, String, UUID, Company, Optional, Query, UUID, InvoiceItem (+30 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.21
+Cohesion: 0.22
 Nodes (12): Bean, HttpServletResponse, PasswordEncoder, String, AuthenticationConfiguration, AuthenticationManager, SecurityConfig, CorsConfigurationSource (+4 more)
 
 ### Community 10 - "Community 10"
@@ -154,16 +164,16 @@ Cohesion: 0.07
 Nodes (9): Company, Integer, String, Company, String, Company, String, from() (+1 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.11
-Nodes (9): Payment, PaymentResponse, BigDecimal, OffsetDateTime, String, UUID, from(), Payment (+1 more)
+Cohesion: 0.06
+Nodes (27): Payment, PaymentResponse, BigDecimal, OffsetDateTime, String, UUID, BigDecimal, List (+19 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.11
 Nodes (14): AbstractIntegrationTest, String, Test, Test, Test, Test, Test, AuthIntegrationTest (+6 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.08
-Nodes (25): AccessDeniedException, ApiError, CurrentUserPrincipal, Override, String, UserDetails, UserRepository, UUID (+17 more)
+Cohesion: 0.06
+Nodes (29): CurrentUserPrincipal, Override, String, UserDetails, UserRepository, UUID, String, User (+21 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.07
@@ -182,8 +192,8 @@ Cohesion: 0.08
 Nodes (23): dependencies, clsx, next, react, react-dom, tailwind-merge, devDependencies, eslint (+15 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.50
-Nodes (3): EmailVerificationTokenRepository, PasswordResetTokenRepository, RefreshTokenRepository
+Cohesion: 0.29
+Nodes (5): AuthResponse, LoginRequest, RefreshRequest, User, UUID
 
 ### Community 19 - "Community 19"
 Cohesion: 0.10
@@ -194,11 +204,11 @@ Cohesion: 0.12
 Nodes (9): String, String, String, String, BadRequestException, ForbiddenException, ResourceNotFoundException, UnauthorizedException (+1 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.12
-Nodes (8): User, OffsetDateTime, String, ResetPasswordRequest, from(), User, UserResponse, UserStatus
+Cohesion: 0.14
+Nodes (6): OffsetDateTime, String, ResetPasswordRequest, VerifyEmailRequest, User, UserStatus
 
 ### Community 22 - "Community 22"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (13): Company, OffsetDateTime, User, UUID, Override, CompanyMemberRole, CompanyMember, JavaType (+5 more)
 
 ### Community 23 - "Community 23"
@@ -206,15 +216,15 @@ Cohesion: 0.11
 Nodes (7): BigDecimal, Integer, LineItemKind, OffsetDateTime, String, UUID, QuoteItem
 
 ### Community 24 - "Community 24"
-Cohesion: 0.14
-Nodes (13): code:txt (src/main/resources/application-local.example.yml), code:txt (src/main/resources/application-local.yml), code:bash (mvn spring-boot:run -Dspring-boot.run.profiles=local), code:txt (http://localhost:8080/api/health), code:txt (POST http://localhost:8080/api/auth/register), code:json ({), code:txt (POST http://localhost:8080/api/auth/login), code:txt (GET http://localhost:8080/api/auth/me) (+5 more)
+Cohesion: 0.11
+Nodes (19): code:txt (src/main/resources/application-local.example.yml), code:txt (GET  /api/invoices/{id}/pdf), code:txt (com.myvision.api), code:txt (src/main/resources/application-local.yml), code:bash (mvn spring-boot:run -Dspring-boot.run.profiles=local), code:txt (http://localhost:8080/api/health), code:txt (MAIL_PROVIDER=resend), code:txt (POST http://localhost:8080/api/auth/register) (+11 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.24
 Nodes (10): CurrentUserPrincipal, GetMapping, List, PaymentRequest, PaymentResponse, PostMapping, ResponseStatus, UUID (+2 more)
 
 ### Community 26 - "Community 26"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (18): AuthResponse, CurrentUserPrincipal, ForgotPasswordRequest, GetMapping, HttpServletRequest, LoginRequest, LogoutRequest, MessageResponse (+10 more)
 
 ### Community 27 - "Community 27"
@@ -230,20 +240,20 @@ Cohesion: 0.12
 Nodes (8): BigDecimal, Company, OffsetDateTime, PrePersist, PreUpdate, String, UUID, CompanySettings
 
 ### Community 30 - "Community 30"
-Cohesion: 0.18
-Nodes (12): AuthResponse, Company, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest, String, Transactional (+4 more)
+Cohesion: 0.27
+Nodes (7): ForgotPasswordRequest, LogoutRequest, MessageResponse, RegisterRequest, String, Transactional, AuthService
 
 ### Community 31 - "Community 31"
 Cohesion: 0.19
-Nodes (9): CompanyMemberRepository, CompanyRepository, JwtService, PasswordEncoder, UserRepository, BadRequestException, CompanySettingsRepository, AuthRateLimiter (+1 more)
+Nodes (10): Company, CompanyMemberRepository, CompanyRepository, EmailService, JwtService, PasswordEncoder, UserRepository, CompanyResponse (+2 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.18
 Nodes (10): Backend (port 8080), code:txt (apps/web  - Next.js frontend), code:bash (docker compose up -d --build), code:bash (cp apps/web/.env.local.example apps/web/.env.local), Frontend (port 3000), Local development, MyVision, Production readiness (+2 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.22
-Nodes (12): CurrentUserPrincipal, GetMapping, InvoiceRequest, InvoiceResponse, InvoiceService, InvoiceUpdateRequest, List, PatchMapping (+4 more)
+Cohesion: 0.19
+Nodes (15): CurrentUserPrincipal, DocumentResponse, GetMapping, InvoiceRequest, InvoiceResponse, InvoiceService, InvoiceUpdateRequest, List (+7 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.20
@@ -262,8 +272,8 @@ Cohesion: 0.20
 Nodes (13): CurrentUserPrincipal, DeleteMapping, GetMapping, List, PatchMapping, PostMapping, ProjectRequest, ProjectResponse (+5 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.22
-Nodes (8): EmailVerificationToken, PasswordResetToken, RefreshToken, String, Transactional, User, IssuedRefreshToken, TokenService
+Cohesion: 0.10
+Nodes (15): OffsetDateTime, String, UUID, EmailVerificationToken, PasswordResetToken, RefreshToken, String, Transactional (+7 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.33
@@ -282,8 +292,8 @@ Cohesion: 0.40
 Nodes (3): geistMono, geistSans, metadata
 
 ### Community 44 - "Community 44"
-Cohesion: 0.21
-Nodes (4): OffsetDateTime, String, UUID, RefreshToken
+Cohesion: 0.25
+Nodes (7): Backend Hosting, code:txt (DATABASE_URL), Deployment Checklist, Frontend Hosting, Monitoring, Required Backend Environment, Supabase
 
 ### Community 45 - "Community 45"
 Cohesion: 0.50
@@ -306,16 +316,16 @@ Cohesion: 0.44
 Nodes (5): Client, List, Optional, UUID, ClientRepository
 
 ### Community 59 - "Community 59"
-Cohesion: 0.33
-Nodes (7): BigDecimal, List, OffsetDateTime, Payment, Query, UUID, PaymentRepository
+Cohesion: 0.15
+Nodes (16): AuditLogService, BigDecimal, ClientRepository, Company, CompanyAccessService, CompanyRepository, DocumentResponse, FileStorageService (+8 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.33
 Nodes (6): List, Optional, Project, ProjectStatus, UUID, ProjectRepository
 
 ### Community 61 - "Community 61"
-Cohesion: 0.24
-Nodes (6): Optional, String, User, ForgotPasswordRequest, MessageResponse, UserRepository
+Cohesion: 0.38
+Nodes (4): Optional, String, User, UserRepository
 
 ### Community 62 - "Community 62"
 Cohesion: 0.47
@@ -341,29 +351,65 @@ Nodes (4): ApiError, Map, String, of()
 Cohesion: 0.60
 Nodes (4): MessageResponse, String, of(), withToken()
 
-### Community 92 - "Community 92"
+### Community 68 - "Community 68"
+Cohesion: 0.27
+Nodes (9): BigDecimal, Client, Company, Invoice, InvoiceItem, List, String, XrechnungBuilder (+1 more)
+
+### Community 69 - "Community 69"
+Cohesion: 0.21
+Nodes (5): OffsetDateTime, PrePersist, PreUpdate, UUID, BaseEntity
+
+### Community 70 - "Community 70"
+Cohesion: 0.31
+Nodes (6): Builder, Override, StorageObject, String, FileStorageService, ProviderFileStorageService
+
+### Community 71 - "Community 71"
+Cohesion: 0.35
+Nodes (5): Builder, Override, String, EmailService, ProviderEmailService
+
+### Community 72 - "Community 72"
+Cohesion: 0.20
+Nodes (9): code:txt (RESEND_API_KEY), code:txt (POST /api/auth/register), Current Decisions, Germany E-Invoicing Notes, Implementation Order, Implemented Backend Routes, Not Yet Done, Provider and Compliance Decisions (+1 more)
+
+### Community 74 - "Community 74"
+Cohesion: 0.53
+Nodes (3): StorageObject, String, FileStorageService
+
+### Community 79 - "Community 79"
 Cohesion: 0.33
-Nodes (5): code:txt (DATABASE_URL), Environment Variables, Implemented, Production Readiness, Provider-Dependent Work
+Nodes (5): code:txt (GET /api/invoices/{id}/xrechnung), code:txt (GET /api/invoices/{id}/zugferd), E-Invoice Validation, XRechnung, ZUGFeRD
+
+### Community 81 - "Community 81"
+Cohesion: 0.40
+Nodes (3): User, from(), UserResponse
+
+### Community 82 - "Community 82"
+Cohesion: 0.40
+Nodes (4): Germany-First Invoice Fields, Invoice Compliance Checklist, Product Decision, VAT Rules To Review
+
+### Community 92 - "Community 92"
+Cohesion: 0.25
+Nodes (7): code:txt (DATABASE_URL), Compliance-Dependent Work, Documents and Compliance, Environment Variables, Implemented, Production Readiness, Provider-Dependent Work
 
 ## Knowledge Gaps
-- **216 isolated node(s):** `name`, `private`, `workspaces`, `dev`, `dev:web` (+211 more)
+- **244 isolated node(s):** `name`, `private`, `workspaces`, `dev`, `dev:web` (+239 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Exception` connect `Community 5` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 11`, `Community 13`, `Community 14`, `Community 15`, `Community 16`, `Community 20`, `Community 21`, `Community 22`, `Community 23`, `Community 25`, `Community 26`, `Community 29`, `Community 31`, `Community 33`, `Community 34`, `Community 36`, `Community 37`, `Community 38`, `Community 41`, `Community 43`, `Community 44`, `Community 45`, `Community 46`, `Community 47`, `Community 57`, `Community 58`, `Community 59`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 64`, `Community 65`, `Community 66`, `Community 67`?**
-  _High betweenness centrality (0.550) - this node is a cross-community bridge._
-- **Why does `Invoice` connect `Community 2` to `Community 8`, `Community 6`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
-- **Why does `Company` connect `Community 10` to `Community 8`, `Community 6`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `Exception` connect `Community 5` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 11`, `Community 13`, `Community 14`, `Community 15`, `Community 16`, `Community 20`, `Community 21`, `Community 22`, `Community 23`, `Community 25`, `Community 26`, `Community 29`, `Community 31`, `Community 33`, `Community 34`, `Community 36`, `Community 37`, `Community 38`, `Community 41`, `Community 43`, `Community 45`, `Community 46`, `Community 47`, `Community 57`, `Community 58`, `Community 60`, `Community 61`, `Community 62`, `Community 63`, `Community 64`, `Community 65`, `Community 66`, `Community 67`, `Community 69`, `Community 81`?**
+  _High betweenness centrality (0.507) - this node is a cross-community bridge._
+- **Why does `ObjectMapper` connect `Community 9` to `Community 12`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `workspaces` to the rest of the system?**
-  _216 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _244 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.06421052631578947 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06293706293706294 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.05200341005967604 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06568832983927324 - nodes in this community are weakly interconnected._
+- **Should `Community 4` be split into smaller, more focused modules?**
+  _Cohesion score 0.07373271889400922 - nodes in this community are weakly interconnected._

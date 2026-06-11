@@ -13,3 +13,17 @@ jwt:
 
 auth:
   return-sensitive-tokens: true
+  frontend-base-url: http://localhost:3000
+
+app:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:5173
+
+mail:
+  provider: log
+  from: MyVision <no-reply@myvision.visionbau.de>
+
+storage:
+  provider: local
+  local-root: .myvision-storage
+  public-base-url: http://localhost:8080/files

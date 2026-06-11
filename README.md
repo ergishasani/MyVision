@@ -50,4 +50,4 @@ The frontend reads `NEXT_PUBLIC_API_URL` (default `http://localhost:8080/api`).
 - Set a strong `JWT_SECRET` in production.
 - Set production database credentials through environment variables, not committed files.
 - The frontend build uses system fonts so CI does not depend on Google Fonts network fetches.
-- See `docs/production-readiness.md` for auth/session/audit details and remaining provider-dependent work.
+- See `docs/production-readiness.md`, `docs/deployment-checklist.md`, and `docs/e-invoice-validation.md` for deployment, provider, and compliance details.

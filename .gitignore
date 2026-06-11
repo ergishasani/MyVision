@@ -11,6 +11,8 @@ out/
 target/
 .gradle/
 build/
+apps/api/.myvision-storage/
+graphify-out/cache/ast/*.json
 
 # Environment
 .env

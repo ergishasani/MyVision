@@ -13,7 +13,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,9 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class InvoiceController {
 
   private final InvoiceService invoiceService;
+  private final InvoiceDocumentService invoiceDocumentService;
 
-  public InvoiceController(InvoiceService invoiceService) {
+  public InvoiceController(InvoiceService invoiceService, InvoiceDocumentService invoiceDocumentService) {
     this.invoiceService = invoiceService;
+    this.invoiceDocumentService = invoiceDocumentService;
   }
 
   @GetMapping
@@ -88,5 +94,62 @@ public class InvoiceController {
       @PathVariable UUID id
   ) {
     return invoiceService.cancel(principal.getUserId(), id);
+  }
+
+  @GetMapping("/{id}/pdf")
+  public ResponseEntity<byte[]> pdf(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    InvoiceResponse invoice = invoiceService.get(principal.getUserId(), id);
+    byte[] pdf = invoiceDocumentService.pdf(principal.getUserId(), id);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .header(HttpHeaders.CONTENT_DISPOSITION,
+            ContentDisposition.inline().filename(invoice.invoiceNumber() + ".pdf").build().toString())
+        .body(pdf);
+  }
+
+  @PostMapping("/{id}/pdf")
+  public DocumentResponse storePdf(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    return invoiceDocumentService.storePdf(principal.getUserId(), id);
+  }
+
+  @GetMapping("/{id}/xrechnung")
+  public ResponseEntity<byte[]> xrechnung(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    InvoiceResponse invoice = invoiceService.get(principal.getUserId(), id);
+    byte[] xml = invoiceDocumentService.xrechnungXml(principal.getUserId(), id);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_XML)
+        .header(HttpHeaders.CONTENT_DISPOSITION,
+            ContentDisposition.attachment()
+                .filename(invoice.invoiceNumber() + "-xrechnung.xml")
+                .build()
+                .toString())
+        .body(xml);
+  }
+
+  @PostMapping("/{id}/xrechnung")
+  public DocumentResponse storeXrechnung(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    return invoiceDocumentService.storeXrechnungXml(principal.getUserId(), id);
+  }
+
+  @GetMapping("/{id}/zugferd")
+  public ResponseEntity<byte[]> zugferd(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .body(invoiceDocumentService.zugferdPdf(principal.getUserId(), id));
   }
 }

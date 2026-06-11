@@ -6,9 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class InvoicePaymentIntegrationTest extends AbstractIntegrationTest {
@@ -177,6 +181,65 @@ class InvoicePaymentIntegrationTest extends AbstractIntegrationTest {
                 """.formatted(clientId)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
+  }
+
+  @Test
+  void invoiceDocumentsCanBeDownloadedAndStored() throws Exception {
+    String token = registerAndGetToken("documents-1@myvision.dev", "Documents GmbH");
+    String clientId = createClient(token, "Document Client GmbH");
+
+    MvcResult invoiceResult = mockMvc.perform(post("/api/invoices")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "clientId": "%s",
+                  "items": [
+                    {
+                      "kind": "service",
+                      "description": "Planning work",
+                      "quantity": 3,
+                      "unit": "h",
+                      "unitPrice": 80.00,
+                      "taxRate": 19
+                    }
+                  ]
+                }
+                """.formatted(clientId)))
+        .andExpect(status().isCreated())
+        .andReturn();
+    String invoiceId = objectMapper.readTree(invoiceResult.getResponse().getContentAsString())
+        .get("id").asText();
+
+    mockMvc.perform(get("/api/invoices/{id}/pdf", invoiceId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Content-Type", startsWith("application/pdf")))
+        .andExpect(content().string(startsWith("%PDF")));
+
+    mockMvc.perform(post("/api/invoices/{id}/pdf", invoiceId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.contentType").value("application/pdf"))
+        .andExpect(jsonPath("$.storagePath", containsString("/invoices/")));
+
+    mockMvc.perform(get("/api/invoices/{id}/xrechnung", invoiceId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Content-Type", startsWith("application/xml")))
+        .andExpect(content().string(containsString("CrossIndustryInvoice")))
+        .andExpect(content().string(containsString("urn:cen.eu:en16931:2017")));
+
+    mockMvc.perform(post("/api/invoices/{id}/xrechnung", invoiceId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.contentType").value("application/xml"))
+        .andExpect(jsonPath("$.fileName", containsString("-xrechnung.xml")));
+
+    mockMvc.perform(get("/api/invoices/{id}/zugferd", invoiceId)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isNotImplemented())
+        .andExpect(jsonPath("$.code").value("NOT_IMPLEMENTED"));
   }
 
   @Test

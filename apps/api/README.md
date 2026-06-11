@@ -36,6 +36,24 @@ Health check:
 http://localhost:8080/api/health
 ```
 
+## Production Providers
+
+Local development logs emails and stores files under `.myvision-storage`.
+Production should use Resend for email and Supabase Storage for generated documents and logos:
+
+```txt
+MAIL_PROVIDER=resend
+MAIL_FROM=MyVision <no-reply@myvision.visionbau.de>
+RESEND_API_KEY=...
+AUTH_FRONTEND_BASE_URL=https://myvision.visionbau.de
+
+STORAGE_PROVIDER=supabase
+SUPABASE_URL=https://toyrbakpcbcishmaulbg.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_DOCUMENTS_BUCKET=myvision-documents
+SUPABASE_PUBLIC_BUCKET=myvision-public
+```
+
 ## First Auth Endpoints
 
 Register:
@@ -65,6 +83,22 @@ Current user:
 GET http://localhost:8080/api/auth/me
 Authorization: Bearer YOUR_TOKEN
 ```
+
+## Document Endpoints
+
+```txt
+GET  /api/invoices/{id}/pdf
+POST /api/invoices/{id}/pdf
+GET  /api/invoices/{id}/xrechnung
+POST /api/invoices/{id}/xrechnung
+GET  /api/invoices/{id}/zugferd
+POST /api/company/logo
+```
+
+The `GET` routes download generated documents.
+The `POST` routes generate and store documents through the configured storage provider.
+The XRechnung route is an export foundation and must be validator-tested before production e-invoice delivery.
+The ZUGFeRD route intentionally returns `501 NOT_IMPLEMENTED` until PDF/A-3 embedding and validator support are added.
 
 ## Package Structure
 

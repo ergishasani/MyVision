@@ -89,6 +89,13 @@ public class GlobalExceptionHandler {
         .body(ApiError.of("The request conflicts with existing data", "CONFLICT"));
   }
 
+  @ExceptionHandler(UnsupportedOperationException.class)
+  public ResponseEntity<ApiError> handleUnsupported(UnsupportedOperationException exception) {
+    return ResponseEntity
+        .status(HttpStatus.NOT_IMPLEMENTED)
+        .body(ApiError.of(exception.getMessage(), "NOT_IMPLEMENTED"));
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleUnexpected(Exception exception) {
     log.error("Unexpected error", exception);
@@ -97,4 +104,3 @@ public class GlobalExceptionHandler {
         .body(ApiError.of("An unexpected error occurred", "INTERNAL_ERROR"));
   }
 }
-
