@@ -30,6 +30,12 @@ Then add the real Supabase database password.
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
+On **PowerShell**, quote the `-D` argument:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
 Health check:
 
 ```txt

@@ -56,19 +56,9 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers(
-                "/api/health",
-                "/actuator/health",
-                "/actuator/health/**",
-                "/api/auth/register",
-                "/api/auth/login",
-                "/api/auth/google",
-                "/api/auth/apple",
-                "/api/auth/refresh",
-                "/api/auth/forgot-password",
-                "/api/auth/reset-password",
-                "/api/auth/verify-email"
-            ).permitAll()
+            .requestMatchers("/api/health", "/actuator/health", "/actuator/health/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+            .requestMatchers("/api/auth/me").authenticated()
             .anyRequest().authenticated()
         )
         .exceptionHandling(exceptions -> exceptions

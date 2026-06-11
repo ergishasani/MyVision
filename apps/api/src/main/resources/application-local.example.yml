@@ -1,7 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://db.toyrbakpcbcishmaulbg.supabase.co:5432/postgres
-    username: postgres
+    # Use the session pooler host (IPv4-friendly on Windows). Find yours in Supabase → Settings → Database.
+    url: jdbc:postgresql://aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+    username: postgres.toyrbakpcbcishmaulbg
     password: ${SUPABASE_DB_PASSWORD:YOUR_SUPABASE_DB_PASSWORD}
 
 server:
