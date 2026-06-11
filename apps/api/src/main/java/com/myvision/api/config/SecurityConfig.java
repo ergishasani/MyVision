@@ -9,7 +9,9 @@ import com.myvision.api.service.*;
 import com.myvision.api.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myvision.api.util.ApiRateLimitFilter;
 import com.myvision.api.util.JwtAuthenticationFilter;
+import com.myvision.api.util.RequestIdFilter;
 import com.myvision.api.dto.ApiError;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -44,6 +46,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
+      RequestIdFilter requestIdFilter,
+      ApiRateLimitFilter apiRateLimitFilter,
       ObjectMapper objectMapper
   ) throws Exception {
     return http
@@ -63,8 +67,6 @@ public class SecurityConfig {
                 "/api/auth/reset-password",
                 "/api/auth/verify-email"
             ).permitAll()
-            .requestMatchers("/docs", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
-            .permitAll()
             .anyRequest().authenticated()
         )
         .exceptionHandling(exceptions -> exceptions
@@ -75,6 +77,8 @@ public class SecurityConfig {
                 objectMapper, response, HttpServletResponse.SC_FORBIDDEN,
                 "Access denied", "FORBIDDEN"))
         )
+        .addFilterBefore(requestIdFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(apiRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

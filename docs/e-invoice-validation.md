@@ -19,6 +19,10 @@ Validation acceptance criteria:
 - Supplier and buyer electronic address rules are satisfied for the chosen delivery channel.
 - Real examples from at least three invoice shapes pass: standard VAT, discount, and reverse-charge/no-VAT.
 
+## Current Status
+
+The repository does not include a bundled KoSIT validator runtime. To complete certification, install the validator in CI/staging, run it against exported XML, and commit only the validation report, not bulky validator binaries.
+
 ## ZUGFeRD
 
 The backend exposes:

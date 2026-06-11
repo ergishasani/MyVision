@@ -37,11 +37,14 @@ management:
         enabled: true
 
 springdoc:
+  enabled: ${SPRINGDOC_ENABLED:true}
   swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
     path: /docs
     operations-sorter: method
     tags-sorter: alpha
   api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
     path: /v3/api-docs
 
 jwt:
@@ -78,6 +81,14 @@ storage:
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  rate-limit:
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
+    max-requests: ${APP_RATE_LIMIT_MAX_REQUESTS:120}
+    window-ms: ${APP_RATE_LIMIT_WINDOW_MS:60000}
+
+logging:
+  pattern:
+    level: "%5p [requestId:%X{requestId:-}]"
 
 compliance:
   invoice-country: ${COMPLIANCE_INVOICE_COUNTRY:DE}

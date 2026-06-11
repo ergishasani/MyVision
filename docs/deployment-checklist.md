@@ -17,6 +17,12 @@ JWT_SECRET
 AUTH_FRONTEND_BASE_URL=https://myvision.visionbau.de
 APP_CORS_ALLOWED_ORIGINS=https://myvision.visionbau.de
 AUTH_RETURN_SENSITIVE_TOKENS=false
+APP_RATE_LIMIT_ENABLED=true
+APP_RATE_LIMIT_MAX_REQUESTS=120
+APP_RATE_LIMIT_WINDOW_MS=60000
+SPRINGDOC_ENABLED=false
+SPRINGDOC_SWAGGER_UI_ENABLED=false
+SPRINGDOC_API_DOCS_ENABLED=false
 MAIL_PROVIDER=resend
 MAIL_FROM=MyVision <no-reply@myvision.visionbau.de>
 RESEND_API_KEY
@@ -26,6 +32,24 @@ SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_DOCUMENTS_BUCKET=myvision-documents
 SUPABASE_PUBLIC_BUCKET=myvision-public
 ```
+
+## Secrets You Must Create Or Copy
+
+- `JWT_SECRET`: generate a long random value, at least 32 bytes.
+- `DATABASE_PASSWORD`: Supabase database password.
+- `RESEND_API_KEY`: Resend API key with send-email permission.
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service-role key, backend only.
+- Hosting deploy token or project credentials, depending on the hosting provider.
+
+Never put these in frontend env vars, source code, Git, screenshots, or chat logs.
+
+## Resend Domain Verification
+
+- Add and verify the sending domain in Resend, preferably `myvision.visionbau.de` or `mail.myvision.visionbau.de`.
+- Add the DNS records Resend gives you: SPF/TXT, DKIM, and any return-path/bounce records.
+- Wait until Resend marks the domain verified.
+- Send a real password-reset email from staging and confirm the link points to `AUTH_FRONTEND_BASE_URL`.
+- Send a real email-verification email from staging and confirm delivery, sender identity, and spam placement.
 
 ## Frontend Hosting
 
@@ -43,5 +67,6 @@ SUPABASE_PUBLIC_BUCKET=myvision-public
 
 - Monitor `/actuator/health`.
 - Capture backend logs from the hosting platform.
+- Ensure logs include `requestId` from the `X-Request-Id` response header.
 - Alert on repeated `INTERNAL_ERROR`, auth failures, and storage/email provider failures.
 - Keep database backups and Supabase point-in-time recovery settings aligned with the paid plan before real customer data.

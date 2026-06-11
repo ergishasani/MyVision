@@ -18,6 +18,17 @@ auth:
 app:
   cors:
     allowed-origins: http://localhost:3000,http://localhost:5173
+  rate-limit:
+    enabled: true
+    max-requests: 120
+    window-ms: 60000
+
+springdoc:
+  enabled: true
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
 
 mail:
   provider: log

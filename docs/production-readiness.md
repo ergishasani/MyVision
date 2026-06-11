@@ -15,6 +15,9 @@ This project now includes the code foundations for production authentication and
 - Supabase Storage-compatible file storage for generated PDFs and company logos.
 - Backend invoice PDF generation.
 - XRechnung XML export foundation.
+- Request ID logging via `X-Request-Id`.
+- General non-auth API rate limiting.
+- Swagger/OpenAPI can be disabled in production with `SPRINGDOC_*` env vars.
 - Audit logs for invoice creation, invoice status changes, invoice updates, and payment creation.
 - GitHub Actions CI for backend and frontend.
 - Supabase/Flyway migration parity.
@@ -42,7 +45,14 @@ AUTH_EMAIL_VERIFICATION_EXPIRATION_MS
 AUTH_RETURN_SENSITIVE_TOKENS=false
 AUTH_RATE_LIMIT_MAX_ATTEMPTS
 AUTH_RATE_LIMIT_WINDOW_MS
+APP_RATE_LIMIT_ENABLED
+APP_RATE_LIMIT_MAX_REQUESTS
+APP_RATE_LIMIT_WINDOW_MS
 AUTH_FRONTEND_BASE_URL
+APP_CORS_ALLOWED_ORIGINS
+SPRINGDOC_ENABLED=false
+SPRINGDOC_SWAGGER_UI_ENABLED=false
+SPRINGDOC_API_DOCS_ENABLED=false
 MAIL_PROVIDER=resend
 MAIL_FROM
 RESEND_API_KEY
@@ -65,3 +75,4 @@ Never enable `AUTH_RETURN_SENSITIVE_TOKENS` in production. It exists only for lo
 - Local development uses filesystem storage.
 - XRechnung XML export is available for invoice data, but must pass a validator before official e-invoice delivery.
 - VAT and invoice field rules are Germany-first defaults only. Review country-specific rules with a qualified tax/compliance expert before onboarding real customers outside a test environment.
+- See `docs/supabase-backup-restore.md` for backup/restore operations.
