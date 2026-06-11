@@ -12,9 +12,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend
+  backend-smoke:
+    name: Backend smoke
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run backend unit smoke tests
+        run: mvn -B -Dtest=ApiRateLimitFilterTest test
+
+      - name: Build backend artifact
+        run: mvn -B package -DskipTests
+
+  backend-integration:
+    name: Backend integration
+    runs-on: ubuntu-latest
+    needs: backend-smoke
     defaults:
       run:
         working-directory: apps/api
@@ -34,11 +58,17 @@ jobs:
           docker version
           docker info
 
-      - name: Run backend tests
+      - name: Run backend integration tests
+        timeout-minutes: 10
         run: mvn -B test
 
-      - name: Build backend artifact
-        run: mvn -B package -DskipTests
+      - name: Upload backend test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-surefire-reports
+          path: apps/api/target/surefire-reports/
+          if-no-files-found: ignore
 
   frontend:
     name: Frontend
