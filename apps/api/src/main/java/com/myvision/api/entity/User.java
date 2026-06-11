@@ -25,8 +25,14 @@ public class User extends BaseEntity {
   @Column(nullable = false, unique = true)
   private String email;
 
-  @Column(nullable = false)
   private String passwordHash;
+
+  @Enumerated(EnumType.STRING)
+  @JdbcType(PostgreSQLEnumJdbcType.class)
+  @Column(nullable = false, columnDefinition = "auth_provider")
+  private AuthProvider authProvider = AuthProvider.local;
+
+  private String providerSubject;
 
   @Column(nullable = false)
   private String fullName;
@@ -104,5 +110,21 @@ public class User extends BaseEntity {
 
   public void setPasswordChangedAt(OffsetDateTime passwordChangedAt) {
     this.passwordChangedAt = passwordChangedAt;
+  }
+
+  public AuthProvider getAuthProvider() {
+    return authProvider;
+  }
+
+  public void setAuthProvider(AuthProvider authProvider) {
+    this.authProvider = authProvider;
+  }
+
+  public String getProviderSubject() {
+    return providerSubject;
+  }
+
+  public void setProviderSubject(String providerSubject) {
+    this.providerSubject = providerSubject;
   }
 }

@@ -39,6 +39,7 @@ public class AuthService {
   private final JwtService jwtService;
   private final TokenService tokenService;
   private final EmailService emailService;
+  private final OAuthVerificationService oauthVerificationService;
   private final boolean returnSensitiveTokens;
   private final String frontendBaseUrl;
 
@@ -51,6 +52,7 @@ public class AuthService {
       JwtService jwtService,
       TokenService tokenService,
       EmailService emailService,
+      OAuthVerificationService oauthVerificationService,
       @Value("${auth.return-sensitive-tokens:false}") boolean returnSensitiveTokens,
       @Value("${auth.frontend-base-url}") String frontendBaseUrl
   ) {
@@ -62,6 +64,7 @@ public class AuthService {
     this.jwtService = jwtService;
     this.tokenService = tokenService;
     this.emailService = emailService;
+    this.oauthVerificationService = oauthVerificationService;
     this.returnSensitiveTokens = returnSensitiveTokens;
     this.frontendBaseUrl = frontendBaseUrl.replaceAll("/+$", "");
   }
@@ -107,6 +110,10 @@ public class AuthService {
     String email = normalizeEmail(request.email());
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+
+    if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+      throw new UnauthorizedException("This account uses social sign-in");
+    }
 
     if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
       throw new UnauthorizedException("Invalid email or password");
@@ -173,6 +180,21 @@ public class AuthService {
   }
 
   @Transactional
+  public AuthResponse loginWithGoogle(GoogleAuthRequest request) {
+    OAuthProfile profile = oauthVerificationService.verifyGoogleIdToken(request.idToken());
+    return authenticateWithOAuth(AuthProvider.google, profile, request.companyName());
+  }
+
+  @Transactional
+  public AuthResponse loginWithApple(AppleAuthRequest request) {
+    OAuthProfile profile = oauthVerificationService.verifyAppleIdentityToken(
+        request.identityToken(),
+        request.fullName()
+    );
+    return authenticateWithOAuth(AuthProvider.apple, profile, request.companyName());
+  }
+
+  @Transactional
   public void verifyEmail(VerifyEmailRequest request) {
     EmailVerificationToken verificationToken =
         tokenService.consumeEmailVerificationToken(request.token());
@@ -180,6 +202,79 @@ public class AuthService {
         .orElseThrow(() -> new BadRequestException("Invalid or expired verification token"));
     user.setEmailVerifiedAt(OffsetDateTime.now());
     userRepository.save(user);
+  }
+
+  private AuthResponse authenticateWithOAuth(
+      AuthProvider provider,
+      OAuthProfile profile,
+      String companyName
+  ) {
+    User user = userRepository.findByAuthProviderAndProviderSubject(provider, profile.subject())
+        .orElseGet(() -> userRepository.findByEmail(profile.email()).orElse(null));
+
+    if (user != null) {
+      if (user.getAuthProvider() != provider) {
+        throw new BadRequestException("This email already uses a different sign-in method");
+      }
+      if (user.getProviderSubject() == null || !user.getProviderSubject().equals(profile.subject())) {
+        user.setProviderSubject(profile.subject());
+      }
+      if (profile.fullName() != null && !profile.fullName().isBlank()) {
+        user.setFullName(profile.fullName());
+      }
+      if (profile.emailVerified() && user.getEmailVerifiedAt() == null) {
+        user.setEmailVerifiedAt(OffsetDateTime.now());
+      }
+      user.setLastLoginAt(OffsetDateTime.now());
+      userRepository.save(user);
+      Company company = currentCompanyForUser(user.getId());
+      return responseWithToken(user, company);
+    }
+
+    return createOAuthUser(provider, profile, companyName);
+  }
+
+  private AuthResponse createOAuthUser(
+      AuthProvider provider,
+      OAuthProfile profile,
+      String companyName
+  ) {
+    if (userRepository.existsByEmail(profile.email())) {
+      throw new BadRequestException("This email already uses a different sign-in method");
+    }
+
+    User user = new User();
+    user.setFullName(profile.fullName());
+    user.setEmail(profile.email());
+    user.setAuthProvider(provider);
+    user.setProviderSubject(profile.subject());
+    user.setStatus(UserStatus.active);
+    user.setLastLoginAt(OffsetDateTime.now());
+    if (profile.emailVerified()) {
+      user.setEmailVerifiedAt(OffsetDateTime.now());
+    }
+    user = userRepository.save(user);
+
+    String resolvedCompanyName = companyName == null || companyName.isBlank()
+        ? profile.fullName() + "'s Company"
+        : companyName.trim();
+
+    Company company = new Company();
+    company.setName(resolvedCompanyName);
+    company.setEmail(profile.email());
+    company = companyRepository.save(company);
+
+    CompanySettings settings = new CompanySettings();
+    settings.setCompany(company);
+    companySettingsRepository.save(settings);
+
+    CompanyMember member = new CompanyMember();
+    member.setUser(user);
+    member.setCompany(company);
+    member.setRole(CompanyMemberRole.owner);
+    companyMemberRepository.save(member);
+
+    return responseWithToken(user, company);
   }
 
   private AuthResponse responseWithToken(User user, Company company) {

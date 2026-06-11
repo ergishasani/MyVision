@@ -101,7 +101,11 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <AuthSocialSection label="Or Register With" />
+      <AuthSocialSection
+        label="Or Register With"
+        companyName={companyName}
+        onError={setError}
+      />
 
       <p className="mt-8 text-center text-sm text-muted">
         Already Have An Account?{" "}

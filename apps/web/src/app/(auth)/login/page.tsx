@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { ApiError } from "@/lib/api/client";
 import { login } from "@/lib/api/auth";
+import { getRememberedEmail, persistRememberedEmail } from "@/lib/auth/remember-email";
 import { AuthFormHeader, AuthSplitLayout } from "@/components/auth/auth-split-layout";
 import { AuthSocialSection } from "@/components/auth/auth-social-section";
 import { PasswordInput } from "@/components/auth/password-input";
@@ -12,23 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const REMEMBER_EMAIL_KEY = "myvision.remembered-email";
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const rememberedEmail = getRememberedEmail();
+  const [email, setEmail] = useState(rememberedEmail ?? "");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(Boolean(rememberedEmail));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const rememberedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
-    if (rememberedEmail) {
-      setEmail(rememberedEmail);
-      setRememberMe(true);
-    }
-  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,13 +29,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-
-      if (rememberMe) {
-        localStorage.setItem(REMEMBER_EMAIL_KEY, email);
-      } else {
-        localStorage.removeItem(REMEMBER_EMAIL_KEY);
-      }
-
+      persistRememberedEmail(email, rememberMe);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Unable to sign in");
@@ -110,7 +96,7 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <AuthSocialSection />
+      <AuthSocialSection onError={setError} />
 
       <p className="mt-8 text-center text-sm text-muted">
         Don&apos;t Have An Account?{" "}

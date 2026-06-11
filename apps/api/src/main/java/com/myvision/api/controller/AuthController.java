@@ -50,6 +50,24 @@ public class AuthController {
     return authService.login(request);
   }
 
+  @PostMapping("/google")
+  public AuthResponse loginWithGoogle(
+      @Valid @RequestBody GoogleAuthRequest request,
+      HttpServletRequest servletRequest
+  ) {
+    authRateLimiter.check("google", "google-oauth", servletRequest.getRemoteAddr());
+    return authService.loginWithGoogle(request);
+  }
+
+  @PostMapping("/apple")
+  public AuthResponse loginWithApple(
+      @Valid @RequestBody AppleAuthRequest request,
+      HttpServletRequest servletRequest
+  ) {
+    authRateLimiter.check("apple", "apple-oauth", servletRequest.getRemoteAddr());
+    return authService.loginWithApple(request);
+  }
+
   @PostMapping("/refresh")
   public AuthResponse refresh(@Valid @RequestBody RefreshRequest request) {
     return authService.refresh(request);

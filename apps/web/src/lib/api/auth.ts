@@ -33,6 +33,32 @@ export async function getCurrentUser() {
   return apiFetch<AuthResponse>("/auth/me");
 }
 
+export async function loginWithGoogle(idToken: string, companyName?: string) {
+  const response = await apiFetch<AuthResponse>("/auth/google", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify({ idToken, companyName }),
+  });
+
+  setSession(response);
+  return response;
+}
+
+export async function loginWithApple(input: {
+  identityToken: string;
+  fullName?: string;
+  companyName?: string;
+}) {
+  const response = await apiFetch<AuthResponse>("/auth/apple", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify(input),
+  });
+
+  setSession(response);
+  return response;
+}
+
 export async function checkHealth() {
   return apiFetch<{ status: string; service: string }>("/health", {
     auth: false,
