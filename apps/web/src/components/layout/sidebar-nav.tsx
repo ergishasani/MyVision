@@ -12,8 +12,11 @@ const navItems = [
   { href: "/projects", label: "Projects" },
   { href: "/quotes", label: "Quotes" },
   { href: "/invoices", label: "Invoices" },
+  { href: "/payments", label: "Payments" },
+  { href: "/documents", label: "Documents" },
   { href: "/reports", label: "Reports" },
   { href: "/settings", label: "Settings" },
+  { href: "/admin", label: "Admin" },
 ];
 
 export function SidebarNav() {
