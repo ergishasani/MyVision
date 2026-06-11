@@ -50,4 +50,5 @@ The frontend reads `NEXT_PUBLIC_API_URL` (default `http://localhost:8080/api`).
 - Set a strong `JWT_SECRET` in production.
 - Set production database credentials through environment variables, not committed files.
 - The frontend build uses system fonts so CI does not depend on Google Fonts network fetches.
+- Vercel builds the frontend through root `vercel.json` using the `@myvision/web` workspace.
 - See `docs/production-readiness.md`, `docs/deployment-checklist.md`, `docs/supabase-backup-restore.md`, and `docs/e-invoice-validation.md` for deployment, provider, backup, and compliance details.
