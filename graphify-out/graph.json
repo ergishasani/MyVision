@@ -285,7 +285,7 @@
       "label": "SecurityConfig",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L38",
+      "source_location": "L40",
       "id": "config_securityconfig_securityconfig",
       "community": 9,
       "norm_label": "securityconfig"
@@ -294,7 +294,7 @@
       "label": ".securityFilterChain()",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "config_securityconfig_securityconfig_securityfilterchain",
       "community": 9,
       "norm_label": ".securityfilterchain()"
@@ -303,7 +303,7 @@
       "label": "HttpSecurity",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "httpsecurity",
       "community": 9,
       "norm_label": "httpsecurity"
@@ -312,17 +312,35 @@
       "label": "JwtAuthenticationFilter",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "jwtauthenticationfilter",
       "community": 9,
       "norm_label": "jwtauthenticationfilter"
     },
     {
+      "label": "RequestIdFilter",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L45",
+      "id": "requestidfilter",
+      "community": 9,
+      "norm_label": "requestidfilter"
+    },
+    {
+      "label": "ApiRateLimitFilter",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L45",
+      "id": "apiratelimitfilter",
+      "community": 9,
+      "norm_label": "apiratelimitfilter"
+    },
+    {
       "label": "ObjectMapper",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
-      "id": "objectmapper",
+      "source_location": "L45",
+      "id": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_objectmapper",
       "community": 9,
       "norm_label": "objectmapper"
     },
@@ -330,7 +348,7 @@
       "label": "SecurityFilterChain",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "securityfilterchain",
       "community": 9,
       "norm_label": "securityfilterchain"
@@ -339,7 +357,7 @@
       "label": "Bean",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_bean",
       "community": 9,
       "norm_label": "bean"
@@ -348,7 +366,7 @@
       "label": ".writeError()",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "config_securityconfig_securityconfig_writeerror",
       "community": 9,
       "norm_label": ".writeerror()"
@@ -357,7 +375,7 @@
       "label": "HttpServletResponse",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_httpservletresponse",
       "community": 9,
       "norm_label": "httpservletresponse"
@@ -366,7 +384,7 @@
       "label": "String",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_string",
       "community": 9,
       "norm_label": "string"
@@ -375,7 +393,7 @@
       "label": ".passwordEncoder()",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L94",
+      "source_location": "L98",
       "id": "config_securityconfig_securityconfig_passwordencoder",
       "community": 9,
       "norm_label": ".passwordencoder()"
@@ -384,7 +402,7 @@
       "label": "PasswordEncoder",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L94",
+      "source_location": "L98",
       "id": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_passwordencoder",
       "community": 9,
       "norm_label": "passwordencoder"
@@ -393,7 +411,7 @@
       "label": ".authenticationManager()",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L99",
+      "source_location": "L103",
       "id": "config_securityconfig_securityconfig_authenticationmanager",
       "community": 9,
       "norm_label": ".authenticationmanager()"
@@ -402,7 +420,7 @@
       "label": "AuthenticationConfiguration",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L99",
+      "source_location": "L103",
       "id": "authenticationconfiguration",
       "community": 9,
       "norm_label": "authenticationconfiguration"
@@ -411,7 +429,7 @@
       "label": "AuthenticationManager",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L99",
+      "source_location": "L103",
       "id": "authenticationmanager",
       "community": 9,
       "norm_label": "authenticationmanager"
@@ -420,7 +438,7 @@
       "label": ".corsConfigurationSource()",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L105",
+      "source_location": "L109",
       "id": "config_securityconfig_securityconfig_corsconfigurationsource",
       "community": 9,
       "norm_label": ".corsconfigurationsource()"
@@ -429,7 +447,7 @@
       "label": "CorsConfigurationSource",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L105",
+      "source_location": "L109",
       "id": "corsconfigurationsource",
       "community": 9,
       "norm_label": "corsconfigurationsource"
@@ -1916,7 +1934,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/AuthResponse.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_dto_authresponse_java",
-      "community": 31,
+      "community": 84,
       "norm_label": "authresponse.java"
     },
     {
@@ -2006,7 +2024,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/CompanyResponse.java",
       "source_location": "L23",
       "id": "companyresponse",
-      "community": 31,
+      "community": 84,
       "norm_label": "companyresponse"
     },
     {
@@ -2492,7 +2510,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/UserResponse.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_dto_userresponse_java",
-      "community": 81,
+      "community": 21,
       "norm_label": "userresponse.java"
     },
     {
@@ -2501,7 +2519,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/UserResponse.java",
       "source_location": "L22",
       "id": "dto_userresponse_from",
-      "community": 81,
+      "community": 21,
       "norm_label": "from()"
     },
     {
@@ -2510,7 +2528,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/UserResponse.java",
       "source_location": "L22",
       "id": "apps_api_src_main_java_com_myvision_api_dto_userresponse_java_user",
-      "community": 81,
+      "community": 21,
       "norm_label": "user"
     },
     {
@@ -2519,7 +2537,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/dto/UserResponse.java",
       "source_location": "L22",
       "id": "userresponse",
-      "community": 81,
+      "community": 21,
       "norm_label": "userresponse"
     },
     {
@@ -2708,7 +2726,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_entity_baseentity_java",
-      "community": 69,
+      "community": 14,
       "norm_label": "baseentity.java"
     },
     {
@@ -2717,7 +2735,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L20",
       "id": "entity_baseentity_baseentity",
-      "community": 69,
+      "community": 14,
       "norm_label": "baseentity"
     },
     {
@@ -2726,7 +2744,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L33",
       "id": "entity_baseentity_baseentity_prepersist",
-      "community": 69,
+      "community": 14,
       "norm_label": ".prepersist()"
     },
     {
@@ -2735,7 +2753,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_entity_baseentity_java_prepersist",
-      "community": 69,
+      "community": 14,
       "norm_label": "prepersist"
     },
     {
@@ -2744,7 +2762,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L44",
       "id": "entity_baseentity_baseentity_preupdate",
-      "community": 69,
+      "community": 14,
       "norm_label": ".preupdate()"
     },
     {
@@ -2753,7 +2771,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L44",
       "id": "apps_api_src_main_java_com_myvision_api_entity_baseentity_java_preupdate",
-      "community": 69,
+      "community": 14,
       "norm_label": "preupdate"
     },
     {
@@ -2762,7 +2780,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L49",
       "id": "entity_baseentity_baseentity_getid",
-      "community": 69,
+      "community": 14,
       "norm_label": ".getid()"
     },
     {
@@ -2771,7 +2789,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L49",
       "id": "apps_api_src_main_java_com_myvision_api_entity_baseentity_java_uuid",
-      "community": 69,
+      "community": 14,
       "norm_label": "uuid"
     },
     {
@@ -2780,7 +2798,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L53",
       "id": "entity_baseentity_baseentity_setid",
-      "community": 69,
+      "community": 14,
       "norm_label": ".setid()"
     },
     {
@@ -2789,7 +2807,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L57",
       "id": "entity_baseentity_baseentity_getcreatedat",
-      "community": 69,
+      "community": 14,
       "norm_label": ".getcreatedat()"
     },
     {
@@ -2798,7 +2816,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L57",
       "id": "apps_api_src_main_java_com_myvision_api_entity_baseentity_java_offsetdatetime",
-      "community": 69,
+      "community": 14,
       "norm_label": "offsetdatetime"
     },
     {
@@ -2807,7 +2825,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L61",
       "id": "entity_baseentity_baseentity_setcreatedat",
-      "community": 69,
+      "community": 14,
       "norm_label": ".setcreatedat()"
     },
     {
@@ -2816,7 +2834,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L65",
       "id": "entity_baseentity_baseentity_getupdatedat",
-      "community": 69,
+      "community": 14,
       "norm_label": ".getupdatedat()"
     },
     {
@@ -2825,7 +2843,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/BaseEntity.java",
       "source_location": "L69",
       "id": "entity_baseentity_baseentity_setupdatedat",
-      "community": 69,
+      "community": 14,
       "norm_label": ".setupdatedat()"
     },
     {
@@ -2942,7 +2960,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/Client.java",
       "source_location": "L84",
       "id": "entity_client_client_setcontactname",
-      "community": 1,
+      "community": 6,
       "norm_label": ".setcontactname()"
     },
     {
@@ -3167,7 +3185,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/Company.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_entity_company_java",
-      "community": 69,
+      "community": 14,
       "norm_label": "company.java"
     },
     {
@@ -6353,7 +6371,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_entity_refreshtoken_java",
-      "community": 38,
+      "community": 60,
       "norm_label": "refreshtoken.java"
     },
     {
@@ -6362,7 +6380,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L19",
       "id": "entity_refreshtoken_refreshtoken",
-      "community": 38,
+      "community": 60,
       "norm_label": "refreshtoken"
     },
     {
@@ -6371,7 +6389,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L42",
       "id": "entity_refreshtoken_refreshtoken_getid",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getid()"
     },
     {
@@ -6380,7 +6398,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L42",
       "id": "apps_api_src_main_java_com_myvision_api_entity_refreshtoken_java_uuid",
-      "community": 38,
+      "community": 60,
       "norm_label": "uuid"
     },
     {
@@ -6389,7 +6407,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L46",
       "id": "entity_refreshtoken_refreshtoken_getuserid",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getuserid()"
     },
     {
@@ -6398,7 +6416,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L50",
       "id": "entity_refreshtoken_refreshtoken_setuserid",
-      "community": 38,
+      "community": 60,
       "norm_label": ".setuserid()"
     },
     {
@@ -6407,7 +6425,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L54",
       "id": "entity_refreshtoken_refreshtoken_gettokenhash",
-      "community": 38,
+      "community": 60,
       "norm_label": ".gettokenhash()"
     },
     {
@@ -6416,7 +6434,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L54",
       "id": "apps_api_src_main_java_com_myvision_api_entity_refreshtoken_java_string",
-      "community": 38,
+      "community": 60,
       "norm_label": "string"
     },
     {
@@ -6425,7 +6443,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L58",
       "id": "entity_refreshtoken_refreshtoken_settokenhash",
-      "community": 38,
+      "community": 60,
       "norm_label": ".settokenhash()"
     },
     {
@@ -6434,7 +6452,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L62",
       "id": "entity_refreshtoken_refreshtoken_getexpiresat",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getexpiresat()"
     },
     {
@@ -6443,7 +6461,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L62",
       "id": "apps_api_src_main_java_com_myvision_api_entity_refreshtoken_java_offsetdatetime",
-      "community": 38,
+      "community": 60,
       "norm_label": "offsetdatetime"
     },
     {
@@ -6452,7 +6470,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L66",
       "id": "entity_refreshtoken_refreshtoken_setexpiresat",
-      "community": 38,
+      "community": 60,
       "norm_label": ".setexpiresat()"
     },
     {
@@ -6461,7 +6479,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L70",
       "id": "entity_refreshtoken_refreshtoken_getrevokedat",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getrevokedat()"
     },
     {
@@ -6479,7 +6497,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L78",
       "id": "entity_refreshtoken_refreshtoken_getreplacedbytokenid",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getreplacedbytokenid()"
     },
     {
@@ -6488,7 +6506,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L82",
       "id": "entity_refreshtoken_refreshtoken_setreplacedbytokenid",
-      "community": 38,
+      "community": 60,
       "norm_label": ".setreplacedbytokenid()"
     },
     {
@@ -6497,7 +6515,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/RefreshToken.java",
       "source_location": "L86",
       "id": "entity_refreshtoken_refreshtoken_getcreatedat",
-      "community": 38,
+      "community": 60,
       "norm_label": ".getcreatedat()"
     },
     {
@@ -6650,7 +6668,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/User.java",
       "source_location": "L89",
       "id": "entity_user_user_setlastloginat",
-      "community": 18,
+      "community": 21,
       "norm_label": ".setlastloginat()"
     },
     {
@@ -6659,7 +6677,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/entity/User.java",
       "source_location": "L93",
       "id": "entity_user_user_getemailverifiedat",
-      "community": 81,
+      "community": 21,
       "norm_label": ".getemailverifiedat()"
     },
     {
@@ -6893,7 +6911,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/exception/GlobalExceptionHandler.java",
       "source_location": "L56",
       "id": "unauthorizedexception",
-      "community": 7,
+      "community": 26,
       "norm_label": "unauthorizedexception"
     },
     {
@@ -7316,7 +7334,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/CompanySettingsRepository.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_repository_companysettingsrepository_java",
-      "community": 5,
+      "community": 85,
       "norm_label": "companysettingsrepository.java"
     },
     {
@@ -7325,7 +7343,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/CompanySettingsRepository.java",
       "source_location": "L14",
       "id": "repository_companysettingsrepository_companysettingsrepository",
-      "community": 5,
+      "community": 85,
       "norm_label": "companysettingsrepository"
     },
     {
@@ -7757,7 +7775,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java",
-      "community": 60,
+      "community": 15,
       "norm_label": "projectrepository.java"
     },
     {
@@ -7766,7 +7784,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L16",
       "id": "repository_projectrepository_projectrepository",
-      "community": 60,
+      "community": 15,
       "norm_label": "projectrepository"
     },
     {
@@ -7775,7 +7793,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L18",
       "id": "repository_projectrepository_projectrepository_findbycompanyidorderbycreatedatdesc",
-      "community": 60,
+      "community": 15,
       "norm_label": ".findbycompanyidorderbycreatedatdesc()"
     },
     {
@@ -7784,7 +7802,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L18",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java_uuid",
-      "community": 60,
+      "community": 15,
       "norm_label": "uuid"
     },
     {
@@ -7793,7 +7811,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L18",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java_list",
-      "community": 60,
+      "community": 15,
       "norm_label": "list"
     },
     {
@@ -7802,7 +7820,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L18",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java_project",
-      "community": 60,
+      "community": 15,
       "norm_label": "project"
     },
     {
@@ -7811,7 +7829,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L20",
       "id": "repository_projectrepository_projectrepository_findbyidandcompanyid",
-      "community": 60,
+      "community": 15,
       "norm_label": ".findbyidandcompanyid()"
     },
     {
@@ -7820,7 +7838,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L20",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java_optional",
-      "community": 60,
+      "community": 15,
       "norm_label": "optional"
     },
     {
@@ -7829,7 +7847,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L22",
       "id": "repository_projectrepository_projectrepository_countbycompanyidandstatus",
-      "community": 60,
+      "community": 15,
       "norm_label": ".countbycompanyidandstatus()"
     },
     {
@@ -7838,7 +7856,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/repository/ProjectRepository.java",
       "source_location": "L22",
       "id": "apps_api_src_main_java_com_myvision_api_repository_projectrepository_java_projectstatus",
-      "community": 60,
+      "community": 15,
       "norm_label": "projectstatus"
     },
     {
@@ -8180,7 +8198,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthRateLimiter.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_service_authratelimiter_java",
-      "community": 26,
+      "community": 7,
       "norm_label": "authratelimiter.java"
     },
     {
@@ -8189,7 +8207,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthRateLimiter.java",
       "source_location": "L22",
       "id": "service_authratelimiter_authratelimiter",
-      "community": 26,
+      "community": 7,
       "norm_label": "authratelimiter"
     },
     {
@@ -8198,7 +8216,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthRateLimiter.java",
       "source_location": "L29",
       "id": "service_authratelimiter_authratelimiter_authratelimiter",
-      "community": 26,
+      "community": 7,
       "norm_label": ".authratelimiter()"
     },
     {
@@ -8351,7 +8369,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L69",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_authresponse",
-      "community": 18,
+      "community": 30,
       "norm_label": "authresponse"
     },
     {
@@ -8369,7 +8387,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L105",
       "id": "service_authservice_authservice_login",
-      "community": 18,
+      "community": 30,
       "norm_label": ".login()"
     },
     {
@@ -8378,7 +8396,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L105",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_loginrequest",
-      "community": 18,
+      "community": 30,
       "norm_label": "loginrequest"
     },
     {
@@ -8387,7 +8405,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L122",
       "id": "service_authservice_authservice_me",
-      "community": 18,
+      "community": 30,
       "norm_label": ".me()"
     },
     {
@@ -8396,7 +8414,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L122",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_uuid",
-      "community": 18,
+      "community": 30,
       "norm_label": "uuid"
     },
     {
@@ -8405,7 +8423,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L130",
       "id": "service_authservice_authservice_refresh",
-      "community": 18,
+      "community": 30,
       "norm_label": ".refresh()"
     },
     {
@@ -8414,7 +8432,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L130",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_refreshrequest",
-      "community": 18,
+      "community": 30,
       "norm_label": "refreshrequest"
     },
     {
@@ -8486,7 +8504,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L175",
       "id": "service_authservice_authservice_verifyemail",
-      "community": 21,
+      "community": 30,
       "norm_label": ".verifyemail()"
     },
     {
@@ -8495,7 +8513,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L175",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_verifyemailrequest",
-      "community": 21,
+      "community": 30,
       "norm_label": "verifyemailrequest"
     },
     {
@@ -8504,7 +8522,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L185",
       "id": "service_authservice_authservice_responsewithtoken",
-      "community": 18,
+      "community": 30,
       "norm_label": ".responsewithtoken()"
     },
     {
@@ -8513,7 +8531,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L185",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_user",
-      "community": 18,
+      "community": 30,
       "norm_label": "user"
     },
     {
@@ -8522,7 +8540,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L185",
       "id": "apps_api_src_main_java_com_myvision_api_service_authservice_java_company",
-      "community": 31,
+      "community": 30,
       "norm_label": "company"
     },
     {
@@ -8531,7 +8549,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/AuthService.java",
       "source_location": "L196",
       "id": "service_authservice_authservice_currentcompanyforuser",
-      "community": 18,
+      "community": 30,
       "norm_label": ".currentcompanyforuser()"
     },
     {
@@ -8558,7 +8576,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientservice.java"
     },
     {
@@ -8567,7 +8585,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L19",
       "id": "service_clientservice_clientservice",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientservice"
     },
     {
@@ -8576,7 +8594,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L25",
       "id": "service_clientservice_clientservice_clientservice",
-      "community": 1,
+      "community": 6,
       "norm_label": ".clientservice()"
     },
     {
@@ -8585,7 +8603,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L25",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_clientrepository",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientrepository"
     },
     {
@@ -8594,7 +8612,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L25",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_companyaccessservice",
-      "community": 1,
+      "community": 6,
       "norm_label": "companyaccessservice"
     },
     {
@@ -8603,7 +8621,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L33",
       "id": "service_clientservice_clientservice_list",
-      "community": 1,
+      "community": 6,
       "norm_label": ".list()"
     },
     {
@@ -8612,7 +8630,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_uuid",
-      "community": 1,
+      "community": 6,
       "norm_label": "uuid"
     },
     {
@@ -8621,7 +8639,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_list",
-      "community": 1,
+      "community": 6,
       "norm_label": "list"
     },
     {
@@ -8630,7 +8648,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_clientresponse",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientresponse"
     },
     {
@@ -8639,7 +8657,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_transactional",
-      "community": 1,
+      "community": 6,
       "norm_label": "transactional"
     },
     {
@@ -8648,7 +8666,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L42",
       "id": "service_clientservice_clientservice_get",
-      "community": 1,
+      "community": 6,
       "norm_label": ".get()"
     },
     {
@@ -8657,7 +8675,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L48",
       "id": "service_clientservice_clientservice_create",
-      "community": 1,
+      "community": 6,
       "norm_label": ".create()"
     },
     {
@@ -8666,7 +8684,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L48",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_clientrequest",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientrequest"
     },
     {
@@ -8675,7 +8693,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L73",
       "id": "service_clientservice_clientservice_update",
-      "community": 1,
+      "community": 6,
       "norm_label": ".update()"
     },
     {
@@ -8684,7 +8702,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L73",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_clientupdaterequest",
-      "community": 1,
+      "community": 6,
       "norm_label": "clientupdaterequest"
     },
     {
@@ -8693,7 +8711,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L121",
       "id": "service_clientservice_clientservice_archive",
-      "community": 1,
+      "community": 6,
       "norm_label": ".archive()"
     },
     {
@@ -8711,7 +8729,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L132",
       "id": "apps_api_src_main_java_com_myvision_api_service_clientservice_java_client",
-      "community": 1,
+      "community": 6,
       "norm_label": "client"
     },
     {
@@ -8720,7 +8738,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ClientService.java",
       "source_location": "L137",
       "id": "service_clientservice_clientservice_requireclient",
-      "community": 1,
+      "community": 6,
       "norm_label": ".requireclient()"
     },
     {
@@ -8810,7 +8828,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java",
-      "community": 13,
+      "community": 7,
       "norm_label": "customuserdetailsservice.java"
     },
     {
@@ -8819,7 +8837,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L18",
       "id": "service_customuserdetailsservice_customuserdetailsservice",
-      "community": 13,
+      "community": 7,
       "norm_label": "customuserdetailsservice"
     },
     {
@@ -8828,7 +8846,7 @@
       "source_file": "",
       "source_location": "",
       "id": "userdetailsservice",
-      "community": 13,
+      "community": 7,
       "norm_label": "userdetailsservice"
     },
     {
@@ -8837,7 +8855,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L23",
       "id": "service_customuserdetailsservice_customuserdetailsservice_customuserdetailsservice",
-      "community": 13,
+      "community": 7,
       "norm_label": ".customuserdetailsservice()"
     },
     {
@@ -8846,7 +8864,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L23",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_userrepository",
-      "community": 13,
+      "community": 7,
       "norm_label": "userrepository"
     },
     {
@@ -8855,7 +8873,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L27",
       "id": "service_customuserdetailsservice_customuserdetailsservice_loaduserbyusername",
-      "community": 13,
+      "community": 18,
       "norm_label": ".loaduserbyusername()"
     },
     {
@@ -8864,7 +8882,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L27",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_string",
-      "community": 13,
+      "community": 18,
       "norm_label": "string"
     },
     {
@@ -8873,7 +8891,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L27",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_userdetails",
-      "community": 13,
+      "community": 18,
       "norm_label": "userdetails"
     },
     {
@@ -8882,7 +8900,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L27",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_override",
-      "community": 13,
+      "community": 18,
       "norm_label": "override"
     },
     {
@@ -8891,7 +8909,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L34",
       "id": "service_customuserdetailsservice_customuserdetailsservice_loaduserbyid",
-      "community": 13,
+      "community": 7,
       "norm_label": ".loaduserbyid()"
     },
     {
@@ -8900,7 +8918,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L34",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_uuid",
-      "community": 13,
+      "community": 7,
       "norm_label": "uuid"
     },
     {
@@ -8909,7 +8927,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/CustomUserDetailsService.java",
       "source_location": "L34",
       "id": "apps_api_src_main_java_com_myvision_api_service_customuserdetailsservice_java_currentuserprincipal",
-      "community": 13,
+      "community": 7,
       "norm_label": "currentuserprincipal"
     },
     {
@@ -9692,7 +9710,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/InvoiceService.java",
       "source_location": "L286",
       "id": "service_invoiceservice_invoiceservice_nextinvoicenumber",
-      "community": 10,
+      "community": 8,
       "norm_label": ".nextinvoicenumber()"
     },
     {
@@ -9701,7 +9719,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/InvoiceService.java",
       "source_location": "L286",
       "id": "apps_api_src_main_java_com_myvision_api_service_invoiceservice_java_company",
-      "community": 10,
+      "community": 8,
       "norm_label": "company"
     },
     {
@@ -9710,7 +9728,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/InvoiceService.java",
       "source_location": "L286",
       "id": "apps_api_src_main_java_com_myvision_api_service_invoiceservice_java_string",
-      "community": 10,
+      "community": 8,
       "norm_label": "string"
     },
     {
@@ -9863,7 +9881,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/JwtService.java",
       "source_location": "L65",
       "id": "service_jwtservice_jwtservice_getexpirationms",
-      "community": 13,
+      "community": 30,
       "norm_label": ".getexpirationms()"
     },
     {
@@ -10826,7 +10844,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/TokenService.java",
       "source_location": "L35",
       "id": "service_tokenservice_tokenservice_tokenservice",
-      "community": 38,
+      "community": 83,
       "norm_label": ".tokenservice()"
     },
     {
@@ -10835,7 +10853,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/TokenService.java",
       "source_location": "L35",
       "id": "refreshtokenrepository",
-      "community": 38,
+      "community": 83,
       "norm_label": "refreshtokenrepository"
     },
     {
@@ -10844,7 +10862,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/TokenService.java",
       "source_location": "L35",
       "id": "passwordresettokenrepository",
-      "community": 38,
+      "community": 83,
       "norm_label": "passwordresettokenrepository"
     },
     {
@@ -10853,7 +10871,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/TokenService.java",
       "source_location": "L35",
       "id": "emailverificationtokenrepository",
-      "community": 38,
+      "community": 83,
       "norm_label": "emailverificationtokenrepository"
     },
     {
@@ -11190,12 +11208,129 @@
       "norm_label": ".esc()"
     },
     {
+      "label": "ApiRateLimitFilter.java",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L1",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "community": 13,
+      "norm_label": "apiratelimitfilter.java"
+    },
+    {
+      "label": "ApiRateLimitFilter",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L21",
+      "id": "util_apiratelimitfilter_apiratelimitfilter",
+      "community": 13,
+      "norm_label": "apiratelimitfilter"
+    },
+    {
+      "label": "OncePerRequestFilter",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "onceperrequestfilter",
+      "community": 13,
+      "norm_label": "onceperrequestfilter"
+    },
+    {
+      "label": ".ApiRateLimitFilter()",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L30",
+      "id": "util_apiratelimitfilter_apiratelimitfilter_apiratelimitfilter",
+      "community": 13,
+      "norm_label": ".apiratelimitfilter()"
+    },
+    {
+      "label": "ObjectMapper",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L30",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_objectmapper",
+      "community": 13,
+      "norm_label": "objectmapper"
+    },
+    {
+      "label": ".shouldNotFilter()",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "id": "util_apiratelimitfilter_apiratelimitfilter_shouldnotfilter",
+      "community": 13,
+      "norm_label": ".shouldnotfilter()"
+    },
+    {
+      "label": "HttpServletRequest",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletrequest",
+      "community": 13,
+      "norm_label": "httpservletrequest"
+    },
+    {
+      "label": "Override",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_override",
+      "community": 13,
+      "norm_label": "override"
+    },
+    {
+      "label": ".doFilterInternal()",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "id": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "community": 13,
+      "norm_label": ".dofilterinternal()"
+    },
+    {
+      "label": "HttpServletResponse",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletresponse",
+      "community": 13,
+      "norm_label": "httpservletresponse"
+    },
+    {
+      "label": "FilterChain",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_filterchain",
+      "community": 13,
+      "norm_label": "filterchain"
+    },
+    {
+      "label": ".remoteAddress()",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L79",
+      "id": "util_apiratelimitfilter_apiratelimitfilter_remoteaddress",
+      "community": 13,
+      "norm_label": ".remoteaddress()"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L79",
+      "id": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_string",
+      "community": 13,
+      "norm_label": "string"
+    },
+    {
       "label": "CurrentUserPrincipal.java",
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L1",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java",
-      "community": 13,
+      "community": 18,
       "norm_label": "currentuserprincipal.java"
     },
     {
@@ -11204,7 +11339,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L17",
       "id": "util_currentuserprincipal_currentuserprincipal",
-      "community": 13,
+      "community": 18,
       "norm_label": "currentuserprincipal"
     },
     {
@@ -11213,7 +11348,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L21",
       "id": "util_currentuserprincipal_currentuserprincipal_currentuserprincipal",
-      "community": 13,
+      "community": 18,
       "norm_label": ".currentuserprincipal()"
     },
     {
@@ -11222,7 +11357,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L21",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java_user",
-      "community": 13,
+      "community": 18,
       "norm_label": "user"
     },
     {
@@ -11231,7 +11366,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L25",
       "id": "util_currentuserprincipal_currentuserprincipal_getuserid",
-      "community": 13,
+      "community": 18,
       "norm_label": ".getuserid()"
     },
     {
@@ -11240,7 +11375,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L25",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java_uuid",
-      "community": 13,
+      "community": 18,
       "norm_label": "uuid"
     },
     {
@@ -11249,7 +11384,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L29",
       "id": "util_currentuserprincipal_currentuserprincipal_getuser",
-      "community": 13,
+      "community": 18,
       "norm_label": ".getuser()"
     },
     {
@@ -11258,7 +11393,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L33",
       "id": "util_currentuserprincipal_currentuserprincipal_getauthorities",
-      "community": 13,
+      "community": 18,
       "norm_label": ".getauthorities()"
     },
     {
@@ -11267,7 +11402,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java_collection",
-      "community": 13,
+      "community": 18,
       "norm_label": "collection"
     },
     {
@@ -11276,7 +11411,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L33",
       "id": "grantedauthority",
-      "community": 13,
+      "community": 18,
       "norm_label": "grantedauthority"
     },
     {
@@ -11285,7 +11420,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L33",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java_override",
-      "community": 13,
+      "community": 18,
       "norm_label": "override"
     },
     {
@@ -11294,7 +11429,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L38",
       "id": "util_currentuserprincipal_currentuserprincipal_getpassword",
-      "community": 13,
+      "community": 18,
       "norm_label": ".getpassword()"
     },
     {
@@ -11303,7 +11438,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L38",
       "id": "apps_api_src_main_java_com_myvision_api_util_currentuserprincipal_java_string",
-      "community": 13,
+      "community": 18,
       "norm_label": "string"
     },
     {
@@ -11312,7 +11447,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L43",
       "id": "util_currentuserprincipal_currentuserprincipal_getusername",
-      "community": 13,
+      "community": 18,
       "norm_label": ".getusername()"
     },
     {
@@ -11321,7 +11456,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L48",
       "id": "util_currentuserprincipal_currentuserprincipal_isaccountnonexpired",
-      "community": 13,
+      "community": 18,
       "norm_label": ".isaccountnonexpired()"
     },
     {
@@ -11330,7 +11465,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L53",
       "id": "util_currentuserprincipal_currentuserprincipal_isaccountnonlocked",
-      "community": 13,
+      "community": 18,
       "norm_label": ".isaccountnonlocked()"
     },
     {
@@ -11339,7 +11474,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L58",
       "id": "util_currentuserprincipal_currentuserprincipal_iscredentialsnonexpired",
-      "community": 13,
+      "community": 18,
       "norm_label": ".iscredentialsnonexpired()"
     },
     {
@@ -11348,7 +11483,7 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L63",
       "id": "util_currentuserprincipal_currentuserprincipal_isenabled",
-      "community": 13,
+      "community": 18,
       "norm_label": ".isenabled()"
     },
     {
@@ -11368,15 +11503,6 @@
       "id": "util_jwtauthenticationfilter_jwtauthenticationfilter",
       "community": 13,
       "norm_label": "jwtauthenticationfilter"
-    },
-    {
-      "label": "OncePerRequestFilter",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "id": "onceperrequestfilter",
-      "community": 13,
-      "norm_label": "onceperrequestfilter"
     },
     {
       "label": ".JwtAuthenticationFilter()",
@@ -11437,7 +11563,7 @@
       "file_type": "code",
       "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
       "source_location": "L41",
-      "id": "filterchain",
+      "id": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java_filterchain",
       "community": 13,
       "norm_label": "filterchain"
     },
@@ -11541,6 +11667,69 @@
       "norm_label": "valueextractor"
     },
     {
+      "label": "RequestIdFilter.java",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L1",
+      "id": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "community": 13,
+      "norm_label": "requestidfilter.java"
+    },
+    {
+      "label": "RequestIdFilter",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L13",
+      "id": "util_requestidfilter_requestidfilter",
+      "community": 13,
+      "norm_label": "requestidfilter"
+    },
+    {
+      "label": ".doFilterInternal()",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "id": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "community": 13,
+      "norm_label": ".dofilterinternal()"
+    },
+    {
+      "label": "HttpServletRequest",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "id": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletrequest",
+      "community": 13,
+      "norm_label": "httpservletrequest"
+    },
+    {
+      "label": "HttpServletResponse",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "id": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletresponse",
+      "community": 13,
+      "norm_label": "httpservletresponse"
+    },
+    {
+      "label": "FilterChain",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "id": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_filterchain",
+      "community": 13,
+      "norm_label": "filterchain"
+    },
+    {
+      "label": "Override",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "id": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_override",
+      "community": 13,
+      "norm_label": "override"
+    },
+    {
       "label": "additional-spring-configuration-metadata.json",
       "file_type": "code",
       "source_file": "apps/api/src/main/resources/META-INF/additional-spring-configuration-metadata.json",
@@ -11607,7 +11796,7 @@
       "label": ".registerAndGetToken()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/AbstractIntegrationTest.java",
-      "source_location": "L46",
+      "source_location": "L47",
       "id": "api_abstractintegrationtest_abstractintegrationtest_registerandgettoken",
       "community": 12,
       "norm_label": ".registerandgettoken()"
@@ -11616,7 +11805,7 @@
       "label": "String",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/AbstractIntegrationTest.java",
-      "source_location": "L46",
+      "source_location": "L47",
       "id": "apps_api_src_test_java_com_myvision_api_abstractintegrationtest_java_string",
       "community": 12,
       "norm_label": "string"
@@ -11625,7 +11814,7 @@
       "label": ".createClient()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/AbstractIntegrationTest.java",
-      "source_location": "L65",
+      "source_location": "L66",
       "id": "api_abstractintegrationtest_abstractintegrationtest_createclient",
       "community": 12,
       "norm_label": ".createclient()"
@@ -11643,16 +11832,34 @@
       "label": "AuthIntegrationTest",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L12",
+      "source_location": "L27",
       "id": "auth_authintegrationtest_authintegrationtest",
       "community": 12,
       "norm_label": "authintegrationtest"
     },
     {
+      "label": ".cleanVerificationTokens()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L35",
+      "id": "auth_authintegrationtest_authintegrationtest_cleanverificationtokens",
+      "community": 12,
+      "norm_label": ".cleanverificationtokens()"
+    },
+    {
+      "label": "BeforeEach",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L35",
+      "id": "beforeeach",
+      "community": 12,
+      "norm_label": "beforeeach"
+    },
+    {
       "label": ".healthEndpointIsPublic()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L14",
+      "source_location": "L40",
       "id": "auth_authintegrationtest_authintegrationtest_healthendpointispublic",
       "community": 12,
       "norm_label": ".healthendpointispublic()"
@@ -11661,16 +11868,43 @@
       "label": "Test",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L14",
+      "source_location": "L40",
       "id": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
       "community": 12,
       "norm_label": "test"
     },
     {
+      "label": ".actuatorHealthEndpointIsPublic()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L49",
+      "id": "auth_authintegrationtest_authintegrationtest_actuatorhealthendpointispublic",
+      "community": 12,
+      "norm_label": ".actuatorhealthendpointispublic()"
+    },
+    {
+      "label": ".docsRequireAuthentication()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L56",
+      "id": "auth_authintegrationtest_authintegrationtest_docsrequireauthentication",
+      "community": 12,
+      "norm_label": ".docsrequireauthentication()"
+    },
+    {
+      "label": ".corsAllowsConfiguredFrontendOrigin()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L62",
+      "id": "auth_authintegrationtest_authintegrationtest_corsallowsconfiguredfrontendorigin",
+      "community": 12,
+      "norm_label": ".corsallowsconfiguredfrontendorigin()"
+    },
+    {
       "label": ".registerCreatesUserCompanyAndReturnsToken()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L22",
+      "source_location": "L71",
       "id": "auth_authintegrationtest_authintegrationtest_registercreatesusercompanyandreturnstoken",
       "community": 12,
       "norm_label": ".registercreatesusercompanyandreturnstoken()"
@@ -11679,7 +11913,7 @@
       "label": ".registerRejectsDuplicateEmail()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L41",
+      "source_location": "L90",
       "id": "auth_authintegrationtest_authintegrationtest_registerrejectsduplicateemail",
       "community": 12,
       "norm_label": ".registerrejectsduplicateemail()"
@@ -11688,7 +11922,7 @@
       "label": ".loginReturnsTokenForValidCredentials()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L59",
+      "source_location": "L108",
       "id": "auth_authintegrationtest_authintegrationtest_loginreturnstokenforvalidcredentials",
       "community": 12,
       "norm_label": ".loginreturnstokenforvalidcredentials()"
@@ -11697,16 +11931,34 @@
       "label": ".loginRejectsWrongPassword()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L76",
+      "source_location": "L125",
       "id": "auth_authintegrationtest_authintegrationtest_loginrejectswrongpassword",
       "community": 12,
       "norm_label": ".loginrejectswrongpassword()"
     },
     {
+      "label": ".passwordResetTokenCanResetPasswordOnce()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L141",
+      "id": "auth_authintegrationtest_authintegrationtest_passwordresettokencanresetpasswordonce",
+      "community": 12,
+      "norm_label": ".passwordresettokencanresetpasswordonce()"
+    },
+    {
+      "label": ".emailVerificationTokenMarksUserVerifiedOnce()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L187",
+      "id": "auth_authintegrationtest_authintegrationtest_emailverificationtokenmarksuserverifiedonce",
+      "community": 12,
+      "norm_label": ".emailverificationtokenmarksuserverifiedonce()"
+    },
+    {
       "label": ".meReturnsCurrentUserAndCompany()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L92",
+      "source_location": "L223",
       "id": "auth_authintegrationtest_authintegrationtest_mereturnscurrentuserandcompany",
       "community": 12,
       "norm_label": ".mereturnscurrentuserandcompany()"
@@ -11715,10 +11967,28 @@
       "label": ".protectedEndpointRequiresToken()",
       "file_type": "code",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
-      "source_location": "L104",
+      "source_location": "L235",
       "id": "auth_authintegrationtest_authintegrationtest_protectedendpointrequirestoken",
       "community": 12,
       "norm_label": ".protectedendpointrequirestoken()"
+    },
+    {
+      "label": ".hash()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L241",
+      "id": "auth_authintegrationtest_authintegrationtest_hash",
+      "community": 12,
+      "norm_label": ".hash()"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L241",
+      "id": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_string",
+      "community": 12,
+      "norm_label": "string"
     },
     {
       "label": "ClientIntegrationTest.java",
@@ -11782,6 +12052,42 @@
       "id": "client_clientintegrationtest_clientintegrationtest_deletearchivesinsteadofremoving",
       "community": 12,
       "norm_label": ".deletearchivesinsteadofremoving()"
+    },
+    {
+      "label": "CompanyAssetIntegrationTest.java",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L1",
+      "id": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java",
+      "community": 12,
+      "norm_label": "companyassetintegrationtest.java"
+    },
+    {
+      "label": "CompanyAssetIntegrationTest",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L12",
+      "id": "company_companyassetintegrationtest_companyassetintegrationtest",
+      "community": 12,
+      "norm_label": "companyassetintegrationtest"
+    },
+    {
+      "label": ".companyLogoCanBeUploadedToPublicStorage()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L14",
+      "id": "company_companyassetintegrationtest_companyassetintegrationtest_companylogocanbeuploadedtopublicstorage",
+      "community": 12,
+      "norm_label": ".companylogocanbeuploadedtopublicstorage()"
+    },
+    {
+      "label": "Test",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L14",
+      "id": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java_test",
+      "community": 12,
+      "norm_label": "test"
     },
     {
       "label": "DashboardIntegrationTest.java",
@@ -11944,6 +12250,96 @@
       "id": "project_projectintegrationtest_projectintegrationtest_createprojectrejectsclientofanothercompany",
       "community": 12,
       "norm_label": ".createprojectrejectsclientofanothercompany()"
+    },
+    {
+      "label": "ApiRateLimitFilterTest.java",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L1",
+      "id": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "community": 13,
+      "norm_label": "apiratelimitfiltertest.java"
+    },
+    {
+      "label": "ApiRateLimitFilterTest",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L12",
+      "id": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "community": 13,
+      "norm_label": "apiratelimitfiltertest"
+    },
+    {
+      "label": ".limitsRepeatedApiRequestsByIpAndPath()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L14",
+      "id": "util_apiratelimitfiltertest_apiratelimitfiltertest_limitsrepeatedapirequestsbyipandpath",
+      "community": 13,
+      "norm_label": ".limitsrepeatedapirequestsbyipandpath()"
+    },
+    {
+      "label": "Test",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L14",
+      "id": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_test",
+      "community": 13,
+      "norm_label": "test"
+    },
+    {
+      "label": ".skipsAuthEndpoints()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L29",
+      "id": "util_apiratelimitfiltertest_apiratelimitfiltertest_skipsauthendpoints",
+      "community": 13,
+      "norm_label": ".skipsauthendpoints()"
+    },
+    {
+      "label": ".request()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "id": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "community": 13,
+      "norm_label": ".request()"
+    },
+    {
+      "label": "String",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "id": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_string",
+      "community": 13,
+      "norm_label": "string"
+    },
+    {
+      "label": "MockHttpServletRequest",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "id": "mockhttpservletrequest",
+      "community": 13,
+      "norm_label": "mockhttpservletrequest"
+    },
+    {
+      "label": ".objectMapper()",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L48",
+      "id": "util_apiratelimitfiltertest_apiratelimitfiltertest_objectmapper",
+      "community": 13,
+      "norm_label": ".objectmapper()"
+    },
+    {
+      "label": "ObjectMapper",
+      "file_type": "code",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L48",
+      "id": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_objectmapper",
+      "community": 13,
+      "norm_label": "objectmapper"
     },
     {
       "label": "eslint.config.mjs",
@@ -13620,10 +14016,28 @@
       "norm_label": "code:txt (database_url)"
     },
     {
+      "label": "Secrets You Must Create Or Copy",
+      "file_type": "document",
+      "source_file": "docs/deployment-checklist.md",
+      "source_location": "L36",
+      "id": "docs_deployment_checklist_secrets_you_must_create_or_copy",
+      "community": 44,
+      "norm_label": "secrets you must create or copy"
+    },
+    {
+      "label": "Resend Domain Verification",
+      "file_type": "document",
+      "source_file": "docs/deployment-checklist.md",
+      "source_location": "L46",
+      "id": "docs_deployment_checklist_resend_domain_verification",
+      "community": 44,
+      "norm_label": "resend domain verification"
+    },
+    {
       "label": "Frontend Hosting",
       "file_type": "document",
       "source_file": "docs/deployment-checklist.md",
-      "source_location": "L30",
+      "source_location": "L54",
       "id": "docs_deployment_checklist_frontend_hosting",
       "community": 44,
       "norm_label": "frontend hosting"
@@ -13632,7 +14046,7 @@
       "label": "Supabase",
       "file_type": "document",
       "source_file": "docs/deployment-checklist.md",
-      "source_location": "L36",
+      "source_location": "L60",
       "id": "docs_deployment_checklist_supabase",
       "community": 44,
       "norm_label": "supabase"
@@ -13641,7 +14055,7 @@
       "label": "Monitoring",
       "file_type": "document",
       "source_file": "docs/deployment-checklist.md",
-      "source_location": "L42",
+      "source_location": "L66",
       "id": "docs_deployment_checklist_monitoring",
       "community": 44,
       "norm_label": "monitoring"
@@ -13683,10 +14097,19 @@
       "norm_label": "code:txt (get /api/invoices/{id}/xrechnung)"
     },
     {
-      "label": "ZUGFeRD",
+      "label": "Current Status",
       "file_type": "document",
       "source_file": "docs/e-invoice-validation.md",
       "source_location": "L22",
+      "id": "docs_e_invoice_validation_current_status",
+      "community": 79,
+      "norm_label": "current status"
+    },
+    {
+      "label": "ZUGFeRD",
+      "file_type": "document",
+      "source_file": "docs/e-invoice-validation.md",
+      "source_location": "L26",
       "id": "docs_e_invoice_validation_zugferd",
       "community": 79,
       "norm_label": "zugferd"
@@ -13695,10 +14118,55 @@
       "label": "code:txt (GET /api/invoices/{id}/zugferd)",
       "file_type": "document",
       "source_file": "docs/e-invoice-validation.md",
-      "source_location": "L26",
+      "source_location": "L30",
       "id": "docs_e_invoice_validation_codeblock_2",
       "community": 79,
       "norm_label": "code:txt (get /api/invoices/{id}/zugferd)"
+    },
+    {
+      "label": "git-cleanup-review.md",
+      "file_type": "document",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L1",
+      "id": "docs_git_cleanup_review_md",
+      "community": 81,
+      "norm_label": "git-cleanup-review.md"
+    },
+    {
+      "label": "Git Cleanup Review",
+      "file_type": "document",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L1",
+      "id": "docs_git_cleanup_review_git_cleanup_review",
+      "community": 81,
+      "norm_label": "git cleanup review"
+    },
+    {
+      "label": "Include For Backend/Provider Work",
+      "file_type": "document",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L3",
+      "id": "docs_git_cleanup_review_include_for_backend_provider_work",
+      "community": 81,
+      "norm_label": "include for backend/provider work"
+    },
+    {
+      "label": "Review Separately",
+      "file_type": "document",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L17",
+      "id": "docs_git_cleanup_review_review_separately",
+      "community": 81,
+      "norm_label": "review separately"
+    },
+    {
+      "label": "Optional Generated Files",
+      "file_type": "document",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L24",
+      "id": "docs_git_cleanup_review_optional_generated_files",
+      "community": 81,
+      "norm_label": "optional generated files"
     },
     {
       "label": "invoice-compliance-checklist.md",
@@ -13812,7 +14280,7 @@
       "label": "Compliance-Dependent Work",
       "file_type": "document",
       "source_file": "docs/production-readiness.md",
-      "source_location": "L22",
+      "source_location": "L25",
       "id": "docs_production_readiness_compliance_dependent_work",
       "community": 92,
       "norm_label": "compliance-dependent work"
@@ -13821,7 +14289,7 @@
       "label": "Environment Variables",
       "file_type": "document",
       "source_file": "docs/production-readiness.md",
-      "source_location": "L30",
+      "source_location": "L33",
       "id": "docs_production_readiness_environment_variables",
       "community": 92,
       "norm_label": "environment variables"
@@ -13830,7 +14298,7 @@
       "label": "code:txt (DATABASE_URL)",
       "file_type": "document",
       "source_file": "docs/production-readiness.md",
-      "source_location": "L34",
+      "source_location": "L37",
       "id": "docs_production_readiness_codeblock_1",
       "community": 92,
       "norm_label": "code:txt (database_url)"
@@ -13839,7 +14307,7 @@
       "label": "Documents and Compliance",
       "file_type": "document",
       "source_file": "docs/production-readiness.md",
-      "source_location": "L60",
+      "source_location": "L70",
       "id": "docs_production_readiness_documents_and_compliance",
       "community": 92,
       "norm_label": "documents and compliance"
@@ -13935,6 +14403,60 @@
       "norm_label": "not yet done"
     },
     {
+      "label": "supabase-backup-restore.md",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L1",
+      "id": "docs_supabase_backup_restore_md",
+      "community": 69,
+      "norm_label": "supabase-backup-restore.md"
+    },
+    {
+      "label": "Supabase Backup And Restore Checklist",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L1",
+      "id": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "community": 69,
+      "norm_label": "supabase backup and restore checklist"
+    },
+    {
+      "label": "Before Real Customers",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L3",
+      "id": "docs_supabase_backup_restore_before_real_customers",
+      "community": 69,
+      "norm_label": "before real customers"
+    },
+    {
+      "label": "Weekly Operational Check",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L10",
+      "id": "docs_supabase_backup_restore_weekly_operational_check",
+      "community": 69,
+      "norm_label": "weekly operational check"
+    },
+    {
+      "label": "Restore Drill",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L18",
+      "id": "docs_supabase_backup_restore_restore_drill",
+      "community": 69,
+      "norm_label": "restore drill"
+    },
+    {
+      "label": "Incident Notes",
+      "file_type": "document",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L30",
+      "id": "docs_supabase_backup_restore_incident_notes",
+      "community": 69,
+      "norm_label": "incident notes"
+    },
+    {
       "label": "supabase-setup.md",
       "file_type": "document",
       "source_file": "docs/supabase-setup.md",
@@ -14014,6 +14536,24 @@
       "id": "docs_supabase_setup_codeblock_4",
       "community": 35,
       "norm_label": "code:txt (database_url=your-supabase-postgres-connection-string)"
+    },
+    {
+      "label": "ObjectMapper",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L43",
+      "community": 9,
+      "norm_label": "objectmapper",
+      "id": "objectmapper"
+    },
+    {
+      "label": "FilterChain",
+      "file_type": "code",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
+      "source_location": "L41",
+      "community": 13,
+      "norm_label": "filterchain",
+      "id": "filterchain"
     },
     {
       "label": "ResponseEntity",
@@ -14335,6 +14875,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java",
+      "target": "apiratelimitfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
       "source_location": "L8",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -14351,6 +14902,17 @@
       "confidence_score": 1.0,
       "source": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java",
       "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_httpservletresponse"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java",
+      "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_objectmapper",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -14455,6 +15017,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java",
+      "target": "requestidfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
       "source_location": "L22",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -14515,12 +15088,34 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "config_securityconfig_securityconfig_securityfilterchain",
+      "target": "apiratelimitfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
       "source_location": "L33",
       "weight": 1.0,
       "context": "attribute",
       "confidence_score": 1.0,
       "source": "config_securityconfig_securityconfig_securityfilterchain",
       "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_bean"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "config_securityconfig_securityconfig_securityfilterchain",
+      "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_objectmapper",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14570,6 +15165,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "config_securityconfig_securityconfig_securityfilterchain",
+      "target": "requestidfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
       "source_location": "L33",
       "weight": 1.0,
       "context": "return_type",
@@ -14578,26 +15184,15 @@
       "target": "securityfilterchain"
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/api/src/test/java/com/myvision/api/AbstractIntegrationTest.java",
-      "source_location": "L4",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "apps_api_src_test_java_com_myvision_api_abstractintegrationtest_java",
-      "target": "objectmapper"
-    },
-    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
-      "source_location": "L62",
+      "source_location": "L86",
       "weight": 1.0,
       "context": "parameter_type",
-      "confidence_score": 1.0,
       "source": "config_securityconfig_securityconfig_writeerror",
-      "target": "objectmapper"
+      "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_objectmapper",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -14658,12 +15253,23 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "confidence_score": 1.0,
+      "source": "config_securityconfig_securityconfig_writeerror",
+      "target": "objectmapper"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/config/SecurityConfig.java",
       "source_location": "L105",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "config_securityconfig_securityconfig_corsconfigurationsource",
-      "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_string",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_config_securityconfig_java_string"
     },
     {
       "relation": "references",
@@ -16326,9 +16932,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/controller/InvoiceController.java",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "controller_invoicecontroller_invoicecontroller",
-      "target": "controller_invoicecontroller_invoicecontroller_zugferd",
-      "confidence_score": 1.0
+      "target": "controller_invoicecontroller_invoicecontroller_zugferd"
     },
     {
       "relation": "references",
@@ -16513,9 +17119,9 @@
       "source_location": "L146",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "controller_invoicecontroller_invoicecontroller_zugferd",
-      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_currentuserprincipal",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_currentuserprincipal"
     },
     {
       "relation": "references",
@@ -16623,9 +17229,9 @@
       "source_location": "L146",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "controller_invoicecontroller_invoicecontroller_zugferd",
-      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_getmapping",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_getmapping"
     },
     {
       "relation": "references",
@@ -16843,9 +17449,9 @@
       "source_location": "L146",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "controller_invoicecontroller_invoicecontroller_zugferd",
-      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_uuid",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_uuid"
     },
     {
       "relation": "references",
@@ -16898,9 +17504,9 @@
       "source_location": "L146",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "controller_invoicecontroller_invoicecontroller_zugferd",
-      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_responseentity",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_controller_invoicecontroller_java_responseentity"
     },
     {
       "relation": "references",
@@ -29290,9 +29896,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/exception/GlobalExceptionHandler.java",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exception_globalexceptionhandler_globalexceptionhandler",
-      "target": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported",
-      "confidence_score": 1.0
+      "target": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported"
     },
     {
       "relation": "method",
@@ -29454,9 +30060,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported",
-      "target": "apps_api_src_main_java_com_myvision_api_exception_globalexceptionhandler_java_responseentity",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_exception_globalexceptionhandler_java_responseentity"
     },
     {
       "relation": "references",
@@ -29553,9 +30159,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "context": "generic_arg",
+      "confidence_score": 1.0,
       "source": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported",
-      "target": "apps_api_src_main_java_com_myvision_api_exception_globalexceptionhandler_java_apierror",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_exception_globalexceptionhandler_java_apierror"
     },
     {
       "relation": "references",
@@ -29652,9 +30258,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported",
-      "target": "exceptionhandler",
-      "confidence_score": 1.0
+      "target": "exceptionhandler"
     },
     {
       "relation": "references",
@@ -29993,9 +30599,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "exception_globalexceptionhandler_globalexceptionhandler_handleunsupported",
-      "target": "unsupportedoperationexception",
-      "confidence_score": 1.0
+      "target": "unsupportedoperationexception"
     },
     {
       "relation": "references",
@@ -35286,9 +35892,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/FileStorageService.java",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "service_filestorageservice_filestorageservice",
-      "target": "service_filestorageservice_filestorageservice_putpublic",
-      "confidence_score": 1.0
+      "target": "service_filestorageservice_filestorageservice_putpublic"
     },
     {
       "relation": "references",
@@ -35319,9 +35925,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "service_filestorageservice_filestorageservice_putpublic",
-      "target": "apps_api_src_main_java_com_myvision_api_service_filestorageservice_java_string",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_filestorageservice_java_string"
     },
     {
       "relation": "references",
@@ -35330,9 +35936,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "service_filestorageservice_filestorageservice_putpublic",
-      "target": "apps_api_src_main_java_com_myvision_api_service_filestorageservice_java_storageobject",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_filestorageservice_java_storageobject"
     },
     {
       "relation": "imports",
@@ -35589,9 +36195,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/InvoiceDocumentService.java",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "service_invoicedocumentservice_invoicedocumentservice",
-      "target": "service_invoicedocumentservice_invoicedocumentservice_zugferdpdf",
-      "confidence_score": 1.0
+      "target": "service_invoicedocumentservice_invoicedocumentservice_zugferdpdf"
     },
     {
       "relation": "references",
@@ -35787,9 +36393,9 @@
       "source_location": "L97",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "service_invoicedocumentservice_invoicedocumentservice_zugferdpdf",
-      "target": "apps_api_src_main_java_com_myvision_api_service_invoicedocumentservice_java_uuid",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_invoicedocumentservice_java_uuid"
     },
     {
       "relation": "references",
@@ -38660,9 +39266,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ProviderFileStorageService.java",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "service_providerfilestorageservice_providerfilestorageservice",
-      "target": "service_providerfilestorageservice_providerfilestorageservice_putpublic",
-      "confidence_score": 1.0
+      "target": "service_providerfilestorageservice_providerfilestorageservice_putpublic"
     },
     {
       "relation": "method",
@@ -38768,9 +39374,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "parameter_type",
+      "confidence_score": 1.0,
       "source": "service_providerfilestorageservice_providerfilestorageservice_putpublic",
-      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_string",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_string"
     },
     {
       "relation": "references",
@@ -38856,9 +39462,9 @@
       "source_file": "apps/api/src/main/java/com/myvision/api/service/ProviderFileStorageService.java",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "service_providerfilestorageservice_providerfilestorageservice_putpublic",
-      "target": "service_providerfilestorageservice_providerfilestorageservice_put",
-      "confidence_score": 1.0
+      "target": "service_providerfilestorageservice_providerfilestorageservice_put"
     },
     {
       "relation": "references",
@@ -38878,9 +39484,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "return_type",
+      "confidence_score": 1.0,
       "source": "service_providerfilestorageservice_providerfilestorageservice_putpublic",
-      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_storageobject",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_storageobject"
     },
     {
       "relation": "references",
@@ -38900,9 +39506,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "context": "attribute",
+      "confidence_score": 1.0,
       "source": "service_providerfilestorageservice_providerfilestorageservice_putpublic",
-      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_override",
-      "confidence_score": 1.0
+      "target": "apps_api_src_main_java_com_myvision_api_service_providerfilestorageservice_java_override"
     },
     {
       "relation": "calls",
@@ -40152,6 +40758,17 @@
       "target": "refreshtokenrepository"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java",
+      "target": "emailverificationtokenrepository",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/service/TokenService.java",
@@ -41013,6 +41630,273 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "onceperrequestfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java",
+      "target": "util_apiratelimitfilter_apiratelimitfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter",
+      "target": "onceperrequestfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter",
+      "target": "util_apiratelimitfilter_apiratelimitfilter_apiratelimitfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter",
+      "target": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter",
+      "target": "util_apiratelimitfilter_apiratelimitfilter_remoteaddress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter",
+      "target": "util_apiratelimitfilter_apiratelimitfilter_shouldnotfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java",
+      "target": "onceperrequestfilter"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "target": "onceperrequestfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "util_jwtauthenticationfilter_jwtauthenticationfilter",
+      "target": "onceperrequestfilter"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "util_requestidfilter_requestidfilter",
+      "target": "onceperrequestfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_apiratelimitfilter",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_shouldnotfilter",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_shouldnotfilter",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_override",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_remoteaddress",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_override",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_httpservletresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "util_apiratelimitfilter_apiratelimitfilter_dofilterinternal",
+      "target": "util_apiratelimitfilter_apiratelimitfilter_remoteaddress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/ApiRateLimitFilter.java",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "util_apiratelimitfilter_apiratelimitfilter_remoteaddress",
+      "target": "apps_api_src_main_java_com_myvision_api_util_apiratelimitfilter_java_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/util/CurrentUserPrincipal.java",
       "source_location": "L11",
       "weight": 1.0,
@@ -41322,6 +42206,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java_filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -41351,17 +42246,6 @@
       "target": "filterchain"
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
-      "source_location": "L23",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java",
-      "target": "onceperrequestfilter"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
@@ -41370,16 +42254,6 @@
       "confidence_score": 1.0,
       "source": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java",
       "target": "util_jwtauthenticationfilter_jwtauthenticationfilter"
-    },
-    {
-      "relation": "inherits",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
-      "source_location": "L25",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "util_jwtauthenticationfilter_jwtauthenticationfilter",
-      "target": "onceperrequestfilter"
     },
     {
       "relation": "method",
@@ -41422,6 +42296,17 @@
       "confidence_score": 1.0,
       "source": "util_jwtauthenticationfilter_jwtauthenticationfilter_jwtauthenticationfilter",
       "target": "customuserdetailsservice"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/JwtAuthenticationFilter.java",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_jwtauthenticationfilter_jwtauthenticationfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_jwtauthenticationfilter_java_filterchain",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -41640,6 +42525,103 @@
       "target": "valueextractor"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java",
+      "target": "util_requestidfilter_requestidfilter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "util_requestidfilter_requestidfilter",
+      "target": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_httpservletresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/main/java/com/myvision/api/util/RequestIdFilter.java",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "util_requestidfilter_requestidfilter_dofilterinternal",
+      "target": "apps_api_src_main_java_com_myvision_api_util_requestidfilter_java_override",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/main/resources/META-INF/additional-spring-configuration-metadata.json",
@@ -41680,6 +42662,17 @@
       "confidence_score": 1.0,
       "source": "apps_api_src_test_java_com_myvision_api_abstractintegrationtest_java",
       "target": "dynamicpropertysource"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/AbstractIntegrationTest.java",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_abstractintegrationtest_java",
+      "target": "objectmapper"
     },
     {
       "relation": "method",
@@ -41737,6 +42730,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java",
+      "target": "api_abstractintegrationtest_abstractintegrationtest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "apps/api/src/test/java/com/myvision/api/dashboard/DashboardIntegrationTest.java",
       "source_location": "L3",
       "weight": 1.0,
@@ -41785,6 +42789,16 @@
       "confidence_score": 1.0,
       "source": "client_clientintegrationtest_clientintegrationtest",
       "target": "api_abstractintegrationtest_abstractintegrationtest"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "company_companyassetintegrationtest_companyassetintegrationtest",
+      "target": "api_abstractintegrationtest_abstractintegrationtest",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -41888,6 +42902,17 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest_passwordresettokencanresetpasswordonce",
+      "target": "api_abstractintegrationtest_abstractintegrationtest_registerandgettoken"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
       "source_location": "L43",
       "weight": 1.0,
       "source": "auth_authintegrationtest_authintegrationtest_registerrejectsduplicateemail",
@@ -41935,6 +42960,17 @@
       "source_location": "L57",
       "weight": 1.0,
       "source": "client_clientintegrationtest_clientintegrationtest_listisscopedtocurrentcompany",
+      "target": "api_abstractintegrationtest_abstractintegrationtest_registerandgettoken"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "company_companyassetintegrationtest_companyassetintegrationtest_companylogocanbeuploadedtopublicstorage",
       "target": "api_abstractintegrationtest_abstractintegrationtest_registerandgettoken"
     },
     {
@@ -42190,6 +43226,77 @@
       "target": "auth_authintegrationtest_authintegrationtest"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java",
+      "target": "beforeeach",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_actuatorhealthendpointispublic",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_cleanverificationtokens",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_corsallowsconfiguredfrontendorigin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_docsrequireauthentication",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L187",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_emailverificationtokenmarksuserverifiedonce",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L241",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_hash",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
@@ -42233,6 +43340,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L141",
+      "weight": 1.0,
+      "source": "auth_authintegrationtest_authintegrationtest",
+      "target": "auth_authintegrationtest_authintegrationtest_passwordresettokencanresetpasswordonce",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
       "source_location": "L103",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -42263,12 +43380,67 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_cleanverificationtokens",
+      "target": "beforeeach",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
       "source_location": "L14",
       "weight": 1.0,
       "context": "attribute",
       "confidence_score": 1.0,
       "source": "auth_authintegrationtest_authintegrationtest_healthendpointispublic",
       "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_actuatorhealthendpointispublic",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_corsallowsconfiguredfrontendorigin",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_docsrequireauthentication",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L187",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_emailverificationtokenmarksuserverifiedonce",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -42307,6 +43479,17 @@
       "relation": "references",
       "confidence": "EXTRACTED",
       "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L141",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "auth_authintegrationtest_authintegrationtest_passwordresettokencanresetpasswordonce",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
       "source_location": "L103",
       "weight": 1.0,
       "context": "attribute",
@@ -42335,6 +43518,17 @@
       "confidence_score": 1.0,
       "source": "auth_authintegrationtest_authintegrationtest_registerrejectsduplicateemail",
       "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_test"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/auth/AuthIntegrationTest.java",
+      "source_location": "L241",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "auth_authintegrationtest_authintegrationtest_hash",
+      "target": "apps_api_src_test_java_com_myvision_api_auth_authintegrationtest_java_string",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -42440,6 +43634,48 @@
       "confidence_score": 1.0,
       "source": "client_clientintegrationtest_clientintegrationtest_listisscopedtocurrentcompany",
       "target": "apps_api_src_test_java_com_myvision_api_client_clientintegrationtest_java_test"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java",
+      "target": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java",
+      "target": "company_companyassetintegrationtest_companyassetintegrationtest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "company_companyassetintegrationtest_companyassetintegrationtest",
+      "target": "company_companyassetintegrationtest_companyassetintegrationtest_companylogocanbeuploadedtopublicstorage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/company/CompanyAssetIntegrationTest.java",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "company_companyassetintegrationtest_companyassetintegrationtest_companylogocanbeuploadedtopublicstorage",
+      "target": "apps_api_src_test_java_com_myvision_api_company_companyassetintegrationtest_java_test",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -42692,6 +43928,199 @@
       "confidence_score": 1.0,
       "source": "project_projectintegrationtest_projectintegrationtest_createprojectrejectsclientofanothercompany",
       "target": "apps_api_src_test_java_com_myvision_api_project_projectintegrationtest_java_test"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "target": "filterchain",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "target": "mockhttpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_limitsrepeatedapirequestsbyipandpath",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_skipsauthendpoints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_limitsrepeatedapirequestsbyipandpath",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_limitsrepeatedapirequestsbyipandpath",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_limitsrepeatedapirequestsbyipandpath",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "attribute",
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_skipsauthendpoints",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_skipsauthendpoints",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_objectmapper",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_skipsauthendpoints",
+      "target": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_string",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_request",
+      "target": "mockhttpservletrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/api/src/test/java/com/myvision/api/util/ApiRateLimitFilterTest.java",
+      "source_location": "L48",
+      "weight": 1.0,
+      "context": "return_type",
+      "source": "util_apiratelimitfiltertest_apiratelimitfiltertest_objectmapper",
+      "target": "apps_api_src_test_java_com_myvision_api_util_apiratelimitfiltertest_java_objectmapper",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -45621,9 +47050,9 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_md",
-      "target": "docs_deployment_checklist_deployment_checklist",
-      "confidence_score": 1.0
+      "target": "docs_deployment_checklist_deployment_checklist"
     },
     {
       "relation": "contains",
@@ -45631,9 +47060,9 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_deployment_checklist",
-      "target": "docs_deployment_checklist_backend_hosting",
-      "confidence_score": 1.0
+      "target": "docs_deployment_checklist_backend_hosting"
     },
     {
       "relation": "contains",
@@ -45641,9 +47070,9 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_deployment_checklist",
-      "target": "docs_deployment_checklist_frontend_hosting",
-      "confidence_score": 1.0
+      "target": "docs_deployment_checklist_frontend_hosting"
     },
     {
       "relation": "contains",
@@ -45651,9 +47080,9 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_deployment_checklist",
-      "target": "docs_deployment_checklist_monitoring",
-      "confidence_score": 1.0
+      "target": "docs_deployment_checklist_monitoring"
     },
     {
       "relation": "contains",
@@ -45661,8 +47090,18 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_deployment_checklist",
-      "target": "docs_deployment_checklist_required_backend_environment",
+      "target": "docs_deployment_checklist_required_backend_environment"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/deployment-checklist.md",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "docs_deployment_checklist_deployment_checklist",
+      "target": "docs_deployment_checklist_resend_domain_verification",
       "confidence_score": 1.0
     },
     {
@@ -45672,8 +47111,18 @@
       "source_location": "L36",
       "weight": 1.0,
       "source": "docs_deployment_checklist_deployment_checklist",
-      "target": "docs_deployment_checklist_supabase",
+      "target": "docs_deployment_checklist_secrets_you_must_create_or_copy",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/deployment-checklist.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "docs_deployment_checklist_deployment_checklist",
+      "target": "docs_deployment_checklist_supabase"
     },
     {
       "relation": "contains",
@@ -45681,9 +47130,9 @@
       "source_file": "docs/deployment-checklist.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_deployment_checklist_required_backend_environment",
-      "target": "docs_deployment_checklist_codeblock_1",
-      "confidence_score": 1.0
+      "target": "docs_deployment_checklist_codeblock_1"
     },
     {
       "relation": "contains",
@@ -45691,19 +47140,9 @@
       "source_file": "docs/e-invoice-validation.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_e_invoice_validation_md",
-      "target": "docs_e_invoice_validation_e_invoice_validation",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "docs/e-invoice-validation.md",
-      "source_location": "L3",
-      "weight": 1.0,
-      "source": "docs_e_invoice_validation_e_invoice_validation",
-      "target": "docs_e_invoice_validation_xrechnung",
-      "confidence_score": 1.0
+      "target": "docs_e_invoice_validation_e_invoice_validation"
     },
     {
       "relation": "contains",
@@ -45712,8 +47151,28 @@
       "source_location": "L22",
       "weight": 1.0,
       "source": "docs_e_invoice_validation_e_invoice_validation",
-      "target": "docs_e_invoice_validation_zugferd",
+      "target": "docs_e_invoice_validation_current_status",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/e-invoice-validation.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "docs_e_invoice_validation_e_invoice_validation",
+      "target": "docs_e_invoice_validation_xrechnung"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/e-invoice-validation.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "docs_e_invoice_validation_e_invoice_validation",
+      "target": "docs_e_invoice_validation_zugferd"
     },
     {
       "relation": "contains",
@@ -45721,9 +47180,9 @@
       "source_file": "docs/e-invoice-validation.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_e_invoice_validation_xrechnung",
-      "target": "docs_e_invoice_validation_codeblock_1",
-      "confidence_score": 1.0
+      "target": "docs_e_invoice_validation_codeblock_1"
     },
     {
       "relation": "contains",
@@ -45731,8 +47190,48 @@
       "source_file": "docs/e-invoice-validation.md",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_e_invoice_validation_zugferd",
-      "target": "docs_e_invoice_validation_codeblock_2",
+      "target": "docs_e_invoice_validation_codeblock_2"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "docs_git_cleanup_review_md",
+      "target": "docs_git_cleanup_review_git_cleanup_review",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "docs_git_cleanup_review_git_cleanup_review",
+      "target": "docs_git_cleanup_review_include_for_backend_provider_work",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "docs_git_cleanup_review_git_cleanup_review",
+      "target": "docs_git_cleanup_review_optional_generated_files",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/git-cleanup-review.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "docs_git_cleanup_review_git_cleanup_review",
+      "target": "docs_git_cleanup_review_review_separately",
       "confidence_score": 1.0
     },
     {
@@ -45741,9 +47240,9 @@
       "source_file": "docs/invoice-compliance-checklist.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_invoice_compliance_checklist_md",
-      "target": "docs_invoice_compliance_checklist_invoice_compliance_checklist",
-      "confidence_score": 1.0
+      "target": "docs_invoice_compliance_checklist_invoice_compliance_checklist"
     },
     {
       "relation": "contains",
@@ -45751,9 +47250,9 @@
       "source_file": "docs/invoice-compliance-checklist.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_invoice_compliance_checklist_invoice_compliance_checklist",
-      "target": "docs_invoice_compliance_checklist_germany_first_invoice_fields",
-      "confidence_score": 1.0
+      "target": "docs_invoice_compliance_checklist_germany_first_invoice_fields"
     },
     {
       "relation": "contains",
@@ -45761,9 +47260,9 @@
       "source_file": "docs/invoice-compliance-checklist.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_invoice_compliance_checklist_invoice_compliance_checklist",
-      "target": "docs_invoice_compliance_checklist_product_decision",
-      "confidence_score": 1.0
+      "target": "docs_invoice_compliance_checklist_product_decision"
     },
     {
       "relation": "contains",
@@ -45771,9 +47270,9 @@
       "source_file": "docs/invoice-compliance-checklist.md",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_invoice_compliance_checklist_invoice_compliance_checklist",
-      "target": "docs_invoice_compliance_checklist_vat_rules_to_review",
-      "confidence_score": 1.0
+      "target": "docs_invoice_compliance_checklist_vat_rules_to_review"
     },
     {
       "relation": "contains",
@@ -45958,6 +47457,56 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "docs_supabase_backup_restore_md",
+      "target": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "target": "docs_supabase_backup_restore_before_real_customers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "target": "docs_supabase_backup_restore_incident_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "target": "docs_supabase_backup_restore_restore_drill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/supabase-backup-restore.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "docs_supabase_backup_restore_supabase_backup_and_restore_checklist",
+      "target": "docs_supabase_backup_restore_weekly_operational_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/supabase-setup.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -46037,5 +47586,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "de2d4467bc8aa4fdd0cc13bde727eddd39aa9230"
+  "built_at_commit": "f05854bbddd416f66a5bedcdde7a76b4dc1004e4"
 }

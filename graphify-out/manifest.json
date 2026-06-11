@@ -10,12 +10,12 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\.github\\modernize\\java-upgrade\\hooks\\scripts\\recordToolUse.ps1": {
-    "mtime": 1781178334.5790603,
+    "mtime": 1781181877.9800756,
     "ast_hash": "9ecf230451dfd20ff4e0a2a01e80a4e6",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\.github\\modernize\\java-upgrade\\hooks\\scripts\\recordToolUse.sh": {
-    "mtime": 1781178334.5799599,
+    "mtime": 1781181877.9810762,
     "ast_hash": "e25ae501603ce6bf738198f5ce32ba83",
     "semantic_hash": ""
   },
@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\java\\com\\myvision\\api\\config\\SecurityConfig.java": {
-    "mtime": 1781179920.1396132,
-    "ast_hash": "97c3e9f1780684899d3d0f9102fcc858",
+    "mtime": 1781182234.413597,
+    "ast_hash": "5a60188b51bab523d8ecd05b4074f20f",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\resources\\db\\migration\\V1__initial_schema.sql": {
@@ -45,13 +45,13 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\test\\java\\com\\myvision\\api\\AbstractIntegrationTest.java": {
-    "mtime": 1781098016.56986,
-    "ast_hash": "71fbabdb407db0ba77f54e48a580aaa3",
+    "mtime": 1781182010.5337021,
+    "ast_hash": "b47f96c5ea08ff39bed4735d57e41c47",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\test\\java\\com\\myvision\\api\\auth\\AuthIntegrationTest.java": {
-    "mtime": 1781117529.5757735,
-    "ast_hash": "e6ecf1a278a1ffedb34cab2181d8625a",
+    "mtime": 1781182010.385635,
+    "ast_hash": "8896b6eea7a71c2c2a127763c896df2d",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\test\\java\\com\\myvision\\api\\client\\ClientIntegrationTest.java": {
@@ -245,13 +245,13 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docker-compose.yml": {
-    "mtime": 1781179959.366951,
-    "ast_hash": "724b9ff3dc4e1e98d4390bae46670e00",
+    "mtime": 1781181962.431089,
+    "ast_hash": "dfd5fc5620cfe1aba0106c18217554a5",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\README.md": {
-    "mtime": 1781180013.2869277,
-    "ast_hash": "812690bc2ed134df5f0e793de899f5da",
+    "mtime": 1781182142.5830743,
+    "ast_hash": "8fe9d94488c028715d3824b367715004",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\README.md": {
@@ -260,13 +260,13 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\resources\\application-local.example.yml": {
-    "mtime": 1781179959.203462,
-    "ast_hash": "6c76f3b7f73c57992ca466b032e27386",
+    "mtime": 1781181962.2878506,
+    "ast_hash": "73f5f321c291e70c514c6a9d8cabb75d",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\resources\\application.yml": {
-    "mtime": 1781179919.9450054,
-    "ast_hash": "1adb4affc1f67be818e5c1cc394bf0fc",
+    "mtime": 1781181961.4638493,
+    "ast_hash": "0c3ab0fd53f4d565f2f9d192c844756e",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\api-design.md": {
@@ -310,8 +310,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\production-readiness.md": {
-    "mtime": 1781180012.7863004,
-    "ast_hash": "29df29c1c54102834a5419bd7236ca66",
+    "mtime": 1781182142.4330802,
+    "ast_hash": "b1d0249ae9a34e177e7f1a5eb56e4a10",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\java\\com\\myvision\\api\\controller\\AuthController.java": {
@@ -880,18 +880,48 @@
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\deployment-checklist.md": {
-    "mtime": 1781179959.536329,
-    "ast_hash": "c26349088787fd0959d988e268d2d620",
+    "mtime": 1781182141.9557028,
+    "ast_hash": "81abae07ee6ad12d790a4b540959f4a5",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\e-invoice-validation.md": {
-    "mtime": 1781179959.9107356,
-    "ast_hash": "191d208664869e1cc3304ffd58778737",
+    "mtime": 1781182142.275036,
+    "ast_hash": "e6b28239bc370d9447754605e138ddd5",
     "semantic_hash": ""
   },
   "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\invoice-compliance-checklist.md": {
     "mtime": 1781179959.7104409,
     "ast_hash": "cab991fd0edcae993c0d9495d7d221ec",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\java\\com\\myvision\\api\\util\\ApiRateLimitFilter.java": {
+    "mtime": 1781181961.7978158,
+    "ast_hash": "17f69fc79c3b0a3dd7e34355101430c3",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\main\\java\\com\\myvision\\api\\util\\RequestIdFilter.java": {
+    "mtime": 1781181961.6288137,
+    "ast_hash": "12e740b042fc283cb0f596e212396e97",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\test\\java\\com\\myvision\\api\\company\\CompanyAssetIntegrationTest.java": {
+    "mtime": 1781182051.321256,
+    "ast_hash": "dcd4497b09ebf9fdd8375af787a87094",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\apps\\api\\src\\test\\java\\com\\myvision\\api\\util\\ApiRateLimitFilterTest.java": {
+    "mtime": 1781182191.535454,
+    "ast_hash": "bbbfb7cfc138a887e46384e576ba465b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\git-cleanup-review.md": {
+    "mtime": 1781180190.2888002,
+    "ast_hash": "f31deade23a9fee791561a4ca72ef1a3",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\gisih\\OneDrive\\Documents\\Frontend Projects\\MyVision\\docs\\supabase-backup-restore.md": {
+    "mtime": 1781182142.118662,
+    "ast_hash": "92158ead114df12815788ae1d5601bb2",
     "semantic_hash": ""
   }
 }
