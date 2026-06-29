@@ -1,0 +1,1808 @@
+{
+  "info": {
+    "_postman_id": "myvision-api-collection-0001",
+    "name": "MyVision API",
+    "description": "MyVision SaaS invoicing & project billing backend (Spring Boot, http://localhost:8080).\n\nImport the matching environment 'MyVision Local' and select it. Run 'Auth > Register' first (or use the Collection Runner top-to-bottom) — it captures the access token and ids into the environment so every other request is authenticated automatically.\n\nCollection-level auth is Bearer {{token}}; public auth endpoints override this to no-auth.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Public liveness probe.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });",
+                  "pm.test(\"status ok\", () => pm.expect(pm.response.json().status).to.eql(\"ok\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actuator health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "description": "Spring Boot actuator health endpoint (public).",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "description": "Registration, login, tokens and current user. POST /api/auth/** is public.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a user + company and returns access + refresh tokens. Pre-request generates a unique email so this can be re-run.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Tester\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\",\n  \"companyName\": \"Postman Test GmbH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set(\"userEmail\", `postman+${ts}@example.com`);",
+                  "pm.environment.set(\"userPassword\", \"Password123!\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"token\", j.token);",
+                  "pm.environment.set(\"refreshToken\", j.refreshToken);",
+                  "pm.environment.set(\"userId\", j.user.id);",
+                  "pm.environment.set(\"companyId\", j.company.id);",
+                  "pm.test(\"returns token\", () => pm.expect(j.token).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in with the credentials created by Register and refreshes the stored tokens.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"token\", j.token);",
+                  "pm.environment.set(\"refreshToken\", j.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get current user (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns the authenticated user + company. Requires Bearer token."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.test(\"email matches\", () => pm.expect(j.user.email).to.eql(pm.environment.get(\"userEmail\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Exchanges the refresh token for a new access token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"token\", j.token);",
+                  "pm.environment.set(\"refreshToken\", j.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Always returns 200 (does not reveal whether the email exists). With MAIL_PROVIDER=log the reset link is printed to the API container logs.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Sets a new password using the token from the forgot-password email. Set {{resetToken}} first; expected to 400 with a placeholder token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-email"
+              ]
+            },
+            "description": "Verifies the account email using the token from the verification email. Set {{verifyToken}} first; expected to 400 with a placeholder token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{verifyToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with Google",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/google",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "google"
+              ]
+            },
+            "description": "Exchanges a Google ID token for app tokens. Needs a real Google idToken; expected to 400/401 with a placeholder.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"{{googleIdToken}}\",\n  \"companyName\": \"Postman Test GmbH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400, 401]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login with Apple",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/apple",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "apple"
+              ]
+            },
+            "description": "Exchanges an Apple identity token for app tokens. Needs a real Apple identityToken; expected to 400/401 with a placeholder.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identityToken\": \"{{appleIdentityToken}}\",\n  \"fullName\": \"Postman Tester\",\n  \"companyName\": \"Postman Test GmbH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400, 401]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes the given refresh token. NOTE: running this invalidates {{refreshToken}} for later requests — run it last or re-login afterwards.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "description": "Company clients (customers). The DELETE (archive) lives in the Cleanup folder so the client stays available for projects/quotes/invoices during a full run.",
+      "item": [
+        {
+          "name": "Create client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients"
+              ]
+            },
+            "description": "Creates a client and stores {{clientId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"business\",\n  \"name\": \"Acme Bau GmbH\",\n  \"contactName\": \"Maria Muster\",\n  \"email\": \"kontakt@acme-bau.example\",\n  \"phone\": \"+49 30 1234567\",\n  \"vatNumber\": \"DE123456789\",\n  \"addressLine1\": \"Baustraße 1\",\n  \"addressLine2\": \"Hof 2\",\n  \"city\": \"Berlin\",\n  \"region\": \"Berlin\",\n  \"postalCode\": \"10115\",\n  \"countryCode\": \"DE\",\n  \"notes\": \"Created from Postman collection.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"clientId\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients"
+              ]
+            },
+            "description": "Lists active clients for the current company."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get client",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Fetches a single client by id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update client",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Partial update — only non-null fields are applied.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+49 30 7654321\",\n  \"notes\": \"Updated from Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "description": "Construction/service projects linked to a client.",
+      "item": [
+        {
+          "name": "Create project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
+            },
+            "description": "Creates a project for {{clientId}} and stores {{projectId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"name\": \"Neubau Wohnhaus\",\n  \"code\": \"PRJ-001\",\n  \"status\": \"active\",\n  \"jobSiteAddressLine1\": \"Bauplatz 5\",\n  \"jobSiteCity\": \"Berlin\",\n  \"jobSiteRegion\": \"Berlin\",\n  \"jobSitePostalCode\": \"10115\",\n  \"jobSiteCountryCode\": \"DE\",\n  \"startDate\": \"2026-01-15\",\n  \"endDate\": \"2026-12-20\",\n  \"budgetAmount\": 250000,\n  \"currency\": \"EUR\",\n  \"description\": \"Full new-build residential project.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"projectId\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get project",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Partial update — only non-null fields are applied.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paused\",\n  \"description\": \"Paused pending permits.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Quotes",
+      "description": "Quotes with line items: draft -> sent -> accepted/rejected -> converted.",
+      "item": [
+        {
+          "name": "Create quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes"
+              ]
+            },
+            "description": "Creates a draft quote for {{clientId}} and stores {{quoteId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"projectId\": \"{{projectId}}\",\n  \"issueDate\": \"2026-06-29\",\n  \"validUntil\": \"2026-07-29\",\n  \"currency\": \"EUR\",\n  \"discountAmount\": 0,\n  \"notes\": \"Quote created from Postman.\",\n  \"terms\": \"Valid for 30 days.\",\n  \"items\": [\n    {\n      \"kind\": \"labor\",\n      \"description\": \"Maurerarbeiten\",\n      \"quantity\": 40,\n      \"unit\": \"h\",\n      \"unitPrice\": 55,\n      \"taxRate\": 19,\n      \"discountAmount\": 0\n    },\n    {\n      \"kind\": \"materials\",\n      \"description\": \"Zement und Sand\",\n      \"quantity\": 10,\n      \"unit\": \"Sack\",\n      \"unitPrice\": 12.5,\n      \"taxRate\": 19,\n      \"discountAmount\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"quoteId\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List quotes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get quote",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update quote",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}"
+              ]
+            },
+            "description": "Partial update of a draft quote. Supplying items replaces all existing items.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated quote notes from Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send quote",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}",
+                "send"
+              ]
+            },
+            "description": "Transitions the quote draft -> sent."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Accept quote",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}",
+                "accept"
+              ]
+            },
+            "description": "Marks a sent quote as accepted."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reject quote",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}",
+                "reject"
+              ]
+            },
+            "description": "Marks a sent quote as rejected. In a full run the quote was just accepted, so this returns 400 (invalid transition) — that is the expected conflict response."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Convert quote to invoice",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/quotes/{{quoteId}}/convert-to-invoice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "quotes",
+                "{{quoteId}}",
+                "convert-to-invoice"
+              ]
+            },
+            "description": "Creates an invoice from an accepted quote and stores {{invoiceId}}. Returns 400 if the quote is not in an acceptable state."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201, 400]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const j = pm.response.json();",
+                  "  pm.environment.set(\"invoiceId\", j.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "description": "Invoices with line items, balance tracking, status actions and document export.",
+      "item": [
+        {
+          "name": "Create invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices"
+              ]
+            },
+            "description": "Creates a draft invoice for {{clientId}} and stores {{invoiceId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"projectId\": \"{{projectId}}\",\n  \"type\": \"STANDARD\",\n  \"issueDate\": \"2026-06-29\",\n  \"dueDate\": \"2026-07-29\",\n  \"currency\": \"EUR\",\n  \"discountAmount\": 0,\n  \"notes\": \"Invoice created from Postman.\",\n  \"terms\": \"Payable within 30 days.\",\n  \"items\": [\n    {\n      \"kind\": \"labor\",\n      \"description\": \"Installationsarbeiten\",\n      \"quantity\": 20,\n      \"unit\": \"h\",\n      \"unitPrice\": 60,\n      \"taxRate\": 19,\n      \"discountAmount\": 0\n    },\n    {\n      \"kind\": \"materials\",\n      \"description\": \"Rohre und Fittings\",\n      \"quantity\": 15,\n      \"unit\": \"Stk\",\n      \"unitPrice\": 8,\n      \"taxRate\": 19,\n      \"discountAmount\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201]).to.include(pm.response.code); });",
+                  "const j = pm.response.json();",
+                  "pm.environment.set(\"invoiceId\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get invoice",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update invoice",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}"
+              ]
+            },
+            "description": "Partial update of a draft invoice. Supplying items replaces all existing items.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated invoice notes from Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark invoice sent",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/mark-sent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "mark-sent"
+              ]
+            },
+            "description": "Transitions the invoice draft -> sent/unpaid. Runs before payments so a payment can be recorded."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get invoice PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "pdf"
+              ]
+            },
+            "description": "Renders the invoice as a PDF (binary)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Store invoice PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "pdf"
+              ]
+            },
+            "description": "Renders and stores the invoice PDF, returning a document record."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get XRechnung XML",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/xrechnung",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "xrechnung"
+              ]
+            },
+            "description": "Exports the invoice as XRechnung XML (German e-invoice)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Store XRechnung XML",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/xrechnung",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "xrechnung"
+              ]
+            },
+            "description": "Generates and stores the XRechnung XML, returning a document record."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get ZUGFeRD PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/zugferd",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "zugferd"
+              ]
+            },
+            "description": "ZUGFeRD hybrid PDF export. Intentionally returns 501 Not Implemented in this build — it requires PDF/A-3 embedding and validator certification before production use."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([501]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Payments recorded against an invoice; updates balance and status. Runs after the invoice is marked sent and before it is marked paid.",
+      "item": [
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "payments"
+              ]
+            },
+            "description": "Lists payments for {{invoiceId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Record payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "payments"
+              ]
+            },
+            "description": "Records a payment against {{invoiceId}} and stores {{paymentId}}. Returns 400 if the invoice is already paid/cancelled.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"method\": \"bank_transfer\",\n  \"paidAt\": \"2026-06-29T10:00:00Z\",\n  \"reference\": \"TXN-0001\",\n  \"notes\": \"Partial payment via Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([201, 400]).to.include(pm.response.code); });",
+                  "if (pm.response.code === 201) {",
+                  "  const j = pm.response.json();",
+                  "  pm.environment.set(\"paymentId\", j.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Invoice status",
+      "description": "Terminal invoice status transitions. These run after Payments so the earlier payment succeeds against an unpaid invoice.",
+      "item": [
+        {
+          "name": "Mark invoice paid",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/mark-paid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "mark-paid"
+              ]
+            },
+            "description": "Marks the invoice fully paid."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel invoice",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/invoices/{{invoiceId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "invoices",
+                "{{invoiceId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels the invoice. In a full run the invoice was just marked paid, so this returns 400 (invalid transition) — the expected conflict response."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Company",
+      "description": "Company profile assets.",
+      "item": [
+        {
+          "name": "Upload company logo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/company/logo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "company",
+                "logo"
+              ]
+            },
+            "description": "Uploads a company logo (PNG/JPEG/WEBP/SVG, < 2MB). Select a file for the 'file' form field in Postman before sending.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200, 400]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Aggregated metrics for the current company.",
+      "item": [
+        {
+          "name": "Dashboard summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "summary"
+              ]
+            },
+            "description": "Returns aggregated counts and totals for the current company."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([200]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "description": "Destructive deletes, intentionally last. Deleting the project then archiving the client frees up the resources created earlier in the run.",
+      "item": [
+        {
+          "name": "Delete project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Deletes the project created earlier in the run."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([204]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Archive client",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Soft-deletes (archives) the client created earlier in the run."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is acceptable\", function () { pm.expect([204]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

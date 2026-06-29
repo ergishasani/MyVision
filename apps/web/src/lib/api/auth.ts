@@ -59,6 +59,22 @@ export async function loginWithApple(input: {
   return response;
 }
 
+export async function forgotPassword(email: string) {
+  return apiFetch<{ message: string; token?: string | null }>("/auth/forgot-password", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, password: string) {
+  return apiFetch<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    auth: false,
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export async function checkHealth() {
   return apiFetch<{ status: string; service: string }>("/health", {
     auth: false,
