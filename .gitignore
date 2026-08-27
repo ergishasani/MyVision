@@ -12,7 +12,6 @@ target/
 .gradle/
 build/
 apps/api/.myvision-storage/
-graphify-out/cache/ast/*.json
 
 # Environment
 .env
@@ -27,3 +26,11 @@ application-local.yml
 # OS
 .DS_Store
 Thumbs.db
+
+# --- graphify knowledge graph -------------------------------------------------
+# The graph is rebuilt locally on each machine, so nothing in here is committed.
+.graphify/
+
+# Legacy pre-.graphify output directory (graphify <= 0.9.x). Superseded by
+# .graphify/.
+graphify-out/
