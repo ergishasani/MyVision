@@ -36,6 +36,8 @@ public record InvoiceResponse(
     OffsetDateTime sentAt,
     OffsetDateTime paidAt,
     OffsetDateTime cancelledAt,
+    String lastPaymentError,
+    OffsetDateTime lastPaymentErrorAt,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt,
     List<InvoiceItemResponse> items
@@ -64,6 +66,8 @@ public record InvoiceResponse(
         invoice.getSentAt(),
         invoice.getPaidAt(),
         invoice.getCancelledAt(),
+        invoice.getLastPaymentError(),
+        invoice.getLastPaymentErrorAt(),
         invoice.getCreatedAt(),
         invoice.getUpdatedAt(),
         items.stream().map(InvoiceItemResponse::from).toList()

@@ -26,6 +26,14 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
   Optional<Invoice> findByIdAndCompanyId(UUID id, UUID companyId);
 
+  /**
+   * Candidates for the overdue sweep, across all companies. A null dueDate is excluded by
+   * the SQL comparison, which is the intended behaviour: an invoice with no due date can
+   * never be late.
+   */
+  List<Invoice> findByStatusInAndDueDateBefore(
+      Collection<InvoiceStatus> statuses, LocalDate dueDate);
+
   @Query("""  
       select coalesce(sum(i.totalAmount), 0) from Invoice i
       where i.companyId = :companyId

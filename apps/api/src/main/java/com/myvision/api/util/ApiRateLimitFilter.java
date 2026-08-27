@@ -45,7 +45,10 @@ public class ApiRateLimitFilter extends OncePerRequestFilter {
     return !enabled
         || !path.startsWith("/api/")
         || path.startsWith("/api/health")
-        || path.startsWith("/api/auth/");
+        || path.startsWith("/api/auth/")
+        // Stripe retries on any non-2xx. Throttling the webhook would turn a traffic spike into
+        // a retry storm and delay payment reconciliation.
+        || path.startsWith("/api/stripe/webhook");
   }
 
   @Override

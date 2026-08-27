@@ -13,6 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import com.myvision.api.service.StripeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -58,6 +59,15 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
         .body(ApiError.of(exception.getMessage(), "UNAUTHORIZED"));
+  }
+
+  @ExceptionHandler(StripeService.StripeNotConfiguredException.class)
+  public ResponseEntity<ApiError> handleStripeNotConfigured(
+      StripeService.StripeNotConfiguredException exception) {
+    // 503 rather than 500: the deployment is missing STRIPE_SECRET_KEY, the request was fine.
+    return ResponseEntity
+        .status(HttpStatus.SERVICE_UNAVAILABLE)
+        .body(ApiError.of(exception.getMessage(), "STRIPE_NOT_CONFIGURED"));
   }
 
   @ExceptionHandler(ForbiddenException.class)

@@ -15,5 +15,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, UUID> {
 
   Optional<PasswordResetToken> findByTokenHash(String tokenHash);
+
+  /** Removes rows that can no longer authenticate anything. */
+  long deleteByExpiresAtBefore(java.time.OffsetDateTime cutoff);
 }
 

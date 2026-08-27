@@ -58,6 +58,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers("/api/health", "/actuator/health", "/actuator/health/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+            // Verified by Stripe signature inside StripeService, not by a bearer token.
+            .requestMatchers(HttpMethod.POST, "/api/stripe/webhook").permitAll()
             .requestMatchers("/api/auth/me").authenticated()
             .anyRequest().authenticated()
         )

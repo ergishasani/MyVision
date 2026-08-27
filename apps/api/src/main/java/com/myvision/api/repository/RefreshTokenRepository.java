@@ -15,5 +15,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
 
   Optional<RefreshToken> findByTokenHash(String tokenHash);
+
+  /** Removes rows that can no longer authenticate anything. */
+  long deleteByExpiresAtBefore(java.time.OffsetDateTime cutoff);
 }
 

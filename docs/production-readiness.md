@@ -19,6 +19,12 @@ This project now includes the code foundations for production authentication and
 - General non-auth API rate limiting.
 - Swagger/OpenAPI can be disabled in production with `SPRINGDOC_*` env vars.
 - Audit logs for invoice creation, invoice status changes, invoice updates, and payment creation.
+- Stripe Checkout payment links and a signature-verified, idempotent webhook receiver.
+- Stripe refunds, including reconciliation of refunds issued from the Stripe dashboard.
+- Stripe fee/net split recorded per payment, and card decline reasons stored on the invoice.
+- Daily overdue sweep moving invoices past their due date into the `overdue` status.
+- Daily cleanup of expired refresh, password-reset, and email-verification tokens.
+- Generated PDFs and XRechnung XML recorded in the `documents` table.
 - GitHub Actions CI for backend and frontend.
 - Supabase/Flyway migration parity.
 
@@ -63,6 +69,27 @@ SUPABASE_DOCUMENTS_BUCKET
 SUPABASE_PUBLIC_BUCKET
 STORAGE_PUBLIC_BASE_URL
 NEXT_PUBLIC_API_URL
+```
+
+Optional, and only needed to accept card payments. Leaving `STRIPE_SECRET_KEY` empty keeps
+Stripe disabled without affecting anything else:
+
+```txt
+STRIPE_SECRET_KEY
+STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_SUCCESS_URL
+STRIPE_CANCEL_URL
+```
+
+Background sweeps run by default. Both are idempotent, so they are safe on every instance if you
+scale out; put a lock in front of them only if you need exactly-once execution:
+
+```txt
+APP_SCHEDULING_ENABLED
+INVOICES_OVERDUE_SWEEP_CRON
+AUTH_TOKEN_CLEANUP_CRON
+AUTH_TOKEN_CLEANUP_RETENTION_DAYS
 ```
 
 Never enable `AUTH_RETURN_SENSITIVE_TOKENS` in production. It exists only for local development before email delivery is configured.

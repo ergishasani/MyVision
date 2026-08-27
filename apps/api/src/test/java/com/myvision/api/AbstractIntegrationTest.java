@@ -35,6 +35,9 @@ public abstract class AbstractIntegrationTest {
     registry.add("spring.datasource.username", POSTGRES::getUsername);
     registry.add("spring.datasource.password", POSTGRES::getPassword);
     registry.add("auth.return-sensitive-tokens", () -> "true");
+    // Background sweeps are driven explicitly in their own tests; leaving the schedulers
+    // running here would let one fire mid-assertion.
+    registry.add("app.scheduling.enabled", () -> "false");
   }
 
   @Autowired

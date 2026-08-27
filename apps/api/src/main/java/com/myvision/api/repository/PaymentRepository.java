@@ -11,6 +11,7 @@ import com.myvision.api.util.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +20,10 @@ import org.springframework.data.repository.query.Param;
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
   List<Payment> findByInvoiceIdAndCompanyIdOrderByPaidAtDesc(UUID invoiceId, UUID companyId);
+
+  boolean existsByStripePaymentIntentId(String stripePaymentIntentId);
+
+  Optional<Payment> findByStripePaymentIntentId(String stripePaymentIntentId);
 
   @Query("""
       select coalesce(sum(p.amount), 0) from Payment p

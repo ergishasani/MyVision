@@ -63,6 +63,11 @@ auth:
   rate-limit:
     max-attempts: ${AUTH_RATE_LIMIT_MAX_ATTEMPTS:5}
     window-ms: ${AUTH_RATE_LIMIT_WINDOW_MS:900000}
+  token-cleanup:
+    # Expired tokens are kept this long before deletion so a failing token is still on disk
+    # while someone investigates.
+    retention-days: ${AUTH_TOKEN_CLEANUP_RETENTION_DAYS:7}
+    cron: ${AUTH_TOKEN_CLEANUP_CRON:0 30 3 * * *}
 
 mail:
   provider: ${MAIL_PROVIDER:log}
@@ -82,6 +87,8 @@ storage:
     public-bucket: ${SUPABASE_PUBLIC_BUCKET:myvision-public}
 
 app:
+  scheduling:
+    enabled: ${APP_SCHEDULING_ENABLED:true}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   rate-limit:
@@ -89,9 +96,22 @@ app:
     max-requests: ${APP_RATE_LIMIT_MAX_REQUESTS:120}
     window-ms: ${APP_RATE_LIMIT_WINDOW_MS:60000}
 
+invoices:
+  overdue-sweep:
+    cron: ${INVOICES_OVERDUE_SWEEP_CRON:0 10 2 * * *}
+
 logging:
   pattern:
     level: "%5p [requestId:%X{requestId:-}]"
+
+stripe:
+  # Empty by default: the app boots and every other feature works without Stripe credentials.
+  # Setting secret-key is what switches payment links on.
+  secret-key: ${STRIPE_SECRET_KEY:}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  success-url: ${STRIPE_SUCCESS_URL:http://localhost:3000/invoices?payment=success}
+  cancel-url: ${STRIPE_CANCEL_URL:http://localhost:3000/invoices?payment=cancelled}
 
 compliance:
   invoice-country: ${COMPLIANCE_INVOICE_COUNTRY:DE}

@@ -21,6 +21,8 @@ public record PaymentResponse(
     OffsetDateTime paidAt,
     String reference,
     String notes,
+    BigDecimal stripeFeeAmount,
+    BigDecimal netAmount,
     OffsetDateTime createdAt
 ) {
 
@@ -34,6 +36,8 @@ public record PaymentResponse(
         payment.getPaidAt(),
         payment.getReference(),
         payment.getNotes(),
+        payment.getStripeFeeAmount(),
+        payment.getNetAmount(),
         payment.getCreatedAt()
     );
   }

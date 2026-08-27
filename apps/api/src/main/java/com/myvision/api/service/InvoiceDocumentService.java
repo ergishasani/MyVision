@@ -3,12 +3,14 @@ package com.myvision.api.service;
 import com.myvision.api.dto.DocumentResponse;
 import com.myvision.api.dto.StorageObject;
 import com.myvision.api.entity.Client;
+import com.myvision.api.entity.Document;
 import com.myvision.api.entity.Company;
 import com.myvision.api.entity.Invoice;
 import com.myvision.api.entity.InvoiceItem;
 import com.myvision.api.exception.ResourceNotFoundException;
 import com.myvision.api.repository.ClientRepository;
 import com.myvision.api.repository.CompanyRepository;
+import com.myvision.api.repository.DocumentRepository;
 import com.myvision.api.repository.InvoiceItemRepository;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +33,7 @@ public class InvoiceDocumentService {
   private final ClientRepository clientRepository;
   private final InvoiceItemRepository invoiceItemRepository;
   private final FileStorageService fileStorageService;
+  private final DocumentRepository documentRepository;
   private final AuditLogService auditLogService;
 
   public InvoiceDocumentService(
@@ -40,6 +43,7 @@ public class InvoiceDocumentService {
       ClientRepository clientRepository,
       InvoiceItemRepository invoiceItemRepository,
       FileStorageService fileStorageService,
+      DocumentRepository documentRepository,
       AuditLogService auditLogService
   ) {
     this.invoiceService = invoiceService;
@@ -48,6 +52,7 @@ public class InvoiceDocumentService {
     this.clientRepository = clientRepository;
     this.invoiceItemRepository = invoiceItemRepository;
     this.fileStorageService = fileStorageService;
+    this.documentRepository = documentRepository;
     this.auditLogService = auditLogService;
   }
 
@@ -67,6 +72,7 @@ public class InvoiceDocumentService {
         "companies/%s/invoices/%s/%s".formatted(companyId, invoiceId, fileName),
         PDF_CONTENT_TYPE,
         pdf);
+    recordDocument(companyId, invoiceId, fileName, PDF_CONTENT_TYPE, stored);
     auditLogService.record(companyId, userId, "invoice", invoiceId, "pdf_generated",
         "{\"path\":\"%s\"}".formatted(stored.path()));
     return new DocumentResponse(fileName, PDF_CONTENT_TYPE, stored.sizeBytes(), stored.path(), stored.publicUrl());
@@ -89,6 +95,7 @@ public class InvoiceDocumentService {
         "companies/%s/invoices/%s/%s".formatted(companyId, invoiceId, fileName),
         XML_CONTENT_TYPE,
         xml);
+    recordDocument(companyId, invoiceId, fileName, XML_CONTENT_TYPE, stored);
     auditLogService.record(companyId, userId, "invoice", invoiceId, "xrechnung_exported",
         "{\"path\":\"%s\",\"requiresValidation\":true}".formatted(stored.path()));
     return new DocumentResponse(fileName, XML_CONTENT_TYPE, stored.sizeBytes(), stored.path(), stored.publicUrl());
@@ -97,6 +104,30 @@ public class InvoiceDocumentService {
   public byte[] zugferdPdf(UUID userId, UUID invoiceId) {
     throw new UnsupportedOperationException(
         "ZUGFeRD export requires PDF/A-3 embedding and validator certification before production use");
+  }
+
+  /**
+   * Records the stored artifact in the documents table so it can be listed later.
+   *
+   * <p>Regenerating the same file updates the existing row instead of adding another, so a user
+   * clicking "download PDF" repeatedly does not grow the table without bound.
+   */
+  private void recordDocument(
+      UUID companyId,
+      UUID invoiceId,
+      String fileName,
+      String mimeType,
+      StorageObject stored
+  ) {
+    Document document = documentRepository
+        .findByCompanyIdAndInvoiceIdAndFileName(companyId, invoiceId, fileName)
+        .orElseGet(Document::new);
+    document.setCompanyId(companyId);
+    document.setInvoiceId(invoiceId);
+    document.setFileName(fileName);
+    document.setFileUrl(stored.publicUrl() != null ? stored.publicUrl() : stored.path());
+    document.setMimeType(mimeType);
+    documentRepository.save(document);
   }
 
   private InvoiceBundle bundle(UUID userId, UUID invoiceId) {

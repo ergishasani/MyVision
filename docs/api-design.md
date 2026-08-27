@@ -69,6 +69,19 @@ All endpoints except `register`, `login` and `health` require a JWT in the
 | GET | `/api/invoices/{invoiceId}/payments` | List payments for an invoice |
 | POST | `/api/invoices/{invoiceId}/payments` | Record payment; updates `amountPaid`, `balanceDue` and status (`partially_paid`/`paid`) |
 
+## Stripe
+
+See `docs/stripe-setup.md`. Disabled until `STRIPE_SECRET_KEY` is set, in which case the
+checkout endpoint answers `503 STRIPE_NOT_CONFIGURED`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/stripe/config` | Publishable key and whether Stripe is enabled on this server |
+| POST | `/api/invoices/{id}/checkout-session` | Create a Stripe Checkout session for the invoice balance |
+| GET | `/api/invoices/{id}/refunds` | List refunds recorded against the invoice |
+| POST | `/api/invoices/{id}/refunds` | Refund the Stripe payment; omit `amount` to refund all that remains |
+| POST | `/api/stripe/webhook` | Stripe event receiver. Public, authenticated by `Stripe-Signature`, exempt from rate limiting |
+
 ## Dashboard
 
 | Method | Path | Description |

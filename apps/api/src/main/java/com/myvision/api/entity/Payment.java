@@ -56,6 +56,20 @@ public class Payment {
   private String reference;
   private String notes;
 
+  @Column(name = "stripe_payment_intent_id")
+  private String stripePaymentIntentId;
+
+  @Column(name = "stripe_checkout_session_id")
+  private String stripeCheckoutSessionId;
+
+  /** Stripe's cut. Null when the balance transaction could not be read. */
+  @Column(name = "stripe_fee_amount")
+  private BigDecimal stripeFeeAmount;
+
+  /** amount minus stripeFeeAmount. Null whenever the fee is null. */
+  @Column(name = "net_amount")
+  private BigDecimal netAmount;
+
   @Column(nullable = false, updatable = false)
   private OffsetDateTime createdAt = OffsetDateTime.now();
 
@@ -131,11 +145,43 @@ public class Payment {
     this.notes = notes;
   }
 
+  public String getStripePaymentIntentId() {
+    return stripePaymentIntentId;
+  }
+
+  public void setStripePaymentIntentId(String stripePaymentIntentId) {
+    this.stripePaymentIntentId = stripePaymentIntentId;
+  }
+
+  public String getStripeCheckoutSessionId() {
+    return stripeCheckoutSessionId;
+  }
+
+  public void setStripeCheckoutSessionId(String stripeCheckoutSessionId) {
+    this.stripeCheckoutSessionId = stripeCheckoutSessionId;
+  }
+
   public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
 
   public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public BigDecimal getStripeFeeAmount() {
+    return stripeFeeAmount;
+  }
+
+  public void setStripeFeeAmount(BigDecimal stripeFeeAmount) {
+    this.stripeFeeAmount = stripeFeeAmount;
+  }
+
+  public BigDecimal getNetAmount() {
+    return netAmount;
+  }
+
+  public void setNetAmount(BigDecimal netAmount) {
+    this.netAmount = netAmount;
   }
 }

@@ -86,6 +86,18 @@ public class Invoice extends BaseEntity {
   private OffsetDateTime paidAt;
   private OffsetDateTime cancelledAt;
 
+  @Column(name = "stripe_checkout_session_id")
+  private String stripeCheckoutSessionId;
+
+  @Column(name = "stripe_payment_intent_id")
+  private String stripePaymentIntentId;
+
+  @Column(name = "last_payment_error")
+  private String lastPaymentError;
+
+  @Column(name = "last_payment_error_at")
+  private OffsetDateTime lastPaymentErrorAt;
+
   public UUID getCompanyId() {
     return companyId;
   }
@@ -252,5 +264,37 @@ public class Invoice extends BaseEntity {
 
   public void setCancelledAt(OffsetDateTime cancelledAt) {
     this.cancelledAt = cancelledAt;
+  }
+
+  public String getStripeCheckoutSessionId() {
+    return stripeCheckoutSessionId;
+  }
+
+  public void setStripeCheckoutSessionId(String stripeCheckoutSessionId) {
+    this.stripeCheckoutSessionId = stripeCheckoutSessionId;
+  }
+
+  public String getStripePaymentIntentId() {
+    return stripePaymentIntentId;
+  }
+
+  public void setStripePaymentIntentId(String stripePaymentIntentId) {
+    this.stripePaymentIntentId = stripePaymentIntentId;
+  }
+
+  public String getLastPaymentError() {
+    return lastPaymentError;
+  }
+
+  public void setLastPaymentError(String lastPaymentError) {
+    this.lastPaymentError = lastPaymentError;
+  }
+
+  public OffsetDateTime getLastPaymentErrorAt() {
+    return lastPaymentErrorAt;
+  }
+
+  public void setLastPaymentErrorAt(OffsetDateTime lastPaymentErrorAt) {
+    this.lastPaymentErrorAt = lastPaymentErrorAt;
   }
 }
