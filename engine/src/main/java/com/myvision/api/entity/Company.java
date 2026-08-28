@@ -68,6 +68,9 @@ public class Company extends BaseEntity {
   @Column(name = "next_customer_number", nullable = false)
   private Integer nextCustomerNumber = 1000;
 
+  @Column(name = "next_article_number", nullable = false)
+  private Integer nextArticleNumber = 1000;
+
   public String getName() {
     return name;
   }
@@ -266,5 +269,13 @@ public class Company extends BaseEntity {
 
   public void setNextCustomerNumber(Integer nextCustomerNumber) {
     this.nextCustomerNumber = nextCustomerNumber;
+  }
+
+  public Integer getNextArticleNumber() {
+    return nextArticleNumber;
+  }
+
+  public void setNextArticleNumber(Integer nextArticleNumber) {
+    this.nextArticleNumber = nextArticleNumber;
   }
 }

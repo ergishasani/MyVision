@@ -59,7 +59,7 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", Icon: HomeIcon },
   {
     href: "/orders",
-    label: "orders",
+    label: "Orders",
     Icon: MailIcon,
     children: [
       // Offers are quotes under a different name, so this points at the real screen.
@@ -70,7 +70,7 @@ const PRIMARY_NAV: NavItem[] = [
   },
   {
     href: "/invoices",
-    label: "invoices",
+    label: "Invoices",
     Icon: InvoiceIcon,
     children: [
       { href: "/invoices", label: "All invoices" },

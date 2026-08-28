@@ -97,6 +97,53 @@ export type Client = {
   updatedAt: string;
 };
 
+export type ProductCategory = "article" | "service";
+
+/** The units a product can be sold in. Mirrors the `product_unit` enum in the database. */
+export type ProductUnitCode =
+  | "pcs"
+  | "lump_sum"
+  | "hour"
+  | "percent"
+  | "day"
+  | "sqm"
+  | "meter"
+  | "kg"
+  | "tonne"
+  | "linear_meter"
+  | "cbm"
+  | "km"
+  | "litre";
+
+/** An alternative unit. `priceNet` is derived by the API, never stored. */
+export type ProductUnit = {
+  id: string;
+  unit: ProductUnitCode;
+  factor: number;
+  priceNet: number;
+};
+
+export type Product = {
+  id: string;
+  articleNumber: number | null;
+  name: string;
+  category: ProductCategory;
+  unit: ProductUnitCode;
+  taxRate: number;
+  /** Net is the stored price; the gross figures are computed by the API on every read. */
+  sellingPriceNet: number;
+  sellingPriceGross: number;
+  purchasePriceNet: number | null;
+  purchasePriceGross: number | null;
+  description: string | null;
+  internalNote: string | null;
+  inventoryEnabled: boolean;
+  units: ProductUnit[];
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type InvoiceStatus =
   | "draft"
   | "sent"
