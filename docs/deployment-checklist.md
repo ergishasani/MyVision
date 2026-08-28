@@ -2,7 +2,7 @@
 
 ## Backend Hosting
 
-- Build from `apps/api/Dockerfile`.
+- Build from `engine/Dockerfile`.
 - Expose `SERVER_PORT=8080` or map the platform port to 8080.
 - Health check: `GET /actuator/health`.
 - API docs should be disabled or protected before public launch if you do not want `/docs` public.
@@ -26,19 +26,13 @@ SPRINGDOC_API_DOCS_ENABLED=false
 MAIL_PROVIDER=resend
 MAIL_FROM=MyVision <no-reply@myvision.visionbau.de>
 RESEND_API_KEY
-STORAGE_PROVIDER=supabase
-SUPABASE_URL=https://toyrbakpcbcishmaulbg.supabase.co
-SUPABASE_SERVICE_ROLE_KEY
-SUPABASE_DOCUMENTS_BUCKET=myvision-documents
-SUPABASE_PUBLIC_BUCKET=myvision-public
 ```
 
 ## Secrets You Must Create Or Copy
 
 - `JWT_SECRET`: generate a long random value, at least 32 bytes.
-- `DATABASE_PASSWORD`: Supabase database password.
+- `DATABASE_PASSWORD`: PostgreSQL password.
 - `RESEND_API_KEY`: Resend API key with send-email permission.
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service-role key, backend only.
 - Hosting deploy token or project credentials, depending on the hosting provider.
 
 Never put these in frontend env vars, source code, Git, screenshots, or chat logs.
@@ -54,14 +48,15 @@ Never put these in frontend env vars, source code, Git, screenshots, or chat log
 ## Frontend Hosting
 
 - Point `NEXT_PUBLIC_API_URL` to the deployed backend `/api` base URL.
-- Point `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the production Supabase project.
 - Serve only over HTTPS.
 
-## Supabase
+## File Storage
 
-- `myvision-documents` is private and intended for invoices/e-invoice exports.
-- `myvision-public` is public-read and intended for logos and other non-sensitive assets.
-- Do not expose `SUPABASE_SERVICE_ROLE_KEY` to the frontend.
+- Mount a persistent volume at `STORAGE_LOCAL_ROOT`. On ephemeral container storage every
+  generated invoice PDF and XRechnung XML is lost on restart.
+- Invoices and e-invoice exports are private: they are streamed through the API, never served
+  directly from disk.
+- Logos are the only public-read assets, served from `STORAGE_PUBLIC_BASE_URL`.
 
 ## Monitoring
 
@@ -69,4 +64,5 @@ Never put these in frontend env vars, source code, Git, screenshots, or chat log
 - Capture backend logs from the hosting platform.
 - Ensure logs include `requestId` from the `X-Request-Id` response header.
 - Alert on repeated `INTERNAL_ERROR`, auth failures, and storage/email provider failures.
-- Keep database backups and Supabase point-in-time recovery settings aligned with the paid plan before real customer data.
+- Back up PostgreSQL and the storage volume together. A database restore without the matching
+  documents leaves invoices pointing at files that no longer exist.

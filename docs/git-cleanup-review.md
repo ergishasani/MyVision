@@ -2,13 +2,12 @@
 
 ## Include For Backend/Provider Work
 
-- `apps/api/**`
+- `engine/**`
 - `docs/deployment-checklist.md`
 - `docs/e-invoice-validation.md`
 - `docs/invoice-compliance-checklist.md`
 - `docs/provider-and-compliance-decisions.md`
 - `docs/production-readiness.md`
-- `supabase/migrations/20260611140500_storage_buckets_for_documents_and_logos.sql`
 - `.env.example`
 - `.gitignore`
 - `docker-compose.yml`
@@ -16,7 +15,7 @@
 
 ## Review Separately
 
-- `apps/web/**`
+- `frontend/**`
 - `package.json`
 
 These frontend/workspace changes existed outside this backend-only pass. Review them before staging if you want a clean backend/provider commit.

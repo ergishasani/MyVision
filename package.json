@@ -2,14 +2,14 @@
   "name": "myvision",
   "private": true,
   "workspaces": [
-    "apps/web"
+    "frontend"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=@myvision/web",
-    "dev:web": "npm run dev --workspace=@myvision/web",
-    "build": "npm run build --workspace=@myvision/web",
-    "build:web": "npm run build --workspace=@myvision/web",
-    "lint": "npm run lint --workspace=@myvision/web",
-    "start:web": "npm run start --workspace=@myvision/web"
+    "dev": "npm run dev --workspace=@myvision/frontend",
+    "dev:frontend": "npm run dev --workspace=@myvision/frontend",
+    "build": "npm run build --workspace=@myvision/frontend",
+    "build:frontend": "npm run build --workspace=@myvision/frontend",
+    "lint": "npm run lint --workspace=@myvision/frontend",
+    "start:frontend": "npm run start --workspace=@myvision/frontend"
   }
 }

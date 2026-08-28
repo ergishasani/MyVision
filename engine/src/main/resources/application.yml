@@ -77,14 +77,10 @@ mail:
     endpoint: ${RESEND_ENDPOINT:https://api.resend.com/emails}
 
 storage:
-  provider: ${STORAGE_PROVIDER:local}
+  # Filesystem-backed. In a container this must be a mounted volume, or generated
+  # documents are lost on restart.
   local-root: ${STORAGE_LOCAL_ROOT:.myvision-storage}
   public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:8080/files}
-  supabase:
-    url: ${SUPABASE_URL:}
-    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
-    documents-bucket: ${SUPABASE_DOCUMENTS_BUCKET:myvision-documents}
-    public-bucket: ${SUPABASE_PUBLIC_BUCKET:myvision-public}
 
 app:
   scheduling:

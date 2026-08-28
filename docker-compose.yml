@@ -17,7 +17,7 @@ services:
       retries: 10
 
   api:
-    build: ./apps/api
+    build: ./engine
     container_name: myvision-api
     depends_on:
       postgres:
@@ -38,13 +38,8 @@ services:
       MAIL_PROVIDER: ${MAIL_PROVIDER:-log}
       MAIL_FROM: ${MAIL_FROM:-MyVision <no-reply@myvision.visionbau.de>}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
-      STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT:-.myvision-storage}
+      STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT:-/var/lib/myvision/storage}
       STORAGE_PUBLIC_BASE_URL: ${STORAGE_PUBLIC_BASE_URL:-http://localhost:8080/files}
-      SUPABASE_URL: ${SUPABASE_URL:-https://toyrbakpcbcishmaulbg.supabase.co}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
-      SUPABASE_DOCUMENTS_BUCKET: ${SUPABASE_DOCUMENTS_BUCKET:-myvision-documents}
-      SUPABASE_PUBLIC_BUCKET: ${SUPABASE_PUBLIC_BUCKET:-myvision-public}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
@@ -56,6 +51,11 @@ services:
       AUTH_TOKEN_CLEANUP_RETENTION_DAYS: ${AUTH_TOKEN_CLEANUP_RETENTION_DAYS:-7}
     ports:
       - "8080:8080"
+    volumes:
+      # Generated invoice PDFs and XRechnung XML live here. Without this the
+      # container loses every stored document on restart.
+      - myvision-storage-data:/var/lib/myvision/storage
 
 volumes:
   myvision-postgres-data:
+  myvision-storage-data:

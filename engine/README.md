@@ -1,4 +1,4 @@
-# MyVision API
+# MyVision Engine
 
 Spring Boot backend for MyVision.
 
@@ -6,7 +6,7 @@ Spring Boot backend for MyVision.
 
 - Java 21 or newer
 - Maven
-- PostgreSQL or Supabase PostgreSQL
+- PostgreSQL 16 (docker-compose provides one)
 
 ## Local Config
 
@@ -22,7 +22,8 @@ to:
 src/main/resources/application-local.yml
 ```
 
-Then add the real Supabase database password.
+Then point the datasource at your PostgreSQL instance. The defaults match the
+`postgres` service in the repository's `docker-compose.yml`.
 
 ## Run
 
@@ -44,20 +45,22 @@ http://localhost:8080/api/health
 
 ## Production Providers
 
-Local development logs emails and stores files under `.myvision-storage`.
-Production should use Resend for email and Supabase Storage for generated documents and logos:
+Local development logs emails instead of sending them. Production should use Resend:
 
 ```txt
 MAIL_PROVIDER=resend
 MAIL_FROM=MyVision <no-reply@myvision.visionbau.de>
 RESEND_API_KEY=...
 AUTH_FRONTEND_BASE_URL=https://myvision.visionbau.de
+```
 
-STORAGE_PROVIDER=supabase
-SUPABASE_URL=https://toyrbakpcbcishmaulbg.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=...
-SUPABASE_DOCUMENTS_BUCKET=myvision-documents
-SUPABASE_PUBLIC_BUCKET=myvision-public
+Generated documents and logos are written to the filesystem under
+`storage.local-root`. **In a container that path must be a mounted volume** — on
+ephemeral storage every generated invoice PDF is lost on restart.
+
+```txt
+STORAGE_LOCAL_ROOT=/var/lib/myvision/storage
+STORAGE_PUBLIC_BASE_URL=https://api.myvision.example/files
 ```
 
 ## First Auth Endpoints

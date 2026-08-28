@@ -4,7 +4,7 @@ export default function IntegrationsSettingsPage() {
   return (
     <SectionPlaceholder
       title="Integrations"
-      description="Connect Supabase Storage, email delivery, accounting exports, and future payment providers."
+      description="Connect email delivery, accounting exports, and payment providers."
     />
   );
 }

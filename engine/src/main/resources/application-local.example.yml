@@ -1,9 +1,10 @@
 spring:
   datasource:
-    # Use the session pooler host (IPv4-friendly on Windows). Find yours in Supabase → Settings → Database.
-    url: jdbc:postgresql://aws-0-eu-central-1.pooler.supabase.com:5432/postgres
-    username: postgres.toyrbakpcbcishmaulbg
-    password: ${SUPABASE_DB_PASSWORD:YOUR_SUPABASE_DB_PASSWORD}
+    # Matches the postgres service in docker-compose.yml. Point this at any
+    # PostgreSQL instance you like.
+    url: jdbc:postgresql://localhost:5432/myvision
+    username: myvision
+    password: ${DATABASE_PASSWORD:myvision}
 
 server:
   port: 8080
@@ -39,6 +40,5 @@ mail:
   from: MyVision <no-reply@myvision.visionbau.de>
 
 storage:
-  provider: local
   local-root: .myvision-storage
   public-base-url: http://localhost:8080/files

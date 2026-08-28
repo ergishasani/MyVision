@@ -5,8 +5,8 @@ MyVision should use a multi-tenant schema where every business account owns its 
 Recommended setup:
 
 - Spring Boot owns authentication, authorization, validation, and business logic.
-- Supabase is used as managed PostgreSQL, the database dashboard, and storage later.
-- The frontend should call Spring Boot, not Supabase directly.
+- PostgreSQL is the database; any managed or self-hosted instance works.
+- The frontend calls Spring Boot, never the database directly.
 
 ## Tables
 
@@ -50,10 +50,10 @@ quotes/invoices -> documents
 
 ## Migration Files
 
-The schema is stored in two places:
+Flyway owns the schema, and it is the single source of truth:
 
-- `supabase/migrations/20260610150000_initial_schema.sql`
-- `apps/api/src/main/resources/db/migration/V1__initial_schema.sql`
+- `engine/src/main/resources/db/migration/`
 
-Use the Supabase migration for Supabase projects. Use the Flyway migration from the Spring Boot backend.
+Migrations run automatically on backend start. Never edit a migration that has already
+been applied; add a new one.
 

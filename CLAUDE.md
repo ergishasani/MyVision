@@ -5,8 +5,8 @@ loads it automatically when working in this project. It is the single source of 
 Claude should behave here — do not rely on account-specific global settings for anything in this file.
 
 MyVision is a SaaS invoicing and project billing platform for small construction and service
-businesses. Next.js + TypeScript + Tailwind frontend (`apps/web`), Java 21 + Spring Boot 3 backend
-(`apps/api`), PostgreSQL with Flyway migrations, JWT auth via Spring Security.
+businesses. Next.js + TypeScript + Tailwind frontend (`frontend/`), Java 21 + Spring Boot 3 backend
+(`engine/`), PostgreSQL with Flyway migrations, JWT auth via Spring Security.
 
 ---
 
@@ -22,7 +22,7 @@ businesses. Next.js + TypeScript + Tailwind frontend (`apps/web`), Java 21 + Spr
 - **Read [docs/production-readiness.md](docs/production-readiness.md) and
   [docs/deployment-checklist.md](docs/deployment-checklist.md) before any deploy or infrastructure
   work** — anything touching `docker-compose.yml`, `vercel.json`, `.github/workflows/ci.yml`,
-  Supabase config, or environment variables.
+  or environment variables.
 - **Never commit secrets.** `JWT_SECRET`, database credentials, and provider keys come from the
   environment. `.env`, `.env.local`, and `application-local.yml` are gitignored — keep it that way.
 - **Match the existing code.** Follow the naming, structure, comment density, and idioms already in
@@ -96,8 +96,9 @@ This project has a graphify knowledge graph at `.graphify/`. Use it before readi
 - Keep changes scoped to the request. Flag unrelated issues you notice instead of fixing them inline.
 - Prefer editing existing files over creating new ones; don't add files that aren't needed.
 - Don't leave the repo in a broken state — if a change spans multiple files, finish all of them.
-- Database changes go through Flyway migrations in the backend and `supabase/migrations` where
-  relevant. Never edit an already-applied migration; add a new one.
+- Database changes go through Flyway migrations in `engine/src/main/resources/db/migration`,
+  which is the single source of truth for the schema. Never edit an already-applied migration;
+  add a new one.
 - After edits, run the project's own checks and report the real result — `npm run lint` and
   `npm run build` for the frontend, the Gradle/Maven test task for the backend.
 
@@ -106,7 +107,7 @@ This project has a graphify knowledge graph at `.graphify/`. Use it before readi
 ## 4. Communication
 
 - Be direct and concise. Give a recommendation, not an exhaustive menu of options.
-- Reference files as clickable links with line numbers where useful, e.g. `apps/web/src/foo.ts:42`.
+- Reference files as clickable links with line numbers where useful, e.g. `frontend/src/foo.ts:42`.
 - Put each runnable shell command in its own fenced `bash` block, one command per block.
 - When you finish a task, state plainly what changed and whether it was verified.
 

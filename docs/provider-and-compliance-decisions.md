@@ -5,7 +5,7 @@ MyVision is Germany-first for invoicing and e-invoicing.
 ## Current Decisions
 
 - Email provider: Resend.
-- File storage provider: Supabase Storage, with local filesystem fallback for development.
+- File storage: local filesystem under `storage.local-root`. In a container this must be a mounted volume.
 - PDF format: backend-generated invoice PDF.
 - E-invoice target: XRechnung XML first, ZUGFeRD/PDF-A-3 later.
 - Legal scope: engineering support only; final VAT/e-invoice compliance must be reviewed by a qualified German tax/compliance expert.
@@ -17,11 +17,6 @@ RESEND_API_KEY
 MAIL_FROM
 MAIL_PROVIDER=resend
 AUTH_FRONTEND_BASE_URL
-SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
-SUPABASE_DOCUMENTS_BUCKET=myvision-documents
-SUPABASE_PUBLIC_BUCKET=myvision-public
-STORAGE_PROVIDER=supabase
 STORAGE_PUBLIC_BASE_URL
 ```
 
@@ -58,7 +53,7 @@ The ZUGFeRD route returns `501 NOT_IMPLEMENTED` until PDF/A-3 embedding and vali
 2. Resend HTTP implementation.
 3. Password-reset and email-verification emails.
 4. Storage service abstraction.
-5. Supabase Storage implementation for logos and generated documents.
+5. Filesystem storage for logos and generated documents.
 6. Invoice/quote PDF template.
 7. PDF generation endpoints.
 8. XRechnung XML export endpoint.
@@ -68,7 +63,7 @@ The ZUGFeRD route returns `501 NOT_IMPLEMENTED` until PDF/A-3 embedding and vali
 ## Not Yet Done
 
 - Real email provider credentials still need to be set in production hosting.
-- Supabase service-role storage credentials still need to be set in production hosting.
+- Production file storage needs a persistent volume mounted at `STORAGE_LOCAL_ROOT`.
 - PDF template is functional but not brand-final.
 - XRechnung XML export exists, but must be tested with a validator before real e-invoice sending.
 - ZUGFeRD needs a PDF/A-3 capable library and validation workflow.

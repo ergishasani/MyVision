@@ -6,15 +6,15 @@ MyVision is a SaaS invoicing and project billing platform for small construction
 
 - Frontend: Next.js, TypeScript, Tailwind CSS
 - Backend: Java 21, Spring Boot 3
-- Database: PostgreSQL
+- Database: PostgreSQL 16
 - Migrations: Flyway
 - Auth: Spring Security with JWT
 
 ## Workspace
 
 ```txt
-apps/web  - Next.js frontend
-apps/api  - Spring Boot backend
+frontend  - Next.js frontend
+engine    - Spring Boot backend
 packages  - shared code and types
 docs      - product and technical planning
 infra     - deployment and infrastructure config
@@ -34,7 +34,7 @@ API docs: http://localhost:8080/docs
 ### Frontend (port 3000)
 
 ```bash
-cp apps/web/.env.local.example apps/web/.env.local
+cp frontend/.env.local.example frontend/.env.local
 npm install
 npm run dev
 ```
@@ -51,4 +51,4 @@ The frontend reads `NEXT_PUBLIC_API_URL` (default `http://localhost:8080/api`).
 - Set production database credentials through environment variables, not committed files.
 - The frontend build uses system fonts so CI does not depend on Google Fonts network fetches.
 - Vercel builds the frontend through root `vercel.json` using the `@myvision/web` workspace.
-- See `docs/production-readiness.md`, `docs/deployment-checklist.md`, `docs/supabase-backup-restore.md`, and `docs/e-invoice-validation.md` for deployment, provider, backup, and compliance details.
+- See `docs/production-readiness.md`, `docs/deployment-checklist.md`, and `docs/e-invoice-validation.md` for deployment, provider, and compliance details.

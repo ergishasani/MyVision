@@ -1,8 +1,5 @@
 {
   "plugins": {
-    "supabase": {
-      "enabled": true
-    },
     "stripe": {
       "enabled": true
     }

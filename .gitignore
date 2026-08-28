@@ -11,7 +11,7 @@ out/
 target/
 .gradle/
 build/
-apps/api/.myvision-storage/
+engine/.myvision-storage/
 
 # Environment
 .env

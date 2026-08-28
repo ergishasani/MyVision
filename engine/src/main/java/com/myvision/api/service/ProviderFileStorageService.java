@@ -7,87 +7,46 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
+/**
+ * Filesystem-backed storage for generated documents and company logos.
+ *
+ * <p>Objects are written under {@code storage.local-root}. In a container that directory must be a
+ * mounted volume: on ephemeral storage every generated invoice PDF disappears on restart.
+ *
+ * <p>Public objects (logos) are served from {@code storage.public-base-url}; private ones
+ * (invoice PDFs, XRechnung XML) get a null public URL and are streamed through the API instead.
+ */
 @Service
 public class ProviderFileStorageService implements FileStorageService {
 
-  private final RestClient restClient;
-  private final String provider;
   private final Path localRoot;
   private final String publicBaseUrl;
-  private final String supabaseUrl;
-  private final String supabaseServiceRoleKey;
-  private final String supabaseDocumentsBucket;
-  private final String supabasePublicBucket;
 
   public ProviderFileStorageService(
-      RestClient.Builder restClientBuilder,
-      @Value("${storage.provider}") String provider,
       @Value("${storage.local-root}") String localRoot,
-      @Value("${storage.public-base-url}") String publicBaseUrl,
-      @Value("${storage.supabase.url}") String supabaseUrl,
-      @Value("${storage.supabase.service-role-key}") String supabaseServiceRoleKey,
-      @Value("${storage.supabase.documents-bucket}") String supabaseDocumentsBucket,
-      @Value("${storage.supabase.public-bucket}") String supabasePublicBucket
+      @Value("${storage.public-base-url}") String publicBaseUrl
   ) {
-    this.restClient = restClientBuilder.build();
-    this.provider = provider;
     this.localRoot = Path.of(localRoot);
     this.publicBaseUrl = trimTrailingSlash(publicBaseUrl);
-    this.supabaseUrl = trimTrailingSlash(supabaseUrl);
-    this.supabaseServiceRoleKey = supabaseServiceRoleKey;
-    this.supabaseDocumentsBucket = supabaseDocumentsBucket;
-    this.supabasePublicBucket = supabasePublicBucket;
   }
 
   @Override
   public StorageObject put(String path, String contentType, byte[] content) {
-    return put(path, contentType, content, false);
+    return write(normalizePath(path), content, false);
   }
 
   @Override
   public StorageObject putPublic(String path, String contentType, byte[] content) {
-    return put(path, contentType, content, true);
+    return write(normalizePath(path), content, true);
   }
 
-  private StorageObject put(String path, String contentType, byte[] content, boolean publicObject) {
-    String normalizedPath = normalizePath(path);
-    if ("supabase".equalsIgnoreCase(provider)) {
-      return putSupabase(normalizedPath, contentType, content, publicObject);
-    }
-    return putLocal(normalizedPath, content, publicObject);
-  }
-
-  private StorageObject putSupabase(String path, String contentType, byte[] content, boolean publicObject) {
-    if (supabaseUrl.isBlank() || supabaseServiceRoleKey == null || supabaseServiceRoleKey.isBlank()) {
-      throw new IllegalStateException(
-          "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required when STORAGE_PROVIDER=supabase");
-    }
-    String bucket = publicObject ? supabasePublicBucket : supabaseDocumentsBucket;
-    String encodedPath = encodePath(path);
-    restClient.post()
-        .uri("%s/storage/v1/object/%s/%s".formatted(supabaseUrl, bucket, encodedPath))
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + supabaseServiceRoleKey)
-        .header("apikey", supabaseServiceRoleKey)
-        .header("x-upsert", "true")
-        .contentType(MediaType.parseMediaType(contentType))
-        .body(content)
-        .retrieve()
-        .toBodilessEntity();
-
-    String publicUrl = publicObject
-        ? "%s/storage/v1/object/public/%s/%s".formatted(supabaseUrl, bucket, encodedPath)
-        : null;
-    return new StorageObject(path, publicUrl, content.length);
-  }
-
-  private StorageObject putLocal(String path, byte[] content, boolean publicObject) {
+  private StorageObject write(String path, byte[] content, boolean publicObject) {
     try {
       Path target = localRoot.resolve(path).normalize();
+      // A path traversing out of the root would let a crafted file name overwrite anything the
+      // process can reach.
       if (!target.startsWith(localRoot.normalize())) {
         throw new IllegalArgumentException("Invalid storage path");
       }
