@@ -38,7 +38,7 @@ services:
       MAIL_PROVIDER: ${MAIL_PROVIDER:-log}
       MAIL_FROM: ${MAIL_FROM:-MyVision <no-reply@myvision.visionbau.de>}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT:-/var/lib/myvision/storage}
+      STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT:-/app/.myvision-storage}
       STORAGE_PUBLIC_BASE_URL: ${STORAGE_PUBLIC_BASE_URL:-http://localhost:8080/files}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
@@ -53,8 +53,10 @@ services:
       - "8080:8080"
     volumes:
       # Generated invoice PDFs and XRechnung XML live here. Without this the
-      # container loses every stored document on restart.
-      - myvision-storage-data:/var/lib/myvision/storage
+      # container loses every stored document on restart. Mounted on the path the
+      # image already creates and chowns to appuser, so the non-root runtime user
+      # can actually write to the volume.
+      - myvision-storage-data:/app/.myvision-storage
 
 volumes:
   myvision-postgres-data:
