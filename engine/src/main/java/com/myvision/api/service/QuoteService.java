@@ -14,6 +14,7 @@ import com.myvision.api.service.CompanyAccessService;
 import com.myvision.api.entity.LineItemKind;
 import com.myvision.api.exception.ResourceNotFoundException;
 import com.myvision.api.entity.Company;
+import com.myvision.api.entity.NumberRangeType;
 import com.myvision.api.repository.CompanyRepository;
 import com.myvision.api.dto.InvoiceResponse;
 import com.myvision.api.service.InvoiceService;
@@ -37,6 +38,7 @@ public class QuoteService {
   private final ProjectService projectService;
   private final InvoiceService invoiceService;
   private final CompanyAccessService companyAccessService;
+  private final NumberRangeService numberRangeService;
 
   public QuoteService(
       QuoteRepository quoteRepository,
@@ -45,7 +47,8 @@ public class QuoteService {
       ClientService clientService,
       ProjectService projectService,
       InvoiceService invoiceService,
-      CompanyAccessService companyAccessService
+      CompanyAccessService companyAccessService,
+      NumberRangeService numberRangeService
   ) {
     this.quoteRepository = quoteRepository;
     this.quoteItemRepository = quoteItemRepository;
@@ -54,6 +57,7 @@ public class QuoteService {
     this.projectService = projectService;
     this.invoiceService = invoiceService;
     this.companyAccessService = companyAccessService;
+    this.numberRangeService = numberRangeService;
   }
 
   @Transactional(readOnly = true)
@@ -227,11 +231,14 @@ public class QuoteService {
         quote, quoteItemRepository.findByQuoteIdOrderByPositionAsc(quote.getId()));
   }
 
+  /**
+   * Allocates the next quote number.
+   *
+   * <p>Delegates to the shared counter so the format configured under accounting settings is the
+   * one that reaches the document, and so the row lock there covers concurrent creation.
+   */
   private String nextQuoteNumber(Company company) {
-    int number = company.getNextQuoteNumber();
-    company.setNextQuoteNumber(number + 1);
-    companyRepository.save(company);
-    return "%s-%04d".formatted(company.getQuotePrefix(), number);
+    return numberRangeService.allocate(company.getId(), NumberRangeType.quote);
   }
 
   private List<QuoteItem> saveItems(UUID quoteId, List<QuoteItemRequest> requests) {

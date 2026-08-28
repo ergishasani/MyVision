@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import com.myvision.api.entity.Company;
 import com.myvision.api.entity.ContactRole;
 import com.myvision.api.entity.DiscountUnit;
+import com.myvision.api.entity.NumberRangeType;
 import com.myvision.api.exception.BadRequestException;
 import com.myvision.api.repository.CompanyRepository;
 import com.myvision.api.dto.ContactDetailInput;
@@ -40,17 +41,20 @@ public class ClientService {
   private final CompanyAccessService companyAccessService;
   private final CompanyRepository companyRepository;
   private final ClientContactDetailRepository contactDetailRepository;
+  private final NumberRangeService numberRangeService;
 
   public ClientService(
       ClientRepository clientRepository,
       CompanyAccessService companyAccessService,
       CompanyRepository companyRepository,
-      ClientContactDetailRepository contactDetailRepository
+      ClientContactDetailRepository contactDetailRepository,
+      NumberRangeService numberRangeService
   ) {
     this.clientRepository = clientRepository;
     this.companyAccessService = companyAccessService;
     this.companyRepository = companyRepository;
     this.contactDetailRepository = contactDetailRepository;
+    this.numberRangeService = numberRangeService;
   }
 
   @Transactional(readOnly = true)
@@ -302,21 +306,11 @@ public class ClientService {
   private Integer assignCustomerNumber(UUID companyId, Integer requested) {
     if (requested != null) {
       requireNumberFree(companyId, requested);
-      Company company = companyRepository.findByIdForUpdate(companyId)
-          .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-      if (requested >= company.getNextCustomerNumber()) {
-        company.setNextCustomerNumber(requested + 1);
-        companyRepository.save(company);
-      }
+      // Push the counter past an explicitly chosen number so it is not handed out again later.
+      numberRangeService.observeUsed(companyId, NumberRangeType.contact, requested);
       return requested;
     }
-
-    Company company = companyRepository.findByIdForUpdate(companyId)
-        .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-    int number = company.getNextCustomerNumber();
-    company.setNextCustomerNumber(number + 1);
-    companyRepository.save(company);
-    return number;
+    return numberRangeService.allocateNumber(companyId, NumberRangeType.contact);
   }
 
   private void requireNumberFree(UUID companyId, Integer number) {
@@ -329,9 +323,7 @@ public class ClientService {
   @Transactional(readOnly = true)
   public int peekNextCustomerNumber(UUID userId) {
     UUID companyId = companyAccessService.currentCompanyId(userId);
-    return companyRepository.findById(companyId)
-        .map(Company::getNextCustomerNumber)
-        .orElse(1000);
+    return numberRangeService.peek(companyId, NumberRangeType.contact);
   }
 
   /**

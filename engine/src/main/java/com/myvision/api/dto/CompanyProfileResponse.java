@@ -31,10 +31,7 @@ public record CompanyProfileResponse(
     String iban,
     String bic,
     Integer paymentTermsDays,
-    String invoicePrefix,
-    Integer nextInvoiceNumber,
-    String quotePrefix,
-    Integer nextQuoteNumber,
+    String defaultPaymentMethod,
     BigDecimal defaultVatRate,
     String quoteFooter,
     String invoiceFooter
@@ -68,10 +65,7 @@ public record CompanyProfileResponse(
         company.getIban(),
         company.getBic(),
         company.getPaymentTermsDays(),
-        company.getInvoicePrefix(),
-        company.getNextInvoiceNumber(),
-        company.getQuotePrefix(),
-        company.getNextQuoteNumber(),
+        company.getDefaultPaymentMethod().name(),
         defaultVatRate,
         quoteFooter,
         invoiceFooter

@@ -10,9 +10,13 @@ import com.myvision.api.util.*;
 
 import com.myvision.api.entity.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.type.SqlTypes;
 
 @Entity
@@ -53,23 +57,11 @@ public class Company extends BaseEntity {
   @Column(nullable = false)
   private Integer paymentTermsDays = 14;
 
-  @Column(nullable = false)
-  private String invoicePrefix = "INV";
-
-  @Column(nullable = false)
-  private Integer nextInvoiceNumber = 1;
-
-  @Column(nullable = false)
-  private String quotePrefix = "Q";
-
-  @Column(nullable = false)
-  private Integer nextQuoteNumber = 1;
-
-  @Column(name = "next_customer_number", nullable = false)
-  private Integer nextCustomerNumber = 1000;
-
-  @Column(name = "next_article_number", nullable = false)
-  private Integer nextArticleNumber = 1000;
+  /** Offered by default on a new invoice. */
+  @Enumerated(EnumType.STRING)
+  @JdbcType(PostgreSQLEnumJdbcType.class)
+  @Column(name = "default_payment_method", nullable = false, columnDefinition = "payment_method")
+  private PaymentMethod defaultPaymentMethod = PaymentMethod.bank_transfer;
 
   public String getName() {
     return name;
@@ -231,51 +223,11 @@ public class Company extends BaseEntity {
     this.paymentTermsDays = paymentTermsDays;
   }
 
-  public String getInvoicePrefix() {
-    return invoicePrefix;
+  public PaymentMethod getDefaultPaymentMethod() {
+    return defaultPaymentMethod;
   }
 
-  public void setInvoicePrefix(String invoicePrefix) {
-    this.invoicePrefix = invoicePrefix;
-  }
-
-  public Integer getNextInvoiceNumber() {
-    return nextInvoiceNumber;
-  }
-
-  public void setNextInvoiceNumber(Integer nextInvoiceNumber) {
-    this.nextInvoiceNumber = nextInvoiceNumber;
-  }
-
-  public String getQuotePrefix() {
-    return quotePrefix;
-  }
-
-  public void setQuotePrefix(String quotePrefix) {
-    this.quotePrefix = quotePrefix;
-  }
-
-  public Integer getNextQuoteNumber() {
-    return nextQuoteNumber;
-  }
-
-  public void setNextQuoteNumber(Integer nextQuoteNumber) {
-    this.nextQuoteNumber = nextQuoteNumber;
-  }
-
-  public Integer getNextCustomerNumber() {
-    return nextCustomerNumber;
-  }
-
-  public void setNextCustomerNumber(Integer nextCustomerNumber) {
-    this.nextCustomerNumber = nextCustomerNumber;
-  }
-
-  public Integer getNextArticleNumber() {
-    return nextArticleNumber;
-  }
-
-  public void setNextArticleNumber(Integer nextArticleNumber) {
-    this.nextArticleNumber = nextArticleNumber;
+  public void setDefaultPaymentMethod(PaymentMethod defaultPaymentMethod) {
+    this.defaultPaymentMethod = defaultPaymentMethod;
   }
 }

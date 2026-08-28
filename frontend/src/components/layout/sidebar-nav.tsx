@@ -141,10 +141,10 @@ const ADMIN_NAV: NavItem[] = [
     label: "Settings",
     Icon: CogIcon,
     children: [
-      { href: "/settings/team", label: "user" },
-      { href: "/settings/taxes", label: "accounting" },
-      // "Pursue" is a machine translation of Unternehmen: the company profile.
-      { href: "/settings/company", label: "Pursue" },
+      { href: "/settings/team", label: "Users" },
+      { href: "/settings/accounting", label: "Accounting" },
+      // Was "Pursue", a machine translation of Unternehmen.
+      { href: "/settings/company", label: "Company" },
       { href: "/admin/system-health", label: "System" },
       { href: "/settings/stationery", label: "Stationery" },
       { href: "/settings/text-templates", label: "Text templates" },

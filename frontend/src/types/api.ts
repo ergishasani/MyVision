@@ -97,6 +97,60 @@ export type Client = {
   updatedAt: string;
 };
 
+export type NumberRangeType =
+  | "invoice"
+  | "quote"
+  | "credit_note"
+  | "order_confirmation"
+  | "delivery_note"
+  | "contact"
+  | "product"
+  | "debtor"
+  | "creditor";
+
+/**
+ * One numbering counter.
+ *
+ * `format` holds the literal `%NUMBER`; `preview` is what the next document would actually be
+ * called, computed by the API so the screen never has to reimplement the rendering.
+ */
+export type NumberRange = {
+  id: string | null;
+  type: NumberRangeType;
+  format: string;
+  padding: number;
+  nextNumber: number;
+  preview: string;
+};
+
+export type BookingAccount = {
+  id: string;
+  displayName: string;
+  name: string | null;
+  skrAccount: string | null;
+};
+
+export type CostCenter = {
+  id: string;
+  name: string;
+  number: string | null;
+};
+
+export type CompanyMemberRole = "owner" | "admin" | "member" | "accountant";
+
+export type TeamMember = {
+  /** The membership id, not the user id: a role belongs to the membership. */
+  id: string;
+  userId: string;
+  fullName: string | null;
+  email: string;
+  role: CompanyMemberRole;
+  status: string;
+  emailVerified: boolean;
+  lastLoginAt: string | null;
+  joinedAt: string;
+};
+
 export type ProductCategory = "article" | "service";
 
 /** The units a product can be sold in. Mirrors the `product_unit` enum in the database. */

@@ -68,8 +68,12 @@ public class CompanyProfileService {
     applyIfPresent(request.bankName(), company::setBankName);
     applyIfPresent(request.iban(), company::setIban);
     applyIfPresent(request.bic(), company::setBic);
-    applyIfPresent(request.invoicePrefix(), company::setInvoicePrefix);
-    applyIfPresent(request.quotePrefix(), company::setQuotePrefix);
+    // The document prefixes moved to accounting settings, where they live beside the counter
+    // they format. Only the payment-method default is still a plain company preference.
+    // A direct check rather than applyIfPresent, which is String-typed and would treat "" as absent.
+    if (request.defaultPaymentMethod() != null) {
+      company.setDefaultPaymentMethod(request.defaultPaymentMethod());
+    }
 
     // Codes are stored uppercase so document rendering and comparisons stay predictable.
     if (request.countryCode() != null) {

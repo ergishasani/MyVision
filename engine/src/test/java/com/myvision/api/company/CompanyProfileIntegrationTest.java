@@ -21,7 +21,7 @@ class CompanyProfileIntegrationTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.name").value("Profile Bau GmbH"))
         .andExpect(jsonPath("$.countryCode").value("DE"))
         .andExpect(jsonPath("$.defaultCurrency").value("EUR"))
-        .andExpect(jsonPath("$.invoicePrefix").value("INV"))
+        .andExpect(jsonPath("$.defaultPaymentMethod").value("bank_transfer"))
         .andExpect(jsonPath("$.paymentTermsDays").value(14));
   }
 
@@ -51,22 +51,30 @@ class CompanyProfileIntegrationTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.defaultCurrency").value("EUR"))
         // Untouched fields keep their value: this is PATCH, not PUT.
         .andExpect(jsonPath("$.name").value("Patch Bau GmbH"))
-        .andExpect(jsonPath("$.invoicePrefix").value("INV"));
+        .andExpect(jsonPath("$.defaultPaymentMethod").value("bank_transfer"));
   }
 
   @Test
-  void invoiceCounterCannotBeRewound() throws Exception {
+  void numberingIsNotPartOfTheCompanyProfile() throws Exception {
     String token = registerAndGetToken("company-counter@myvision.dev", "Counter Bau GmbH");
 
-    // nextInvoiceNumber is deliberately not part of the update contract. Rewinding it would
-    // produce duplicate invoice numbers, which is a compliance problem rather than a preference.
+    // Formats and counters live in number_ranges and are edited through the accounting settings
+    // endpoint, which is where the forward-only rule is enforced. Posting them here changes
+    // nothing rather than opening a second way in.
     mockMvc.perform(patch("/api/company")
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content("{\"nextInvoiceNumber\": 1, \"invoicePrefix\": \"RE\"}"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.invoicePrefix").value("RE"))
-        .andExpect(jsonPath("$.nextInvoiceNumber").value(1));
+        .andExpect(jsonPath("$.invoicePrefix").doesNotExist())
+        .andExpect(jsonPath("$.nextInvoiceNumber").doesNotExist());
+
+    // The real counter is untouched by that request.
+    mockMvc.perform(get("/api/settings/accounting/number-ranges")
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.type=='invoice')].format").value("INV-%NUMBER"))
+        .andExpect(jsonPath("$[?(@.type=='invoice')].nextNumber").value(1));
   }
 
   @Test

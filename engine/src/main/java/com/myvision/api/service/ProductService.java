@@ -5,14 +5,13 @@ import com.myvision.api.dto.ProductResponse;
 import com.myvision.api.dto.ProductUnitInput;
 import com.myvision.api.dto.ProductUnitResponse;
 import com.myvision.api.dto.ProductUpdateRequest;
-import com.myvision.api.entity.Company;
 import com.myvision.api.entity.Product;
+import com.myvision.api.entity.NumberRangeType;
 import com.myvision.api.entity.ProductCategory;
 import com.myvision.api.entity.ProductUnit;
 import com.myvision.api.entity.ProductUnitCode;
 import com.myvision.api.exception.BadRequestException;
 import com.myvision.api.exception.ResourceNotFoundException;
-import com.myvision.api.repository.CompanyRepository;
 import com.myvision.api.repository.ProductRepository;
 import com.myvision.api.repository.ProductUnitRepository;
 import java.math.BigDecimal;
@@ -30,18 +29,18 @@ public class ProductService {
   private final ProductRepository productRepository;
   private final ProductUnitRepository productUnitRepository;
   private final CompanyAccessService companyAccessService;
-  private final CompanyRepository companyRepository;
+  private final NumberRangeService numberRangeService;
 
   public ProductService(
       ProductRepository productRepository,
       ProductUnitRepository productUnitRepository,
       CompanyAccessService companyAccessService,
-      CompanyRepository companyRepository
+      NumberRangeService numberRangeService
   ) {
     this.productRepository = productRepository;
     this.productUnitRepository = productUnitRepository;
     this.companyAccessService = companyAccessService;
-    this.companyRepository = companyRepository;
+    this.numberRangeService = numberRangeService;
   }
 
   @Transactional(readOnly = true)
@@ -150,9 +149,7 @@ public class ProductService {
   @Transactional(readOnly = true)
   public int peekNextArticleNumber(UUID userId) {
     UUID companyId = companyAccessService.currentCompanyId(userId);
-    return companyRepository.findById(companyId)
-        .map(Company::getNextArticleNumber)
-        .orElse(1000);
+    return numberRangeService.peek(companyId, NumberRangeType.product);
   }
 
   /**
@@ -223,21 +220,11 @@ public class ProductService {
   private Integer assignArticleNumber(UUID companyId, Integer requested) {
     if (requested != null) {
       requireNumberFree(companyId, requested);
-      Company company = companyRepository.findByIdForUpdate(companyId)
-          .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-      if (requested >= company.getNextArticleNumber()) {
-        company.setNextArticleNumber(requested + 1);
-        companyRepository.save(company);
-      }
+      // Push the counter past an explicitly chosen number so it is not handed out again later.
+      numberRangeService.observeUsed(companyId, NumberRangeType.product, requested);
       return requested;
     }
-
-    Company company = companyRepository.findByIdForUpdate(companyId)
-        .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-    int number = company.getNextArticleNumber();
-    company.setNextArticleNumber(number + 1);
-    companyRepository.save(company);
-    return number;
+    return numberRangeService.allocateNumber(companyId, NumberRangeType.product);
   }
 
   private void requireNumberFree(UUID companyId, Integer number) {

@@ -2,6 +2,7 @@ package com.myvision.api.dto;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import com.myvision.api.entity.PaymentMethod;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -11,9 +12,10 @@ import java.math.BigDecimal;
  * Partial update of the company profile. Every field is optional; a null leaves the stored value
  * untouched.
  *
- * <p>Deliberately excludes nextInvoiceNumber and nextQuoteNumber. Those counters must only ever
- * move forward through document creation: letting an operator rewind them would produce duplicate
- * invoice numbers, which is a compliance problem rather than a preference.
+ * <p>Carries no numbering at all any more. Formats and counters live in number_ranges and are
+ * edited through the accounting settings endpoint, which enforces the rule that a counter may be
+ * moved forward but never back — rewinding one would reissue an invoice number already in a
+ * customer's hands.
  */
 public record CompanyUpdateRequest(
     @Size(max = 255) String name,
@@ -35,8 +37,7 @@ public record CompanyUpdateRequest(
     @Size(max = 64) String iban,
     @Size(max = 32) String bic,
     @Positive Integer paymentTermsDays,
-    @Size(max = 16) String invoicePrefix,
-    @Size(max = 16) String quotePrefix,
+    PaymentMethod defaultPaymentMethod,
     @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal defaultVatRate,
     @Size(max = 5000) String quoteFooter,
     @Size(max = 5000) String invoiceFooter

@@ -15,6 +15,7 @@ import com.myvision.api.service.CompanyAccessService;
 import com.myvision.api.entity.LineItemKind;
 import com.myvision.api.exception.ResourceNotFoundException;
 import com.myvision.api.entity.Company;
+import com.myvision.api.entity.NumberRangeType;
 import com.myvision.api.repository.CompanyRepository;
 import com.myvision.api.service.ProjectService;
 import com.myvision.api.entity.Quote;
@@ -39,6 +40,7 @@ public class InvoiceService {
   private final ProjectService projectService;
   private final CompanyAccessService companyAccessService;
   private final AuditLogService auditLogService;
+  private final NumberRangeService numberRangeService;
 
   public InvoiceService(
       InvoiceRepository invoiceRepository,
@@ -47,7 +49,8 @@ public class InvoiceService {
       ClientService clientService,
       ProjectService projectService,
       CompanyAccessService companyAccessService,
-      AuditLogService auditLogService
+      AuditLogService auditLogService,
+      NumberRangeService numberRangeService
   ) {
     this.invoiceRepository = invoiceRepository;
     this.invoiceItemRepository = invoiceItemRepository;
@@ -56,6 +59,7 @@ public class InvoiceService {
     this.projectService = projectService;
     this.companyAccessService = companyAccessService;
     this.auditLogService = auditLogService;
+    this.numberRangeService = numberRangeService;
   }
 
   @Transactional(readOnly = true)
@@ -283,11 +287,14 @@ public class InvoiceService {
         invoice, invoiceItemRepository.findByInvoiceIdOrderByPositionAsc(invoice.getId()));
   }
 
+  /**
+   * Allocates the next invoice number.
+   *
+   * <p>Delegates to the shared counter so the format configured under accounting settings is the
+   * one that reaches the document, and so the row lock there covers concurrent creation.
+   */
   private String nextInvoiceNumber(Company company) {
-    int number = company.getNextInvoiceNumber();
-    company.setNextInvoiceNumber(number + 1);
-    companyRepository.save(company);
-    return "%s-%04d".formatted(company.getInvoicePrefix(), number);
+    return numberRangeService.allocate(company.getId(), NumberRangeType.invoice);
   }
 
   private List<InvoiceItem> saveItems(UUID invoiceId, List<InvoiceItemRequest> requests) {

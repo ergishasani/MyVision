@@ -15,4 +15,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CompanyMemberRepository extends JpaRepository<CompanyMember, UUID> {
 
   Optional<CompanyMember> findFirstByUser_IdOrderByCreatedAtAsc(UUID userId);
+
+  java.util.List<CompanyMember> findByCompany_IdOrderByCreatedAtAsc(UUID companyId);
+
+  Optional<CompanyMember> findByIdAndCompany_Id(UUID id, UUID companyId);
+
+  long countByCompany_IdAndRole(UUID companyId, CompanyMemberRole role);
 }
