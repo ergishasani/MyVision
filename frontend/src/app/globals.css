@@ -8,10 +8,15 @@
   --border: #e2e8f0;
   --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #e2e8f0;
-  --sidebar-muted: #94a3b8;
-  --sidebar-active: #1e293b;
+  /* Light sidebar: the nav reads as part of the page rather than a dark slab,
+     which keeps focus on the invoice data next to it. */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-muted: #64748b;
+  --sidebar-active: #f1f5f9;
+  /* Active-item accent in the nav. Orange follows the sevdesk reference; set it to
+     var(--primary) if you would rather the nav match the blue used elsewhere. */
+  --sidebar-accent: #e8552d;
 }
 
 @theme inline {
@@ -26,6 +31,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-accent: var(--sidebar-accent);
   --font-sans: var(--font-inter, Inter), Arial, Helvetica, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
 }
@@ -34,4 +40,41 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/*
+ * Pointer cursors on anything clickable.
+ *
+ * Tailwind v4 changed Preflight to reset buttons to `cursor: default`, where v3 gave them
+ * `cursor: pointer`. Almost every control in this app is a <button>, so without this the whole UI
+ * loses the one hint that tells people a thing can be clicked. Anchors already get a pointer from
+ * the browser's own stylesheet and are left alone.
+ *
+ * These live in the base layer deliberately: a `cursor-*` utility on an element still wins, so the
+ * `cursor-default` on the dialog dismiss backdrops and the `disabled:cursor-not-allowed` on
+ * individual controls keep behaving exactly as they were written.
+ */
+@layer base {
+  button:not(:disabled),
+  select:not(:disabled),
+  summary,
+  input:is([type="checkbox"], [type="radio"], [type="file"], [type="range"], [type="color"], [type="submit"], [type="button"], [type="reset"]):not(:disabled),
+  /* A label wired to a checkbox or radio is part of that control's hit area. */
+  label:has(input:is([type="checkbox"], [type="radio"]):not(:disabled)),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"]:not([aria-disabled="true"]),
+  [role="tab"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  /* A control that is present but unavailable should say so rather than silently ignore clicks. */
+  button:disabled,
+  select:disabled,
+  textarea:disabled,
+  input:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }

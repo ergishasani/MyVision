@@ -16,5 +16,7 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItem, UUID> 
 
   List<InvoiceItem> findByInvoiceIdOrderByPositionAsc(UUID invoiceId);
 
+  List<InvoiceItem> findByInvoiceIdIn(java.util.Collection<UUID> invoiceIds);
+
   void deleteByInvoiceId(UUID invoiceId);
 }

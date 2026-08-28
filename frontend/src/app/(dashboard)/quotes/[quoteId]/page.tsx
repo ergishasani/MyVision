@@ -1,10 +1,12 @@
-import { SectionPlaceholder } from "@/components/layout/section-placeholder";
+import { PageShell, Panel } from "@/components/layout/page-shell";
 
 export default function QuoteDetailPage() {
   return (
-    <SectionPlaceholder
-      title="Quote"
-      description="Review quote details and status."
-    />
+    <PageShell title="Quote" description="Review quote details and status.">
+      <Panel
+        title="Not built yet"
+        description="This screen is scaffolded and routed. The form and its API wiring come next."
+      />
+    </PageShell>
   );
 }

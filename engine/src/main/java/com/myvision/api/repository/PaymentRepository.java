@@ -25,6 +25,8 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
   Optional<Payment> findByStripePaymentIntentId(String stripePaymentIntentId);
 
+  List<Payment> findByCompanyIdOrderByPaidAtDesc(UUID companyId);
+
   @Query("""
       select coalesce(sum(p.amount), 0) from Payment p
       where p.companyId = :companyId

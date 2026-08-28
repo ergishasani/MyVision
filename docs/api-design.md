@@ -69,6 +69,37 @@ All endpoints except `register`, `login` and `health` require a JWT in the
 | GET | `/api/invoices/{invoiceId}/payments` | List payments for an invoice |
 | POST | `/api/invoices/{invoiceId}/payments` | Record payment; updates `amountPaid`, `balanceDue` and status (`partially_paid`/`paid`) |
 
+## Company
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/company` | Full company profile: identity, address, bank details, numbering, VAT defaults |
+| PATCH | `/api/company` | Partial update. Omitted fields keep their value |
+| POST | `/api/company/logo` | Upload the logo used on generated documents |
+
+`nextInvoiceNumber` and `nextQuoteNumber` are deliberately not updatable. Those counters may only
+move forward through document creation; rewinding them would produce duplicate invoice numbers,
+which is a compliance problem rather than a preference.
+
+## Ledger
+
+Company-wide lists that do not hang off a single parent record.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/payments` | Every payment for the company, newest first, joined to invoice number and client name |
+| GET | `/api/documents` | Generated PDFs and XRechnung XML stored for the company |
+
+## Reports
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/reports/vat?from=&to=` | VAT invoiced over a period, split by rate |
+
+The VAT aggregate counts invoices by **issue date**, not payment date, and excludes drafts and
+cancelled invoices — neither represents an issued supply. It is engineering output, not tax
+advice; see `docs/invoice-compliance-checklist.md` before the figures inform a filing.
+
 ## Stripe
 
 See `docs/stripe-setup.md`. Disabled until `STRIPE_SECRET_KEY` is set, in which case the

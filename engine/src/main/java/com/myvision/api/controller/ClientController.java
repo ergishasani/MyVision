@@ -11,6 +11,8 @@ import com.myvision.api.util.*;
 import com.myvision.api.util.CurrentUserPrincipal;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -48,6 +50,18 @@ public class ClientController {
       @Valid @RequestBody ClientRequest request
   ) {
     return clientService.create(principal.getUserId(), request);
+  }
+
+  /**
+   * The number the next contact would receive, so the create form can show it before saving.
+   *
+   * <p>A preview only. The number is allocated server-side on create, so two people opening the
+   * form at once still get different numbers.
+   */
+  @GetMapping("/next-number")
+  @Operation(summary = "Preview the next customer number")
+  public Map<String, Integer> nextNumber(@AuthenticationPrincipal CurrentUserPrincipal principal) {
+    return Map.of("nextCustomerNumber", clientService.peekNextCustomerNumber(principal.getUserId()));
   }
 
   @GetMapping("/{id}")

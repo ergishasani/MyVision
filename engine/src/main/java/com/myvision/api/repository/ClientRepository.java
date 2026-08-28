@@ -21,5 +21,7 @@ public interface ClientRepository extends JpaRepository<Client, UUID> {
 
   Optional<Client> findByIdAndCompanyId(UUID id, UUID companyId);
 
+  boolean existsByCompanyIdAndCustomerNumber(UUID companyId, Integer customerNumber);
+
   Optional<Client> findByIdAndCompanyIdAndArchivedAtIsNull(UUID id, UUID companyId);
 }

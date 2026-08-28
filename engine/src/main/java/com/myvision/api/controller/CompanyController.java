@@ -1,5 +1,7 @@
 package com.myvision.api.controller;
 
+import com.myvision.api.dto.CompanyProfileResponse;
+import com.myvision.api.dto.CompanyUpdateRequest;
 import com.myvision.api.dto.LogoUploadResponse;
 import com.myvision.api.dto.StorageObject;
 import com.myvision.api.entity.Company;
@@ -7,6 +9,7 @@ import com.myvision.api.exception.BadRequestException;
 import com.myvision.api.exception.ResourceNotFoundException;
 import com.myvision.api.repository.CompanyRepository;
 import com.myvision.api.service.CompanyAccessService;
+import com.myvision.api.service.CompanyProfileService;
 import com.myvision.api.service.FileStorageService;
 import com.myvision.api.util.CurrentUserPrincipal;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +18,11 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,15 +43,33 @@ public class CompanyController {
   private final CompanyAccessService companyAccessService;
   private final CompanyRepository companyRepository;
   private final FileStorageService fileStorageService;
+  private final CompanyProfileService companyProfileService;
 
   public CompanyController(
       CompanyAccessService companyAccessService,
       CompanyRepository companyRepository,
-      FileStorageService fileStorageService
+      FileStorageService fileStorageService,
+      CompanyProfileService companyProfileService
   ) {
     this.companyAccessService = companyAccessService;
     this.companyRepository = companyRepository;
     this.fileStorageService = fileStorageService;
+    this.companyProfileService = companyProfileService;
+  }
+
+  @GetMapping
+  public CompanyProfileResponse profile(
+      @AuthenticationPrincipal CurrentUserPrincipal principal
+  ) {
+    return companyProfileService.get(principal.getUserId());
+  }
+
+  @PatchMapping
+  public CompanyProfileResponse update(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @Valid @RequestBody CompanyUpdateRequest request
+  ) {
+    return companyProfileService.update(principal.getUserId(), request);
   }
 
   @PostMapping(value = "/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

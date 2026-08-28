@@ -204,6 +204,43 @@ public class AuthService {
     userRepository.save(user);
   }
 
+  /**
+   * Attaches a verified OAuth identity to an account that already exists under the same email.
+   *
+   * <p>Without this, anyone who signed up with a password could never use social sign-in, which is
+   * the common case: people forget which button they used last time.
+   *
+   * <p>Linking naively would enable account pre-hijacking. An attacker registers the victim's
+   * address with a password, waits for the victim to sign in with Google, and the merge hands them
+   * an account they still hold a password for. Two rules close that:
+   *
+   * <ul>
+   *   <li>The provider must assert the email is verified. An unverified assertion proves nothing.
+   *   <li>If the existing account never verified its own email, its password was set on an address
+   *       nobody proved they owned, so it is discarded on link. The provider has now proven
+   *       mailbox control, so the provider identity wins and the untrusted password does not
+   *       survive. The owner can set a new one through forgot-password, which also requires
+   *       mailbox access.
+   * </ul>
+   *
+   * <p>An account that had verified its email keeps its password: both sign-in methods then work,
+   * because both are backed by proven ownership of the same mailbox.
+   */
+  static void linkOAuthIdentity(User user, AuthProvider provider, OAuthProfile profile) {
+    if (!profile.emailVerified()) {
+      throw new BadRequestException(
+          "This email already uses a different sign-in method, and the provider has not verified it");
+    }
+
+    boolean ownershipAlreadyProven = user.getEmailVerifiedAt() != null;
+    user.setAuthProvider(provider);
+    user.setProviderSubject(profile.subject());
+
+    if (!ownershipAlreadyProven) {
+      user.setPasswordHash(null);
+    }
+  }
+
   private AuthResponse authenticateWithOAuth(
       AuthProvider provider,
       OAuthProfile profile,
@@ -214,7 +251,7 @@ public class AuthService {
 
     if (user != null) {
       if (user.getAuthProvider() != provider) {
-        throw new BadRequestException("This email already uses a different sign-in method");
+        linkOAuthIdentity(user, provider, profile);
       }
       if (user.getProviderSubject() == null || !user.getProviderSubject().equals(profile.subject())) {
         user.setProviderSubject(profile.subject());

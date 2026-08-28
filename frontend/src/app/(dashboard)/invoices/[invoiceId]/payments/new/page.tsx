@@ -1,10 +1,12 @@
-import { SectionPlaceholder } from "@/components/layout/section-placeholder";
+import { PageShell, Panel } from "@/components/layout/page-shell";
 
 export default function NewInvoicePaymentPage() {
   return (
-    <SectionPlaceholder
-      title="New payment"
-      description="Record a payment for this invoice."
-    />
+    <PageShell title="New payment" description="Record a payment for this invoice.">
+      <Panel
+        title="Not built yet"
+        description="This screen is scaffolded and routed. The form and its API wiring come next."
+      />
+    </PageShell>
   );
 }
