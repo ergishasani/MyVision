@@ -20,4 +20,10 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
   Optional<Project> findByIdAndCompanyId(UUID id, UUID companyId);
 
   long countByCompanyIdAndStatus(UUID companyId, ProjectStatus status);
+
+  long countByClientId(java.util.UUID clientId);
+
+  /** One contact's projects, newest first, for their detail screen. */
+  List<Project> findByCompanyIdAndClientIdOrderByCreatedAtDesc(UUID companyId, UUID clientId);
+
 }

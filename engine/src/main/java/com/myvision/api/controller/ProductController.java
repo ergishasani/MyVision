@@ -85,4 +85,20 @@ public class ProductController {
   ) {
     productService.archive(principal.getUserId(), id);
   }
+
+  /**
+   * Removes a product for good.
+   *
+   * <p>Separate verb from archiving. Safe at any time: invoice lines copy what they were written
+   * with rather than referencing the catalogue entry.
+   */
+  @DeleteMapping("/{id}/permanent")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Delete a product outright")
+  public void delete(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    productService.delete(principal.getUserId(), id);
+  }
 }

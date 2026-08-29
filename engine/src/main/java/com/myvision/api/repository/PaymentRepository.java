@@ -27,6 +27,10 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
   List<Payment> findByCompanyIdOrderByPaidAtDesc(UUID companyId);
 
+  /** Payments received in a window, for the dashboard's monthly series. */
+  List<Payment> findByCompanyIdAndPaidAtBetween(
+      UUID companyId, OffsetDateTime from, OffsetDateTime to);
+
   @Query("""
       select coalesce(sum(p.amount), 0) from Payment p
       where p.companyId = :companyId

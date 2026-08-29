@@ -76,4 +76,21 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
       @Param("companyId") UUID companyId,
       @Param("statuses") Collection<InvoiceStatus> statuses,
       @Param("today") LocalDate today);
+
+  long countByClientId(java.util.UUID clientId);
+
+  /** Every invoice issued in a window, for the dashboard's monthly series. */
+  List<Invoice> findByCompanyIdAndIssueDateBetween(
+      UUID companyId, LocalDate from, LocalDate to);
+
+  /**
+   * One contact's invoices, newest issue date first, for their detail screen.
+   *
+   * <p>Ordered by issue date rather than creation: that is the date on the document, and the
+   * order an operator reading the billing history expects. Creation time breaks ties so two
+   * invoices issued the same day still come back in a stable order.
+   */
+  List<Invoice> findByCompanyIdAndClientIdOrderByIssueDateDescCreatedAtDesc(
+      UUID companyId, UUID clientId);
+
 }

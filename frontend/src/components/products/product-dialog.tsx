@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/client";
 import {
   createProduct,
   peekNextArticleNumber,
+  updateProduct,
   type ProductUnitInput,
 } from "@/lib/api/products";
 import type { Product, ProductCategory, ProductUnitCode } from "@/types/api";
@@ -60,8 +61,29 @@ function money(value: number) {
   return value.toFixed(2);
 }
 
+/** The stored product, as the form's own shape. Mirrors {@link EMPTY} field for field. */
+function seedFrom(product: Product): Draft {
+  const rate = Number(product.taxRate);
+  const gross = (net: number | null) =>
+    net === null ? "" : money(net * (1 + rate / 100));
+  return {
+    name: product.name,
+    articleNumber: product.articleNumber != null ? String(product.articleNumber) : "",
+    category: product.category,
+    unit: product.unit,
+    taxRate: String(rate),
+    sellingNet: money(Number(product.sellingPriceNet)),
+    sellingGross: gross(Number(product.sellingPriceNet)),
+    purchaseNet: product.purchasePriceNet != null ? money(Number(product.purchasePriceNet)) : "",
+    purchaseGross: gross(product.purchasePriceNet != null ? Number(product.purchasePriceNet) : null),
+    description: product.description ?? "",
+    internalNote: product.internalNote ?? "",
+    inventoryEnabled: product.inventoryEnabled,
+  };
+}
+
 /**
- * Create-product dialog.
+ * Create- and edit-product dialog.
  *
  * <p>Net and gross are two views of one price, so editing either rewrites the other rather than
  * both being stored. Only the net figure is sent — the API derives gross on read, which is what
@@ -71,14 +93,22 @@ export function ProductDialog({
   open,
   onClose,
   onCreated,
+  product,
 }: {
   open: boolean;
   onClose: () => void;
   onCreated: (product: Product) => void;
+  /** When set, the dialog edits this product instead of creating a new one. */
+  product?: Product | null;
 }) {
-  const [form, setForm] = useState<Draft>(EMPTY);
+  const editing = Boolean(product);
+  // Seeded once on mount. The parent keys the dialog on the product id, so opening a different
+  // one remounts it with fresh values rather than an effect copying props into state.
+  const [form, setForm] = useState<Draft>(() => (product ? seedFrom(product) : EMPTY));
   const [section, setSection] = useState<Section>("Description");
-  const [units, setUnits] = useState<ProductUnitInput[]>([]);
+  const [units, setUnits] = useState<ProductUnitInput[]>(() =>
+    product ? product.units.map((u) => ({ unit: u.unit, factor: Number(u.factor) })) : [],
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextNumber, setNextNumber] = useState<number | null>(null);
@@ -86,7 +116,7 @@ export function ProductDialog({
   // Shown so the number is not a surprise after saving. The server still allocates it on create,
   // so two people with the form open at once cannot end up with the same one.
   useEffect(() => {
-    if (!open) return;
+    if (!open || editing) return;
     let cancelled = false;
     peekNextArticleNumber()
       .then((value) => {
@@ -98,7 +128,7 @@ export function ProductDialog({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, editing]);
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -141,8 +171,8 @@ export function ProductDialog({
   }
 
   function reset() {
-    setForm(EMPTY);
-    setUnits([]);
+    setForm(product ? seedFrom(product) : EMPTY);
+    setUnits(product ? product.units.map((u) => ({ unit: u.unit, factor: Number(u.factor) })) : []);
     setSection("Description");
     setError(null);
   }
@@ -155,7 +185,7 @@ export function ProductDialog({
     setSaving(true);
     setError(null);
     try {
-      const created = await createProduct({
+      const body = {
         name: form.name.trim(),
         articleNumber: toNumber(form.articleNumber),
         category: form.category,
@@ -168,12 +198,26 @@ export function ProductDialog({
         internalNote: form.internalNote.trim() || null,
         inventoryEnabled: form.inventoryEnabled,
         units: units.filter((row) => row.factor > 0),
-      });
-      onCreated(created);
-      reset();
-      if (!keepOpen) onClose();
+      };
+
+      const saved = product ? await updateProduct(product.id, body) : await createProduct(body);
+      onCreated(saved);
+
+      // Editing always closes: there is no "and next" for a record that already exists.
+      if (keepOpen && !product) {
+        reset();
+      } else {
+        reset();
+        onClose();
+      }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not create the product");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : product
+            ? "Could not save the product"
+            : "Could not create the product",
+      );
     } finally {
       setSaving(false);
     }
@@ -188,7 +232,7 @@ export function ProductDialog({
         reset();
         onClose();
       }}
-      title="New product"
+      title={editing ? "Edit product" : "New product"}
       footer={
         <>
           {error ? <p className="mr-auto text-sm text-red-600">{error}</p> : null}
@@ -202,21 +246,24 @@ export function ProductDialog({
           >
             Cancel
           </button>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => submit(true)}
-            className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
-          >
-            Create and new
-          </button>
+          {/* No "and new" when editing: the record already exists. */}
+          {!editing ? (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => submit(true)}
+              className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
+            >
+              Create and new
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={saving}
             onClick={() => submit(false)}
             className="h-10 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-60"
           >
-            {saving ? "Creating…" : "Create"}
+            {saving ? (editing ? "Saving…" : "Creating…") : editing ? "Save changes" : "Create"}
           </button>
         </>
       }
@@ -243,9 +290,12 @@ export function ProductDialog({
           onChange={(v) => set("articleNumber", v)}
           placeholder={nextNumber != null ? String(nextNumber) : "Assigned on save"}
           hint={
-            nextNumber != null
-              ? `Left blank, this product gets ${nextNumber}.`
-              : "Assigned automatically when you save."
+            // An existing product already has its number; only a new one is waiting for one.
+            editing
+              ? "Changing this renumbers the product in your catalogue."
+              : nextNumber != null
+                ? `Left blank, this product gets ${nextNumber}.`
+                : "Assigned automatically when you save."
           }
         />
         <Select

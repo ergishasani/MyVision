@@ -44,9 +44,19 @@ export async function updateProduct(id: string, patch: Partial<ProductInput>) {
   });
 }
 
-/** Soft delete: the backend sets archivedAt rather than removing the row. */
-export async function deleteProduct(id: string) {
+/** Hides the product from the catalogue. The row stays. */
+export async function archiveProduct(id: string) {
   return apiFetch<void>(`/products/${id}`, { method: "DELETE" });
+}
+
+/**
+ * Removes the product for good.
+ *
+ * <p>Always allowed, unlike deleting a contact: an invoice line copies the description and price
+ * it was written with rather than pointing at the catalogue entry.
+ */
+export async function deleteProduct(id: string) {
+  return apiFetch<void>(`/products/${id}/permanent`, { method: "DELETE" });
 }
 
 /** The number the next product would get, for pre-filling the create form. */

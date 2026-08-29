@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { Client, DiscountUnit } from "@/types/api";
+import type { Client, ClientOverview, DiscountUnit } from "@/types/api";
 
 export type ContactDetailInput = {
   kind: "phone" | "email" | "website";
@@ -53,6 +53,15 @@ export async function getClient(id: string) {
   return apiFetch<Client>(`/clients/${id}`);
 }
 
+/**
+ * The contact plus their billing history and totals, for the detail screen.
+ *
+ * <p>One call rather than four so the headline figures cannot disagree with the rows under them.
+ */
+export async function getClientOverview(id: string) {
+  return apiFetch<ClientOverview>(`/clients/${id}/overview`);
+}
+
 export async function createClient(input: ClientInput) {
   return apiFetch<Client>("/clients", {
     method: "POST",
@@ -67,9 +76,19 @@ export async function updateClient(id: string, patch: Partial<ClientInput>) {
   });
 }
 
-/** Soft delete: the backend sets archivedAt rather than removing the row. */
-export async function deleteClient(id: string) {
+/** Hides the contact. The row stays, because documents still point at it. */
+export async function archiveClient(id: string) {
   return apiFetch<void>(`/clients/${id}`, { method: "DELETE" });
+}
+
+/**
+ * Removes the contact for good.
+ *
+ * <p>Rejected with 400 while any invoice, quote or project still references them — an invoice has
+ * to keep the contact it was issued to.
+ */
+export async function deleteClient(id: string) {
+  return apiFetch<void>(`/clients/${id}/permanent`, { method: "DELETE" });
 }
 
 /** The number the next contact would get, for pre-filling the create form. */

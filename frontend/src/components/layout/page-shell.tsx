@@ -300,9 +300,12 @@ function PageButton({
   );
 }
 
-/** Coloured status badge, matching the invoice and quote lifecycles. */
+/** Coloured status badge, matching the invoice, quote and project lifecycles. */
 export function StatusPill({ status }: { status: string }) {
-  const tone = STATUS_TONES[status.toLowerCase()] ?? "bg-slate-100 text-slate-700";
+  // Takes the raw status or a humanised label ("Partially paid"), so a screen can print a
+  // readable word without the badge losing the colour that belongs to it.
+  const tone =
+    STATUS_TONES[status.toLowerCase().replace(/ /g, "_")] ?? "bg-slate-100 text-slate-700";
   return (
     <span
       className={cn(
@@ -326,6 +329,11 @@ const STATUS_TONES: Record<string, string> = {
   cancelled: "bg-slate-100 text-slate-500",
   accepted: "bg-emerald-50 text-emerald-700",
   rejected: "bg-red-50 text-red-700",
+  converted: "bg-blue-50 text-blue-700",
+  expired: "bg-slate-100 text-slate-500",
+  active: "bg-blue-50 text-blue-700",
+  paused: "bg-amber-50 text-amber-700",
+  completed: "bg-emerald-50 text-emerald-700",
 };
 
 /** Card grid used by settings and report sections, which are not lists. */

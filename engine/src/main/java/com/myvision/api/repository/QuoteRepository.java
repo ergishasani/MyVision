@@ -20,4 +20,11 @@ public interface QuoteRepository extends JpaRepository<Quote, UUID> {
   Optional<Quote> findByIdAndCompanyId(UUID id, UUID companyId);
 
   long countByCompanyIdAndStatusIn(UUID companyId, List<QuoteStatus> statuses);
+
+  long countByClientId(java.util.UUID clientId);
+
+  /** One contact's quotes, newest issue date first, for their detail screen. */
+  List<Quote> findByCompanyIdAndClientIdOrderByIssueDateDescCreatedAtDesc(
+      UUID companyId, UUID clientId);
+
 }

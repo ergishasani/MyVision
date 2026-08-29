@@ -63,7 +63,7 @@ const PRIMARY_NAV: NavItem[] = [
     Icon: MailIcon,
     children: [
       // Offers are quotes under a different name, so this points at the real screen.
-      { href: "/quotes", label: "Offers" },
+      { href: "/quotes", label: "Quotes" },
       { href: "/orders/confirmations", label: "Order confirmations" },
       { href: "/orders/delivery-notes", label: "Delivery notes" },
     ],
@@ -94,19 +94,19 @@ const PRIMARY_NAV: NavItem[] = [
     label: "Bank",
     Icon: BankIcon,
     children: [
-      { href: "/payments", label: "Content" },
+      { href: "/payments", label: "Transactions" },
       { href: "/bank/cash-book", label: "Cash book" },
       { href: "/bank/incomplete", label: "Incomplete" },
     ],
   },
   {
     href: "/steer",
-    label: "Steer",
+    label: "Taxes",
     Icon: PercentIcon,
     children: [
       { href: "/steer/constitution", label: "Constitution" },
       // UStVA, the advance VAT return, is backed by /api/reports/vat.
-      { href: "/reports/taxes", label: "YOUR" },
+      { href: "/reports/taxes", label: "VAT return" },
       { href: "/steer/tax-advisor", label: "My tax advisor" },
     ],
   },
@@ -116,8 +116,8 @@ const PRIMARY_NAV: NavItem[] = [
     Icon: ChartIcon,
     children: [
       { href: "/reports", label: "Reports" },
-      { href: "/evaluations/susa", label: "SuSa" },
-      { href: "/evaluations/bwa", label: "BWA" },
+      { href: "/evaluations/susa", label: "Trial balance" },
+      { href: "/evaluations/bwa", label: "Management report" },
     ],
   },
 ];
@@ -132,7 +132,7 @@ const ADMIN_NAV: NavItem[] = [
     Icon: GridIcon,
     children: [
       { href: "/extensions/add-ons", label: "Add-ons" },
-      { href: "/settings/integrations", label: "The integration" },
+      { href: "/settings/integrations", label: "Integrations" },
       { href: "/extensions/api", label: "API" },
     ],
   },

@@ -20,14 +20,22 @@ import com.myvision.api.entity.DiscountUnit;
 import com.myvision.api.entity.NumberRangeType;
 import com.myvision.api.exception.BadRequestException;
 import com.myvision.api.repository.CompanyRepository;
+import com.myvision.api.repository.ProjectRepository;
+import com.myvision.api.repository.QuoteRepository;
+import com.myvision.api.repository.InvoiceRepository;
 import com.myvision.api.dto.ContactDetailInput;
 import com.myvision.api.dto.ContactDetailResponse;
 import com.myvision.api.entity.ClientContactDetail;
 import com.myvision.api.entity.ContactDetailKind;
 import com.myvision.api.entity.ContactDetailLabel;
 import com.myvision.api.repository.ClientContactDetailRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.Map;
 import java.util.List;
 import java.util.UUID;
@@ -37,24 +45,50 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ClientService {
 
+  /**
+   * Issued and not cancelled — what counts as having been billed. Kept identical to the dashboard's
+   * definition so a contact's total and the company total cannot tell different stories.
+   */
+  private static final List<InvoiceStatus> INVOICED_STATUSES = List.of(
+      InvoiceStatus.sent, InvoiceStatus.unpaid, InvoiceStatus.partially_paid,
+      InvoiceStatus.paid, InvoiceStatus.overdue);
+
+  /** Issued and still owing money. */
+  private static final List<InvoiceStatus> OUTSTANDING_STATUSES = List.of(
+      InvoiceStatus.sent, InvoiceStatus.unpaid, InvoiceStatus.partially_paid,
+      InvoiceStatus.overdue);
+
+  /** A quote that could still turn into an invoice. */
+  private static final List<QuoteStatus> OPEN_QUOTE_STATUSES =
+      List.of(QuoteStatus.draft, QuoteStatus.sent);
+
   private final ClientRepository clientRepository;
   private final CompanyAccessService companyAccessService;
   private final CompanyRepository companyRepository;
   private final ClientContactDetailRepository contactDetailRepository;
   private final NumberRangeService numberRangeService;
+  private final InvoiceRepository invoiceRepository;
+  private final QuoteRepository quoteRepository;
+  private final ProjectRepository projectRepository;
 
   public ClientService(
       ClientRepository clientRepository,
       CompanyAccessService companyAccessService,
       CompanyRepository companyRepository,
       ClientContactDetailRepository contactDetailRepository,
-      NumberRangeService numberRangeService
+      NumberRangeService numberRangeService,
+      InvoiceRepository invoiceRepository,
+      QuoteRepository quoteRepository,
+      ProjectRepository projectRepository
   ) {
     this.clientRepository = clientRepository;
     this.companyAccessService = companyAccessService;
     this.companyRepository = companyRepository;
     this.contactDetailRepository = contactDetailRepository;
     this.numberRangeService = numberRangeService;
+    this.invoiceRepository = invoiceRepository;
+    this.quoteRepository = quoteRepository;
+    this.projectRepository = projectRepository;
   }
 
   @Transactional(readOnly = true)
@@ -71,6 +105,158 @@ public class ClientService {
     UUID companyId = companyAccessService.currentCompanyId(userId);
     Client client = requireClient(clientId, companyId);
     return ClientResponse.from(client, detailsFor(client.getId()));
+  }
+
+  /**
+   * Everything the contact detail screen shows: who they are, what they are worth, and every
+   * document issued to them.
+   *
+   * <p>Assembled in one transaction rather than left to four calls from the browser. The headline
+   * figures have to agree with the rows printed underneath them, and separate requests can
+   * interleave with a payment landing and disagree — an outstanding total that does not match the
+   * invoices below it reads as a bug in the books.
+   */
+  @Transactional(readOnly = true)
+  public ClientOverviewResponse overview(UUID userId, UUID clientId) {
+    UUID companyId = companyAccessService.currentCompanyId(userId);
+    Client client = requireClient(clientId, companyId);
+
+    List<Invoice> invoices = invoiceRepository
+        .findByCompanyIdAndClientIdOrderByIssueDateDescCreatedAtDesc(companyId, clientId);
+    List<Quote> quotes = quoteRepository
+        .findByCompanyIdAndClientIdOrderByIssueDateDescCreatedAtDesc(companyId, clientId);
+    List<Project> projects =
+        projectRepository.findByCompanyIdAndClientIdOrderByCreatedAtDesc(companyId, clientId);
+
+    return new ClientOverviewResponse(
+        ClientResponse.from(client, detailsFor(client.getId())),
+        stats(companyId, invoices, quotes, projects),
+        invoices.stream().map(ClientInvoiceSummaryResponse::from).toList(),
+        quotes.stream().map(ClientQuoteSummaryResponse::from).toList(),
+        projects.stream().map(ProjectResponse::from).toList());
+  }
+
+  /**
+   * The headline figures for one contact.
+   *
+   * <p>Counts cover every document; the money sums cover only the primary currency, and anything
+   * left out is named in {@code excludedCurrencies}. Adding 1.000 EUR to 1.000 CHF produces a
+   * number that is true of nothing, so the sum stays in one unit and the screen says what it
+   * omitted.
+   */
+  private ClientStatsResponse stats(
+      UUID companyId, List<Invoice> invoices, List<Quote> quotes, List<Project> projects) {
+    LocalDate today = LocalDate.now();
+    String currency = primaryCurrency(companyId, invoices);
+
+    List<Invoice> billed = invoices.stream()
+        .filter(invoice -> currency.equals(invoice.getCurrency()))
+        .toList();
+    List<String> excluded = invoices.stream()
+        .map(Invoice::getCurrency)
+        .filter(code -> code != null && !code.isBlank() && !currency.equals(code))
+        .distinct()
+        .sorted()
+        .toList();
+
+    // Derived from the due date rather than read off the status. The overdue sweep runs once a
+    // day, so between the due date and the next sweep a late invoice is still stored as `sent`.
+    List<Invoice> overdue = billed.stream()
+        .filter(invoice -> OUTSTANDING_STATUSES.contains(invoice.getStatus()))
+        .filter(invoice -> invoice.getDueDate() != null && invoice.getDueDate().isBefore(today))
+        .toList();
+
+    List<LocalDate> issuedDates = invoices.stream()
+        .filter(invoice -> INVOICED_STATUSES.contains(invoice.getStatus()))
+        .map(Invoice::getIssueDate)
+        .filter(Objects::nonNull)
+        .sorted()
+        .toList();
+
+    List<Quote> openQuotes = quotes.stream()
+        .filter(quote -> OPEN_QUOTE_STATUSES.contains(quote.getStatus()))
+        .toList();
+
+    return new ClientStatsResponse(
+        currency,
+        excluded,
+        sum(billed, INVOICED_STATUSES, Invoice::getTotalAmount),
+        sum(billed, INVOICED_STATUSES, Invoice::getAmountPaid),
+        sum(billed, OUTSTANDING_STATUSES, Invoice::getBalanceDue),
+        overdue.stream()
+            .map(Invoice::getBalanceDue)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add),
+        invoices.size(),
+        invoices.stream().filter(invoice -> invoice.getStatus() == InvoiceStatus.draft).count(),
+        invoices.stream()
+            .filter(invoice -> OUTSTANDING_STATUSES.contains(invoice.getStatus()))
+            .count(),
+        overdue.size(),
+        quotes.size(),
+        openQuotes.size(),
+        openQuotes.stream()
+            .filter(quote -> currency.equals(quote.getCurrency()))
+            .map(Quote::getTotalAmount)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add),
+        projects.size(),
+        projects.stream().filter(project -> project.getStatus() == ProjectStatus.active).count(),
+        issuedDates.isEmpty() ? null : issuedDates.get(0),
+        issuedDates.isEmpty() ? null : issuedDates.get(issuedDates.size() - 1),
+        averageDaysToPay(invoices));
+  }
+
+  /**
+   * How long this contact takes to settle, averaged over the invoices they have paid.
+   *
+   * <p>Null until one has been paid — a made-up zero would read as "pays immediately", which is
+   * the opposite of "we do not know yet". A settlement recorded before the issue date is dropped
+   * rather than counted as negative days; it means a back-dated payment, not a fast payer.
+   */
+  private static Integer averageDaysToPay(List<Invoice> invoices) {
+    long[] days = invoices.stream()
+        .filter(invoice -> invoice.getPaidAt() != null && invoice.getIssueDate() != null)
+        .mapToLong(invoice ->
+            ChronoUnit.DAYS.between(invoice.getIssueDate(), invoice.getPaidAt().toLocalDate()))
+        .filter(value -> value >= 0)
+        .toArray();
+    if (days.length == 0) {
+      return null;
+    }
+    long total = 0;
+    for (long value : days) {
+      total += value;
+    }
+    return Math.toIntExact(Math.round((double) total / days.length));
+  }
+
+  /**
+   * The currency this contact is billed in.
+   *
+   * <p>Taken from their most recent issued invoice, because that is what they have actually been
+   * charged in. Drafts are ignored — an unsent draft in another currency should not relabel a
+   * history of euro invoices. With no invoices at all the company default gives the screen a unit
+   * to show zeroes in.
+   */
+  private String primaryCurrency(UUID companyId, List<Invoice> invoices) {
+    return invoices.stream()
+        .filter(invoice -> invoice.getStatus() != InvoiceStatus.draft)
+        .map(Invoice::getCurrency)
+        .filter(code -> code != null && !code.isBlank())
+        .findFirst()
+        .orElseGet(() -> companyRepository.findById(companyId)
+            .map(Company::getDefaultCurrency)
+            .orElse("EUR"));
+  }
+
+  private static BigDecimal sum(
+      List<Invoice> invoices, List<InvoiceStatus> statuses, Function<Invoice, BigDecimal> field) {
+    return invoices.stream()
+        .filter(invoice -> statuses.contains(invoice.getStatus()))
+        .map(field)
+        .filter(Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   @Transactional
@@ -254,6 +440,54 @@ public class ClientService {
       client.setArchivedAt(OffsetDateTime.now());
       clientRepository.save(client);
     }
+  }
+
+  /**
+   * Deletes a contact outright.
+   *
+   * <p>Only possible while nothing references them. An invoice has to keep the name and address it
+   * was issued to — that is what makes it a valid invoice, and German retention rules expect it to
+   * still be there years later — so a contact who has been invoiced can be archived but never
+   * removed. The foreign keys are {@code on delete restrict}, so the database would refuse anyway;
+   * counting first turns that into a sentence the operator can act on instead of a 500.
+   */
+  @Transactional
+  public void delete(UUID userId, UUID clientId) {
+    UUID companyId = companyAccessService.currentCompanyId(userId);
+    Client client = requireClient(clientId, companyId);
+
+    long invoices = invoiceRepository.countByClientId(clientId);
+    long quotes = quoteRepository.countByClientId(clientId);
+    long projects = projectRepository.countByClientId(clientId);
+
+    if (invoices + quotes + projects > 0) {
+      throw new BadRequestException(
+          "This contact cannot be deleted because " + describe(invoices, quotes, projects)
+              + " still reference them. Archive them instead — the documents have to keep the"
+              + " contact they were issued to.");
+    }
+
+    // Contact details cascade; nothing else points here.
+    clientRepository.delete(client);
+  }
+
+  /** "2 invoices and 1 project", for a message that says what is actually in the way. */
+  private static String describe(long invoices, long quotes, long projects) {
+    List<String> parts = new ArrayList<>();
+    if (invoices > 0) {
+      parts.add(invoices + (invoices == 1 ? " invoice" : " invoices"));
+    }
+    if (quotes > 0) {
+      parts.add(quotes + (quotes == 1 ? " quote" : " quotes"));
+    }
+    if (projects > 0) {
+      parts.add(projects + (projects == 1 ? " project" : " projects"));
+    }
+    if (parts.size() == 1) {
+      return parts.get(0);
+    }
+    return String.join(", ", parts.subList(0, parts.size() - 1))
+        + " and " + parts.get(parts.size() - 1);
   }
 
   /** Tenant-safe lookup used by the project, quote and invoice domains. */

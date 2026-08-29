@@ -146,6 +146,22 @@ public class ProductService {
     }
   }
 
+  /**
+   * Deletes a product outright.
+   *
+   * <p>Always safe, unlike deleting a contact. An invoice line copies the description and price
+   * it was written with rather than pointing at the catalogue entry, so a past invoice is
+   * unaffected by the product behind it disappearing. Only the alternative units belong to it, and
+   * those cascade.
+   */
+  @Transactional
+  public void delete(UUID userId, UUID productId) {
+    UUID companyId = companyAccessService.currentCompanyId(userId);
+    Product product = requireProduct(productId, companyId);
+    productUnitRepository.deleteByProductId(productId);
+    productRepository.delete(product);
+  }
+
   @Transactional(readOnly = true)
   public int peekNextArticleNumber(UUID userId) {
     UUID companyId = companyAccessService.currentCompanyId(userId);

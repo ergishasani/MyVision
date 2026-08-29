@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/client";
 import {
   createClient,
   peekNextCustomerNumber,
+  updateClient,
   type ClientInput,
   type ContactDetailInput,
 } from "@/lib/api/clients";
@@ -21,7 +22,20 @@ const SECTIONS = [
 ] as const;
 type Section = (typeof SECTIONS)[number];
 
+/**
+ * Salutations.
+ *
+ * <p>The label is what this screen shows; the value is what gets printed in the address block of
+ * a German document, which is why it stays German. Translating the stored value would put "Ms"
+ * on a letter to a German customer.
+ */
 const SALUTATIONS = ["", "Frau", "Herr", "Divers"];
+const SALUTATION_LABELS: Record<string, string> = {
+  "": "No salutation",
+  Frau: "Ms (Frau)",
+  Herr: "Mr (Herr)",
+  Divers: "Non-binary (Divers)",
+};
 
 const ROLES = [
   ["customer", "Customer"],
@@ -76,30 +90,87 @@ const EMPTY: ClientInput = {
   notes: "",
 };
 
+/** The stored contact, as the form's own shape. Mirrors {@link EMPTY} field for field. */
+function seedFrom(client: Client): ClientInput {
+  return {
+    type: client.type,
+    name: client.name,
+    contactName: client.contactName ?? "",
+    salutation: client.salutation ?? "",
+    academicTitle: client.academicTitle ?? "",
+    firstName: client.firstName ?? "",
+    lastName: client.lastName ?? "",
+    nameSuffix: client.nameSuffix ?? "",
+    position: client.position ?? "",
+    contactRole: client.contactRole,
+    customerNumber: client.customerNumber,
+    iban: client.iban ?? "",
+    bic: client.bic ?? "",
+    taxNumber: client.taxNumber ?? "",
+    showVatId: client.showVatId,
+    einvoiceStandard: client.einvoiceStandard,
+    paymentTermsDays: client.paymentTermsDays,
+    discountDays: client.discountDays,
+    discountPercent: client.discountPercent,
+    customerDiscount: client.customerDiscount,
+    customerDiscountUnit: client.customerDiscountUnit,
+    terms: client.terms ?? "",
+    debtorNumber: client.debtorNumber ?? "",
+    creditorNumber: client.creditorNumber ?? "",
+    email: client.email ?? "",
+    phone: client.phone ?? "",
+    vatNumber: client.vatNumber ?? "",
+    addressLine1: client.addressLine1 ?? "",
+    addressLine2: client.addressLine2 ?? "",
+    city: client.city ?? "",
+    region: client.region ?? "",
+    postalCode: client.postalCode ?? "",
+    countryCode: client.countryCode ?? "DE",
+    notes: client.notes ?? "",
+  };
+}
+
 /**
- * Create-contact dialog.
+ * Create- and edit-contact dialog.
+ *
+ * <p>One component for both, because a contact edited through a different form from the one it was
+ * created in is how the two drift apart and a field ends up editable in only one of them.
+ * Passing a {@code client} switches it to editing that record.
  *
  * <p>"Create and new" keeps the dialog open for the next entry, which is what makes bulk entry
- * bearable when someone is typing in a stack of clients.
+ * bearable when someone is typing in a stack of clients. It has no meaning when editing, so it is
+ * not shown there.
  */
 export function ClientDialog({
   open,
   onClose,
   onCreated,
+  client,
 }: {
   open: boolean;
   onClose: () => void;
   onCreated: (client: Client) => void;
+  /** When set, the dialog edits this contact instead of creating a new one. */
+  client?: Client | null;
 }) {
-  const [form, setForm] = useState<ClientInput>(EMPTY);
+  const editing = Boolean(client);
+  // Seeded once on mount rather than synchronised by an effect. The parent gives the dialog a
+  // key of the contact's id, so opening a different contact remounts it with fresh values —
+  // which is React's own answer to "reset state when the subject changes".
+  const [form, setForm] = useState<ClientInput>(() => (client ? seedFrom(client) : EMPTY));
   const [section, setSection] = useState<Section>("Address");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextNumber, setNextNumber] = useState<number | null>(null);
-  const [details, setDetails] = useState<ContactDetailInput[]>([
-    { kind: "phone", label: "work", value: "" },
-    { kind: "email", label: "work", value: "" },
-  ]);
+  const [details, setDetails] = useState<ContactDetailInput[]>(() =>
+    // An existing contact keeps exactly the rows it has; the blank starter pair is for new ones.
+    client && client.contactDetails.length > 0
+      ? client.contactDetails.map((d) => ({ kind: d.kind, label: d.label, value: d.value }))
+      : [
+          { kind: "phone", label: "work", value: "" },
+          { kind: "email", label: "work", value: "" },
+        ],
+  );
 
   function setDetail(index: number, patch: Partial<ContactDetailInput>) {
     setDetails((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -116,7 +187,7 @@ export function ClientDialog({
   // Shown so the number is not a surprise after saving. The server still allocates it on create,
   // so two people with the form open at once cannot end up with the same one.
   useEffect(() => {
-    if (!open) return;
+    if (!open || editing) return;
     let cancelled = false;
     peekNextCustomerNumber()
       .then((value) => {
@@ -128,20 +199,24 @@ export function ClientDialog({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, editing]);
 
   function set<K extends keyof ClientInput>(key: K, value: ClientInput[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function reset() {
-    setForm(EMPTY);
+    setForm(client ? seedFrom(client) : EMPTY);
     setSection("Address");
     setError(null);
-    setDetails([
-      { kind: "phone", label: "work", value: "" },
-      { kind: "email", label: "work", value: "" },
-    ]);
+    setDetails(
+      client && client.contactDetails.length > 0
+        ? client.contactDetails.map((d) => ({ kind: d.kind, label: d.label, value: d.value }))
+        : [
+            { kind: "phone", label: "work", value: "" },
+            { kind: "email", label: "work", value: "" },
+          ],
+    );
   }
 
   async function submit(keepOpen: boolean) {
@@ -166,21 +241,33 @@ export function ClientDialog({
       const fallbackName = isPerson
         ? [form.firstName, form.lastName].filter(Boolean).join(" ").trim()
         : form.name.trim();
-      const created = await createClient({
+      const body = {
         ...payload,
         name: fallbackName,
         // Blank rows are dropped server-side; sending them keeps the form simple.
         contactDetails: details.filter((row) => row.value.trim() !== ""),
-      });
-      onCreated(created);
-      if (keepOpen) {
+      };
+
+      const saved = client
+        ? await updateClient(client.id, body)
+        : await createClient(body);
+      onCreated(saved);
+
+      // Editing always closes: there is no "and next" for a record that already exists.
+      if (keepOpen && !client) {
         reset();
       } else {
         reset();
         onClose();
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not create the contact");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : client
+            ? "Could not save the contact"
+            : "Could not create the contact",
+      );
     } finally {
       setSaving(false);
     }
@@ -195,7 +282,7 @@ export function ClientDialog({
         reset();
         onClose();
       }}
-      title="Create contact"
+      title={editing ? "Edit contact" : "Create contact"}
       headerAside={
         /* Pinned rather than sitting in the body: it changes which fields exist, so it has to
            stay reachable once the form is scrolled. */
@@ -236,21 +323,24 @@ export function ClientDialog({
           >
             Cancel
           </button>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => submit(true)}
-            className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
-          >
-            Create and new
-          </button>
+          {/* No "and new" when editing: the record already exists. */}
+          {!editing ? (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => submit(true)}
+              className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
+            >
+              Create and new
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={saving}
             onClick={() => submit(false)}
             className="h-10 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-60"
           >
-            {saving ? "Creating…" : "Create"}
+            {saving ? (editing ? "Saving…" : "Creating…") : editing ? "Save changes" : "Create"}
           </button>
         </>
       }
@@ -262,7 +352,7 @@ export function ClientDialog({
             required
             value={form.name}
             onChange={(v) => set("name", v)}
-            placeholder="Muster Bau GmbH"
+            placeholder="Acme Construction Ltd"
           />
           <Field
             label="Contact person"
@@ -278,6 +368,7 @@ export function ClientDialog({
             value={form.salutation ?? ""}
             onChange={(v) => set("salutation", v)}
             options={SALUTATIONS}
+            labels={SALUTATION_LABELS}
           />
           <Field
             label="Title"
@@ -289,20 +380,20 @@ export function ClientDialog({
             label="First name"
             value={form.firstName ?? ""}
             onChange={(v) => set("firstName", v)}
-            placeholder="Erika"
+            placeholder="Anna"
           />
           <Field
             label="Last name"
             required
             value={form.lastName ?? ""}
             onChange={(v) => set("lastName", v)}
-            placeholder="Mustermann"
+            placeholder="Schmidt"
           />
           <Field
             label="Name suffix"
             value={form.nameSuffix ?? ""}
             onChange={(v) => set("nameSuffix", v)}
-            placeholder="jr."
+            placeholder="Jr."
           />
           <div className="sm:col-span-2">
             <Field
@@ -333,7 +424,14 @@ export function ClientDialog({
             value={form.customerNumber != null ? String(form.customerNumber) : ""}
             onChange={(v) => set("customerNumber", v.trim() === "" ? null : Number(v))}
             placeholder={nextNumber != null ? String(nextNumber) : "auto"}
-            hint={nextNumber != null ? `Blank uses ${nextNumber}` : "Assigned automatically"}
+            hint={
+              // An existing contact already has its number; only a new one is waiting for one.
+              editing
+                ? "Changing this renumbers the contact in your books."
+                : nextNumber != null
+                  ? `Blank uses ${nextNumber}`
+                  : "Assigned automatically"
+            }
           />
           <Select
             label="Type"
@@ -359,7 +457,7 @@ export function ClientDialog({
       <div className="mt-6">
         <Toggle
           label="E-invoice standard"
-          hint="Send this contact a structured XRechnung file instead of a PDF."
+          hint="Send this contact a structured e-invoice (XRechnung) instead of a PDF."
           checked={Boolean(form.einvoiceStandard)}
           onChange={(v) => set("einvoiceStandard", v)}
         />
@@ -391,7 +489,7 @@ export function ClientDialog({
             <Field label="Street and number" value={form.addressLine1 ?? ""} onChange={(v) => set("addressLine1", v)} />
             <Field label="Address line 2" value={form.addressLine2 ?? ""} onChange={(v) => set("addressLine2", v)} />
             <Field label="Postcode" value={form.postalCode ?? ""} onChange={(v) => set("postalCode", v)} placeholder="36119" />
-            <Field label="City" value={form.city ?? ""} onChange={(v) => set("city", v)} placeholder="Neuhof" />
+            <Field label="City" value={form.city ?? ""} onChange={(v) => set("city", v)} placeholder="Berlin" />
             <Field label="Region" value={form.region ?? ""} onChange={(v) => set("region", v)} />
             <Field
               label="Country code"
@@ -423,7 +521,7 @@ export function ClientDialog({
               onAdd={() => addDetail("email")}
               onRemove={removeDetail}
               addLabel="Add email address"
-              placeholder="rechnung@kunde.de"
+              placeholder="billing@customer.com"
               type="email"
             />
             <DetailGroup
@@ -434,7 +532,7 @@ export function ClientDialog({
               onAdd={() => addDetail("website")}
               onRemove={removeDetail}
               addLabel="Add domain"
-              placeholder="https://kunde.de"
+              placeholder="https://customer.com"
             />
           </div>
         ) : null}
@@ -460,14 +558,14 @@ export function ClientDialog({
                 value={form.vatNumber ?? ""}
                 onChange={(v) => set("vatNumber", v.toUpperCase())}
                 placeholder="DE123456789"
-                hint="USt-IdNr. Required on reverse-charge and intra-EU invoices."
+                hint="The EU VAT identification number (USt-IdNr.). Required on reverse-charge and intra-EU invoices."
               />
               <Field
                 label="Tax ID number"
                 value={form.taxNumber ?? ""}
                 onChange={(v) => set("taxNumber", v)}
                 placeholder="013/815/08154"
-                hint="Steuernummer from the local Finanzamt. Not the same as the VAT ID."
+                hint="The domestic tax number from your local tax office (Steuernummer). Not the same as the VAT ID."
               />
             </div>
 
@@ -485,8 +583,8 @@ export function ClientDialog({
             <div>
               <p className="mb-1 text-sm font-medium text-foreground">Early payment discount</p>
               <p className="mb-3 text-xs text-muted">
-                Skonto — deducted only if they actually pay inside the window. The invoice total is
-                unchanged when it is issued.
+                Deducted only if they actually pay inside the window, so the invoice total is
+                unchanged when it is issued. Known in Germany as Skonto.
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <NumberField
@@ -551,7 +649,7 @@ export function ClientDialog({
                   </select>
                 </div>
                 <span className="mt-1 block text-xs text-muted">
-                  Always applied, unlike the Skonto above.
+                  Always applied, unlike the early payment discount above.
                 </span>
               </div>
             </div>
@@ -564,7 +662,7 @@ export function ClientDialog({
                 rows={4}
                 value={form.terms ?? ""}
                 onChange={(event) => set("terms", event.target.value)}
-                placeholder="Zahlbar innerhalb 30 Tagen ohne Abzug."
+                placeholder="Payable within 30 days without deduction."
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </label>

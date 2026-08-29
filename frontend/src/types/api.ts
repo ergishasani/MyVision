@@ -44,6 +44,97 @@ export type DashboardSummary = {
   recentClients: unknown[];
 };
 
+/** One month of the overview chart. `month` is ISO ("2026-08"); `label` is what the axis prints. */
+export type DashboardRevenuePoint = {
+  month: string;
+  label: string;
+  invoiced: number;
+  collected: number;
+};
+
+/** An amount and how many invoices make it up. */
+export type ReceivablesBucket = {
+  amount: number;
+  count: number;
+};
+
+/** The three buckets are mutually exclusive and sum to `total`. */
+export type DashboardReceivables = {
+  total: number;
+  overdue: ReceivablesBucket;
+  open: ReceivablesBucket;
+  partiallyPaid: ReceivablesBucket;
+};
+
+/**
+ * The VAT quarter in progress.
+ *
+ * `inputVatAvailable` is false because purchases are not modelled, so `payable` is only the
+ * output-tax side of the return. The screen says so rather than presenting it as a filing figure.
+ */
+export type DashboardVat = {
+  periodStart: string;
+  periodEnd: string;
+  dueDate: string;
+  outputVat: number;
+  netRevenue: number;
+  payable: number;
+  inputVatAvailable: boolean;
+};
+
+export type DashboardTopClient = {
+  clientId: string;
+  name: string;
+  amount: number;
+  invoiceCount: number;
+};
+
+/** Revenue grouped by invoice line text — lines carry no link to the product catalogue. */
+export type DashboardTopProduct = {
+  description: string;
+  amount: number;
+  quantity: number;
+};
+
+export type DashboardOverview = {
+  currency: string;
+  greetingName: string | null;
+  companyName: string | null;
+  revenue: DashboardRevenuePoint[];
+  revenueInvoicedTotal: number;
+  revenueCollectedTotal: number;
+  receivables: DashboardReceivables;
+  vat: DashboardVat;
+  topClients: DashboardTopClient[];
+  topProducts: DashboardTopProduct[];
+  draftInvoiceCount: number;
+  openQuoteCount: number;
+  activeProjectCount: number;
+  clientCount: number;
+  /** Both false: purchases, bank feeds and receipt matching are not part of this system. */
+  expensesAvailable: boolean;
+  bankAvailable: boolean;
+};
+
+/** One recorded action. `documentLabel`/`clientName` are null once the record is gone. */
+export type ActivityEntry = {
+  id: string;
+  createdAt: string;
+  actorName: string | null;
+  entityType: string;
+  entityId: string;
+  action: string;
+  documentLabel: string | null;
+  clientName: string | null;
+};
+
+export type DashboardActivity = {
+  entries: ActivityEntry[];
+  page: number;
+  size: number;
+  total: number;
+};
+
 export type ContactDetail = {
   id: string;
   kind: "phone" | "email" | "website";
@@ -57,7 +148,7 @@ export type DiscountUnit = "percent" | "absolute";
 
 export type Client = {
   id: string;
-  type: string;
+  type: "business" | "individual";
   name: string;
   contactName: string | null;
   salutation: string | null;
@@ -90,11 +181,80 @@ export type Client = {
   addressLine1: string | null;
   addressLine2: string | null;
   city: string | null;
+  region: string | null;
   postalCode: string | null;
   countryCode: string | null;
   notes: string | null;
+  /** Set once the contact is hidden from the list. They stay fetchable by id. */
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+/** One invoice as it appears in a contact's billing history. No line items — see `Invoice`. */
+export type ClientInvoiceSummary = {
+  id: string;
+  projectId: string | null;
+  invoiceNumber: string;
+  status: InvoiceStatus;
+  issueDate: string;
+  dueDate: string | null;
+  currency: string;
+  totalAmount: number;
+  amountPaid: number;
+  balanceDue: number;
+  sentAt: string | null;
+  paidAt: string | null;
+};
+
+export type ClientQuoteSummary = {
+  id: string;
+  projectId: string | null;
+  quoteNumber: string;
+  status: QuoteStatus;
+  issueDate: string;
+  validUntil: string | null;
+  currency: string;
+  totalAmount: number;
+  sentAt: string | null;
+  acceptedAt: string | null;
+};
+
+/**
+ * A contact's headline billing figures.
+ *
+ * Counts cover every document. The money figures are all in `currency` and cover only the
+ * documents issued in it; `excludedCurrencies` names anything left out, so the screen can say
+ * a total is partial instead of quietly under-reporting.
+ */
+export type ClientStats = {
+  currency: string;
+  excludedCurrencies: string[];
+  totalInvoiced: number;
+  totalPaid: number;
+  outstanding: number;
+  overdue: number;
+  invoiceCount: number;
+  draftInvoiceCount: number;
+  openInvoiceCount: number;
+  overdueInvoiceCount: number;
+  quoteCount: number;
+  openQuoteCount: number;
+  openQuoteValue: number;
+  projectCount: number;
+  activeProjectCount: number;
+  firstInvoiceDate: string | null;
+  lastInvoiceDate: string | null;
+  /** Mean days from issue to settlement. Null until they have paid something. */
+  averageDaysToPay: number | null;
+};
+
+export type ClientOverview = {
+  client: Client;
+  stats: ClientStats;
+  invoices: ClientInvoiceSummary[];
+  quotes: ClientQuoteSummary[];
+  projects: Project[];
 };
 
 export type NumberRangeType =

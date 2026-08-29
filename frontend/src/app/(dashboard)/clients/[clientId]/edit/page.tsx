@@ -1,12 +1,16 @@
-import { PageShell, Panel } from "@/components/layout/page-shell";
+import { redirect } from "next/navigation";
 
-export default function EditClientPage() {
-  return (
-    <PageShell title="Edit client" description="Update client profile details.">
-      <Panel
-        title="Not built yet"
-        description="This screen is scaffolded and routed. The form and its API wiring come next."
-      />
-    </PageShell>
-  );
+/**
+ * Editing happens in a dialog over the contact list, not on its own page.
+ *
+ * <p>The route stays so links and bookmarks that already point here keep working: it forwards to
+ * the list with the contact selected, which opens the same form.
+ */
+export default async function EditClientPage({
+  params,
+}: {
+  params: Promise<{ clientId: string }>;
+}) {
+  const { clientId } = await params;
+  redirect(`/clients?edit=${clientId}`);
 }

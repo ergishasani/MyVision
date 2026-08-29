@@ -39,6 +39,7 @@ public class QuoteService {
   private final InvoiceService invoiceService;
   private final CompanyAccessService companyAccessService;
   private final NumberRangeService numberRangeService;
+  private final AuditLogService auditLogService;
 
   public QuoteService(
       QuoteRepository quoteRepository,
@@ -48,7 +49,8 @@ public class QuoteService {
       ProjectService projectService,
       InvoiceService invoiceService,
       CompanyAccessService companyAccessService,
-      NumberRangeService numberRangeService
+      NumberRangeService numberRangeService,
+      AuditLogService auditLogService
   ) {
     this.quoteRepository = quoteRepository;
     this.quoteItemRepository = quoteItemRepository;
@@ -58,6 +60,7 @@ public class QuoteService {
     this.invoiceService = invoiceService;
     this.companyAccessService = companyAccessService;
     this.numberRangeService = numberRangeService;
+    this.auditLogService = auditLogService;
   }
 
   @Transactional(readOnly = true)
@@ -112,6 +115,9 @@ public class QuoteService {
     List<QuoteItem> items = saveItems(quote.getId(), request.items());
     applyTotals(quote, items);
     quote = quoteRepository.save(quote);
+    auditLogService.record(
+        companyId, userId, "quote", quote.getId(), "created",
+        "{\"quoteNumber\":\"%s\"}".formatted(quote.getQuoteNumber()));
 
     return QuoteResponse.from(quote, items);
   }
@@ -178,6 +184,9 @@ public class QuoteService {
     }
     quote.setStatus(QuoteStatus.sent);
     quote.setSentAt(OffsetDateTime.now());
+    auditLogService.record(
+        companyId, userId, "quote", quote.getId(), "sent",
+        "{\"quoteNumber\":\"%s\"}".formatted(quote.getQuoteNumber()));
     return toResponse(quoteRepository.save(quote));
   }
 
@@ -190,6 +199,9 @@ public class QuoteService {
     }
     quote.setStatus(QuoteStatus.accepted);
     quote.setAcceptedAt(OffsetDateTime.now());
+    auditLogService.record(
+        companyId, userId, "quote", quote.getId(), "accepted",
+        "{\"quoteNumber\":\"%s\"}".formatted(quote.getQuoteNumber()));
     return toResponse(quoteRepository.save(quote));
   }
 
@@ -202,6 +214,9 @@ public class QuoteService {
     }
     quote.setStatus(QuoteStatus.rejected);
     quote.setRejectedAt(OffsetDateTime.now());
+    auditLogService.record(
+        companyId, userId, "quote", quote.getId(), "rejected",
+        "{\"quoteNumber\":\"%s\"}".formatted(quote.getQuoteNumber()));
     return toResponse(quoteRepository.save(quote));
   }
 

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
-import { deleteClient, listClients } from "@/lib/api/clients";
+import { archiveClient, deleteClient, listClients } from "@/lib/api/clients";
 import type { Client } from "@/types/api";
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { formatDate } from "@/lib/utils/format";
@@ -34,8 +36,22 @@ export default function ClientsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  // The open menu, with the anchor it hangs from. Held here because the menu renders in a portal.
+  const [menu, setMenu] = useState<{ id: string; top: number; right: number } | null>(null);
+  const [confirmArchive, setConfirmArchive] = useState<Client | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Client | null>(null);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // /clients/<id>/edit redirects here with ?edit=<id>, so an edit link still opens the form.
+  //
+  // Derived from the row rather than copied into state: an effect that mirrored the list into a
+  // second copy would go stale the moment the contact was saved, and the dialog would keep showing
+  // the values it opened with.
+  const editParam = searchParams.get("edit");
+  const editing = clients.find((c) => c.id === (editingId ?? editParam)) ?? null;
 
   useEffect(() => {
     listClients()
@@ -73,22 +89,41 @@ export default function ClientsPage() {
   const firstRow = filtered.length === 0 ? 0 : (current - 1) * pageSize + 1;
   const lastRow = Math.min(current * pageSize, filtered.length);
 
-  async function handleDelete(client: Client) {
-    setConfirmDelete(null);
-    setMenuFor(null);
+  async function handleArchive(client: Client) {
+    setConfirmArchive(null);
+    setMenu(null);
     // Optimistic: the row disappears at once and comes back if the API refuses.
     const previous = clients;
     setClients((list) => list.filter((c) => c.id !== client.id));
     try {
-      await deleteClient(client.id);
+      await archiveClient(client.id);
     } catch (err) {
       setClients(previous);
       setError(err instanceof ApiError ? err.message : "Could not archive the contact");
     }
   }
 
+  async function handleDelete(client: Client) {
+    setConfirmDelete(null);
+    setMenu(null);
+    // Not optimistic. A delete is refused whenever a document references the contact, and that
+    // refusal is the common case — removing the row first would flash it away and put it back.
+    try {
+      await deleteClient(client.id);
+      setClients((list) => list.filter((c) => c.id !== client.id));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not delete the contact");
+    }
+  }
+
+  function closeEditor() {
+    setEditingId(null);
+    // Drop ?edit= so a refresh does not reopen the form that was just closed.
+    if (editParam) router.replace("/clients");
+  }
+
   return (
-    <div className="space-y-6" onClick={() => setMenuFor(null)}>
+    <div className="space-y-6" onClick={() => setMenu(null)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Contacts</h1>
@@ -244,57 +279,46 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-4 py-3 text-muted">{location(client)}</td>
                     <td className="px-4 py-3 text-muted">{formatDate(client.createdAt)}</td>
-                    <td className="relative px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right">
                       {/* Kept always visible rather than hover-only: hover-only controls are
                           unreachable by keyboard and on touch. */}
                       <div className="inline-flex items-center gap-1">
-                        <Link
-                          href={`/clients/${client.id}/edit`}
+                        <button
+                          type="button"
                           aria-label={`Edit ${client.name}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenu(null);
+                            setEditingId(client.id);
+                          }}
                           className="rounded-md p-1.5 text-muted transition-colors hover:bg-slate-200 hover:text-foreground"
                         >
                           <PencilIcon className="size-4" />
-                        </Link>
+                        </button>
                         <button
                           type="button"
                           aria-label={`Options for ${client.name}`}
-                          aria-expanded={menuFor === client.id}
+                          aria-expanded={menu?.id === client.id}
                           onClick={(event) => {
                             event.stopPropagation();
-                            setMenuFor(menuFor === client.id ? null : client.id);
+                            if (menu?.id === client.id) {
+                              setMenu(null);
+                              return;
+                            }
+                            // The menu is positioned from the button's own box because it renders
+                            // in a portal on document.body, outside this scrolling table.
+                            const box = event.currentTarget.getBoundingClientRect();
+                            setMenu({
+                              id: client.id,
+                              top: box.bottom + 6,
+                              right: window.innerWidth - box.right,
+                            });
                           }}
                           className="rounded-md p-1.5 text-muted transition-colors hover:bg-slate-200 hover:text-foreground"
                         >
                           <DotsIcon className="size-4" />
                         </button>
                       </div>
-
-                      {menuFor === client.id ? (
-                        <div
-                          onClick={(event) => event.stopPropagation()}
-                          className="absolute right-4 top-12 z-20 w-48 overflow-hidden rounded-xl border border-border bg-card py-1 text-left shadow-lg"
-                        >
-                          <Link
-                            href={`/clients/${client.id}`}
-                            className="block px-4 py-2 text-sm text-foreground hover:bg-slate-50"
-                          >
-                            View details
-                          </Link>
-                          <Link
-                            href={`/invoices/new?clientId=${client.id}`}
-                            className="block px-4 py-2 text-sm text-foreground hover:bg-slate-50"
-                          >
-                            New invoice
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => setConfirmDelete(client)}
-                            className="mt-1 block w-full border-t border-border px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                          >
-                            Archive contact
-                          </button>
-                        </div>
-                      ) : null}
                     </td>
                   </tr>
                 ))
@@ -339,45 +363,168 @@ export default function ClientsPage() {
         </div>
       </section>
 
+      {/* Rendered on document.body so the horizontally scrolling table cannot clip it — that is
+          what cut the menu off against the table's edge before. */}
+      {menu
+        ? createPortal(
+            (() => {
+              const client = clients.find((c) => c.id === menu.id);
+              if (!client) return null;
+              return (
+                <div
+                  role="menu"
+                  onClick={(event) => event.stopPropagation()}
+                  style={{ top: menu.top, right: menu.right }}
+                  className="fixed z-50 w-52 overflow-hidden rounded-xl border border-border bg-card py-1 text-left shadow-lg"
+                >
+                  <Link
+                    href={`/clients/${client.id}`}
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-50"
+                  >
+                    View details
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenu(null);
+                      setEditingId(client.id);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50"
+                  >
+                    Edit contact
+                  </button>
+                  <Link
+                    href={`/invoices/new?clientId=${client.id}`}
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-50"
+                  >
+                    New invoice
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmArchive(client)}
+                    className="mt-1 block w-full border-t border-border px-4 py-2 text-left text-sm text-foreground hover:bg-slate-50"
+                  >
+                    Archive contact
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(client)}
+                    className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Delete contact
+                  </button>
+                </div>
+              );
+            })(),
+            document.body,
+          )
+        : null}
+
       <ClientDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onCreated={(client) => setClients((list) => [client, ...list])}
       />
 
+      <ClientDialog
+        // Keyed on the contact so opening a different one remounts the form with its values,
+        // rather than leaving the previous contact's data in the fields.
+        key={editing?.id ?? "none"}
+        open={editing !== null}
+        client={editing}
+        onClose={closeEditor}
+        onCreated={(saved) => {
+          setClients((list) => list.map((c) => (c.id === saved.id ? saved : c)));
+          closeEditor();
+        }}
+      />
+
+      {confirmArchive ? (
+        <ConfirmDialog
+          title="Archive this contact?"
+          confirmLabel="Archive"
+          tone="neutral"
+          onCancel={() => setConfirmArchive(null)}
+          onConfirm={() => handleArchive(confirmArchive)}
+        >
+          <span className="font-medium text-foreground">{confirmArchive.name}</span> is hidden from
+          the list but keeps everything attached to them. Invoices and quotes already issued are
+          unaffected, and nothing is lost.
+        </ConfirmDialog>
+      ) : null}
+
       {confirmDelete ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <ConfirmDialog
+          title="Delete this contact?"
+          confirmLabel="Delete permanently"
+          tone="danger"
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={() => handleDelete(confirmDelete)}
+        >
+          <span className="font-medium text-foreground">{confirmDelete.name}</span> and their
+          contact details are removed for good. This cannot be undone.
+          {/* Said up front rather than after the attempt fails, since it is the usual outcome. */}
+          <span className="mt-3 block">
+            If any invoice, quote or project refers to them the delete is refused — those documents
+            have to keep the contact they were issued to. Archive instead.
+          </span>
+        </ConfirmDialog>
+      ) : null}
+    </div>
+  );
+}
+
+/** Confirmation for an action that cannot simply be undone by clicking again. */
+function ConfirmDialog({
+  title,
+  children,
+  confirmLabel,
+  tone,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  children: React.ReactNode;
+  confirmLabel: string;
+  tone: "neutral" | "danger";
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button
+        type="button"
+        aria-label="Cancel"
+        onClick={onCancel}
+        className="fixed inset-0 cursor-default bg-slate-900/40"
+      />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl"
+      >
+        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+        <p className="mt-2 text-sm text-muted">{children}</p>
+        <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
-            aria-label="Cancel"
-            onClick={() => setConfirmDelete(null)}
-            className="fixed inset-0 cursor-default bg-slate-900/40"
-          />
-          <div role="alertdialog" aria-modal="true" className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-foreground">Archive this contact?</h2>
-            <p className="mt-2 text-sm text-muted">
-              <span className="font-medium text-foreground">{confirmDelete.name}</span> will be
-              hidden from the list. Invoices and quotes already issued to them are not affected.
-            </p>
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(null)}
-                className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(confirmDelete)}
-                className="h-10 rounded-lg bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700"
-              >
-                Archive
-              </button>
-            </div>
-          </div>
+            onClick={onCancel}
+            className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={cn(
+              "h-10 rounded-lg px-4 text-sm font-medium text-white",
+              tone === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-slate-800 hover:bg-slate-900",
+            )}
+          >
+            {confirmLabel}
+          </button>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

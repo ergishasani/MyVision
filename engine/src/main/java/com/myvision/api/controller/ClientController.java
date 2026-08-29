@@ -72,6 +72,21 @@ public class ClientController {
     return clientService.get(principal.getUserId(), id);
   }
 
+  /**
+   * The contact plus their billing history and headline figures, for the detail screen.
+   *
+   * <p>Separate from {@code GET /clients/{id}} so the list screen, which needs only the contact,
+   * does not pay for their whole invoice history on every row.
+   */
+  @GetMapping("/{id}/overview")
+  @Operation(summary = "A contact with their invoices, quotes, projects and billing totals")
+  public ClientOverviewResponse overview(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    return clientService.overview(principal.getUserId(), id);
+  }
+
   @PatchMapping("/{id}")
   public ClientResponse update(
       @AuthenticationPrincipal CurrentUserPrincipal principal,
@@ -88,5 +103,21 @@ public class ClientController {
       @PathVariable UUID id
   ) {
     clientService.archive(principal.getUserId(), id);
+  }
+
+  /**
+   * Removes a contact for good.
+   *
+   * <p>Separate verb from archiving, and refused with 400 while any document still references
+   * them: an invoice must keep the contact it was issued to.
+   */
+  @DeleteMapping("/{id}/permanent")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Delete a contact outright; fails if any document references them")
+  public void delete(
+      @AuthenticationPrincipal CurrentUserPrincipal principal,
+      @PathVariable UUID id
+  ) {
+    clientService.delete(principal.getUserId(), id);
   }
 }

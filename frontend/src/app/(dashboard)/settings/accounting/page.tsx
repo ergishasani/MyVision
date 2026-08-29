@@ -23,13 +23,13 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
-/** What each counter is called on screen, with the German document term it maps to. */
+/** What each counter is called on screen, and what it numbers. */
 const RANGE_LABELS: Record<string, { label: string; hint: string }> = {
-  invoice: { label: "Invoice", hint: "Rechnung" },
-  quote: { label: "Offer", hint: "Angebot" },
-  credit_note: { label: "Credit note", hint: "Gutschrift" },
-  order_confirmation: { label: "Order confirmation", hint: "Auftragsbestätigung" },
-  delivery_note: { label: "Delivery note", hint: "Lieferschein" },
+  invoice: { label: "Invoice", hint: "Numbers every invoice you issue" },
+  quote: { label: "Quote", hint: "Numbers quotes sent to customers" },
+  credit_note: { label: "Credit note", hint: "Numbers refunds and corrections" },
+  order_confirmation: { label: "Order confirmation", hint: "Numbers accepted orders" },
+  delivery_note: { label: "Delivery note", hint: "Numbers goods sent out" },
   contact: { label: "Contact", hint: "Customer number on a contact" },
   product: { label: "Product", hint: "Article number in the catalogue" },
   debtor: { label: "Debtor", hint: "Customer ledger account" },
@@ -367,14 +367,14 @@ function BookingAccounts({
         <input
           value={draft.displayName}
           onChange={(event) => setDraft({ ...draft, displayName: event.target.value })}
-          placeholder="Revenue 19%"
+          placeholder="Sales 19%"
           aria-label="Display name"
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <input
           value={draft.name}
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-          placeholder="Erlöse 19% USt"
+          placeholder="Revenue, 19% VAT"
           aria-label="Name"
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
@@ -458,7 +458,7 @@ function CostCenters({
         <input
           value={draft.name}
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-          placeholder="Baustelle Fulda"
+          placeholder="North site"
           aria-label="Cost centre name"
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />

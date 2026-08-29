@@ -33,6 +33,16 @@ export function Dialog({
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
+  // onClose is almost always an inline arrow at the call site, so its identity changes on every
+  // render of the parent. Held in a ref so the setup effect below can depend on `open` alone:
+  // when it depended on onClose too, an unrelated parent render tore the effect down and set it
+  // up again, which moved focus to the first field and yanked the caret out of whatever was
+  // being typed into.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   useEffect(() => {
     if (!open) return;
 
@@ -50,7 +60,7 @@ export function Dialog({
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== "Tab" || !panel) return;
@@ -79,7 +89,8 @@ export function Dialog({
       document.body.style.overflow = overflow;
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+    // Deliberately only `open`: see the ref above. Adding onClose here reintroduces the bug.
+  }, [open]);
 
   if (!open) return null;
 
