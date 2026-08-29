@@ -31,6 +31,7 @@ import com.myvision.api.entity.ContactDetailLabel;
 import com.myvision.api.repository.ClientContactDetailRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -217,8 +218,7 @@ public class ClientService {
   private static Integer averageDaysToPay(List<Invoice> invoices) {
     long[] days = invoices.stream()
         .filter(invoice -> invoice.getPaidAt() != null && invoice.getIssueDate() != null)
-        .mapToLong(invoice ->
-            ChronoUnit.DAYS.between(invoice.getIssueDate(), invoice.getPaidAt().toLocalDate()))
+        .mapToLong(invoice -> ChronoUnit.DAYS.between(invoice.getIssueDate(), settledOn(invoice)))
         .filter(value -> value >= 0)
         .toArray();
     if (days.length == 0) {
@@ -229,6 +229,18 @@ public class ClientService {
       total += value;
     }
     return Math.toIntExact(Math.round((double) total / days.length));
+  }
+
+  /**
+   * The calendar day a settlement landed on, in the same clock the issue date uses.
+   *
+   * <p>`issueDate` is a plain local date, while `paidAt` is a timestamptz that Postgres hands
+   * back normalised to UTC. Taking `.toLocalDate()` off it would read the UTC calendar day, so in
+   * the hours where the two clocks disagree an invoice settled the day it was issued measured as
+   * minus one day and was silently discarded — the contact then read as never having paid.
+   */
+  private static LocalDate settledOn(Invoice invoice) {
+    return invoice.getPaidAt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
   }
 
   /**

@@ -58,12 +58,15 @@ type NavItem = {
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", Icon: HomeIcon },
   {
-    href: "/orders",
+    // Opening Orders lands on Offers, because that is the section's real work — the other two
+    // screens are downstream of an offer existing. /orders itself redirects here.
+    href: "/quotes",
     label: "Orders",
     Icon: MailIcon,
     children: [
-      // Offers are quotes under a different name, so this points at the real screen.
-      { href: "/quotes", label: "Quotes" },
+      // "Offers" is the customer-facing word; the route stays /quotes, which is what the API and
+      // every existing link already call them.
+      { href: "/quotes", label: "Offers" },
       { href: "/orders/confirmations", label: "Order confirmations" },
       { href: "/orders/delivery-notes", label: "Delivery notes" },
     ],
@@ -193,8 +196,17 @@ export function SidebarNav() {
 
   const filter = query.trim().toLowerCase();
 
+  /**
+   * Whether the current page belongs to this section.
+   *
+   * <p>Children count, not just the section's own href. Several sections link to routes outside
+   * their own prefix — Orders opens on /quotes, Evidence lists /documents, Evaluations lists
+   * /reports — and matching on the parent path alone left the sidebar with nothing highlighted on
+   * exactly those pages.
+   */
   function inSection(item: NavItem) {
-    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+    const matches = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+    return matches(item.href) || (item.children?.some((child) => matches(child.href)) ?? false);
   }
 
   function visible(items: NavItem[]) {
@@ -330,7 +342,10 @@ export function SidebarNav() {
         </label>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 pb-4">
+      {/* min-h-0 is what actually lets this scroll: a flex child defaults to min-height:auto,
+          so without it the list refuses to shrink below its content and pushes the sidebar
+          taller than the viewport instead of scrolling inside it. */}
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
         <ul>{primary}</ul>
 
         {admin.length > 0 ? (

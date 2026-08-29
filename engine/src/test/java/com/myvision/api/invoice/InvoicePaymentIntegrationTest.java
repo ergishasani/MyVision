@@ -289,4 +289,49 @@ class InvoicePaymentIntegrationTest extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.totalAmount").value(59.50))
         .andExpect(jsonPath("$.status").value("draft"));
   }
+
+  @Test
+  void markingAnInvoicePaidRecordsTheSettlementInTheLedger() throws Exception {
+    String token = registerAndGetToken("settle-ledger@myvision.dev", "Settle Ledger Co");
+    String clientId = createClient(token, "Quittung GmbH");
+
+    MvcResult created = mockMvc.perform(post("/api/invoices")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"clientId":"%s","items":[
+                  {"description":"Arbeit","quantity":1,"unitPrice":1000.00,"taxRate":0}
+                ]}
+                """.formatted(clientId)))
+        .andExpect(status().isCreated())
+        .andReturn();
+    String id = objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText();
+
+    mockMvc.perform(post("/api/invoices/{id}/mark-sent", id)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk());
+
+    // Part of it arrives normally...
+    mockMvc.perform(post("/api/invoices/{id}/payments", id)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"amount\":400.00}"))
+        .andExpect(status().isCreated());
+
+    // ...and the rest is settled with the shortcut.
+    mockMvc.perform(post("/api/invoices/{id}/mark-paid", id)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.amountPaid").value(1000.00))
+        .andExpect(jsonPath("$.balanceDue").value(0));
+
+    // The ledger has to agree with the invoice. Only the 600 remainder is added, never the full
+    // total again — otherwise the payments would sum to 1.400 against a 1.000 invoice.
+    mockMvc.perform(get("/api/invoices/{id}/payments", id)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[?(@.amount == 600.00)]").exists())
+        .andExpect(jsonPath("$[?(@.amount == 400.00)]").exists());
+  }
 }

@@ -21,11 +21,13 @@ import com.myvision.api.entity.ProjectStatus;
 import com.myvision.api.repository.QuoteRepository;
 import com.myvision.api.entity.QuoteStatus;
 import com.myvision.api.repository.AuditLogRepository;
+import com.myvision.api.repository.RefundRepository;
 import com.myvision.api.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -67,6 +69,7 @@ public class DashboardService {
   private final CompanyRepository companyRepository;
   private final AuditLogRepository auditLogRepository;
   private final UserRepository userRepository;
+  private final RefundRepository refundRepository;
 
   /** Months on the revenue chart when the caller does not say. */
   private static final int DEFAULT_REVENUE_MONTHS = 12;
@@ -88,7 +91,8 @@ public class DashboardService {
       CompanyAccessService companyAccessService,
       CompanyRepository companyRepository,
       AuditLogRepository auditLogRepository,
-      UserRepository userRepository
+      UserRepository userRepository,
+      RefundRepository refundRepository
   ) {
     this.invoiceRepository = invoiceRepository;
     this.invoiceItemRepository = invoiceItemRepository;
@@ -100,6 +104,7 @@ public class DashboardService {
     this.companyRepository = companyRepository;
     this.auditLogRepository = auditLogRepository;
     this.userRepository = userRepository;
+    this.refundRepository = refundRepository;
   }
 
   @Transactional(readOnly = true)
@@ -216,7 +221,11 @@ public class DashboardService {
       if (payment.getPaidAt() == null) {
         continue;
       }
-      collected.merge(YearMonth.from(payment.getPaidAt()),
+      // Same clock as the invoices this chart sits beside: paidAt comes back from Postgres in
+      // UTC, so bucketing straight off it would drop a payment taken late on the 31st into the
+      // following month.
+      collected.merge(
+          YearMonth.from(payment.getPaidAt().atZoneSameInstant(ZoneId.systemDefault())),
           nullSafe(payment.getAmount()), BigDecimal::add);
     }
 
@@ -393,13 +402,24 @@ public class DashboardService {
         .stream()
         .collect(Collectors.toMap(User::getId, User::getFullName, (a, b) -> a));
 
-    Map<UUID, Invoice> invoices = byId(
-        invoiceRepository.findAllById(idsOf(found.getContent(), "invoice")), Invoice::getId);
     Map<UUID, Quote> quotes = byId(
         quoteRepository.findAllById(idsOf(found.getContent(), "quote")), Quote::getId);
 
+    // Payments and refunds are logged against their own id, but nobody thinks in payment ids —
+    // they think "that payment on INV-0004". Both carry the invoice they moved money against, so
+    // they are resolved through to it and the feed names the document instead.
+    Map<UUID, Payment> payments = byId(
+        paymentRepository.findAllById(idsOf(found.getContent(), "payment")), Payment::getId);
+    Map<UUID, Refund> refunds = byId(
+        refundRepository.findAllById(idsOf(found.getContent(), "refund")), Refund::getId);
+
+    Set<UUID> invoiceIds = new HashSet<>(idsOf(found.getContent(), "invoice"));
+    payments.values().forEach(payment -> invoiceIds.add(payment.getInvoiceId()));
+    refunds.values().forEach(refund -> invoiceIds.add(refund.getInvoiceId()));
+    Map<UUID, Invoice> invoices = byId(invoiceRepository.findAllById(invoiceIds), Invoice::getId);
+
     Set<UUID> clientIds = new HashSet<>();
-    invoices.values().forEach(invoice -> clientIds.add(invoice.getClientId()));
+    invoices.values().forEach(entry -> clientIds.add(entry.getClientId()));
     quotes.values().forEach(quote -> clientIds.add(quote.getClientId()));
     Map<UUID, String> clientNames = clientRepository.findAllById(clientIds).stream()
         .collect(Collectors.toMap(Client::getId, Client::getName, (a, b) -> a));
@@ -408,12 +428,21 @@ public class DashboardService {
         .map(log -> {
           String label = null;
           String client = null;
-          if ("invoice".equals(log.getEntityType())) {
-            Invoice invoice = invoices.get(log.getEntityId());
-            if (invoice != null) {
-              label = invoice.getInvoiceNumber();
-              client = clientNames.get(invoice.getClientId());
+          Invoice invoice = switch (log.getEntityType()) {
+            case "invoice" -> invoices.get(log.getEntityId());
+            case "payment" -> {
+              Payment payment = payments.get(log.getEntityId());
+              yield payment == null ? null : invoices.get(payment.getInvoiceId());
             }
+            case "refund" -> {
+              Refund refund = refunds.get(log.getEntityId());
+              yield refund == null ? null : invoices.get(refund.getInvoiceId());
+            }
+            default -> null;
+          };
+          if (invoice != null) {
+            label = invoice.getInvoiceNumber();
+            client = clientNames.get(invoice.getClientId());
           } else if ("quote".equals(log.getEntityType())) {
             Quote quote = quotes.get(log.getEntityId());
             if (quote != null) {

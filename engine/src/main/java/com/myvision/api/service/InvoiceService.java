@@ -41,6 +41,7 @@ public class InvoiceService {
   private final CompanyAccessService companyAccessService;
   private final AuditLogService auditLogService;
   private final NumberRangeService numberRangeService;
+  private final PaymentRepository paymentRepository;
 
   public InvoiceService(
       InvoiceRepository invoiceRepository,
@@ -50,7 +51,8 @@ public class InvoiceService {
       ProjectService projectService,
       CompanyAccessService companyAccessService,
       AuditLogService auditLogService,
-      NumberRangeService numberRangeService
+      NumberRangeService numberRangeService,
+      PaymentRepository paymentRepository
   ) {
     this.invoiceRepository = invoiceRepository;
     this.invoiceItemRepository = invoiceItemRepository;
@@ -60,6 +62,7 @@ public class InvoiceService {
     this.companyAccessService = companyAccessService;
     this.auditLogService = auditLogService;
     this.numberRangeService = numberRangeService;
+    this.paymentRepository = paymentRepository;
   }
 
   @Transactional(readOnly = true)
@@ -251,10 +254,32 @@ public class InvoiceService {
     if (invoice.getStatus() == InvoiceStatus.paid) {
       throw new BadRequestException("Invoice is already paid");
     }
+    // Settle the outstanding balance as a real payment rather than only moving the invoice's
+    // own numbers. Without a row here the payments ledger silently misses money that arrived:
+    // /payments, the dashboard's collected figure and the invoice's own status would each tell a
+    // different story about the same settlement. Only the remainder is recorded, so an invoice
+    // that already had part-payments against it does not end up over-paid in the ledger.
+    OffsetDateTime settledAt = OffsetDateTime.now();
+    BigDecimal outstanding = invoice.getBalanceDue() == null
+        ? invoice.getTotalAmount()
+        : invoice.getBalanceDue();
+    if (outstanding.compareTo(BigDecimal.ZERO) > 0) {
+      Payment settlement = new Payment();
+      settlement.setCompanyId(companyId);
+      settlement.setInvoiceId(invoice.getId());
+      settlement.setAmount(outstanding);
+      settlement.setCurrency(invoice.getCurrency());
+      // The method is genuinely unknown — "marked as paid" says money arrived, not how.
+      settlement.setMethod(PaymentMethod.other);
+      settlement.setPaidAt(settledAt);
+      settlement.setNotes("Recorded automatically when the invoice was marked as paid");
+      paymentRepository.save(settlement);
+    }
+
     invoice.setAmountPaid(invoice.getTotalAmount());
     invoice.setBalanceDue(BigDecimal.ZERO.setScale(2));
     invoice.setStatus(InvoiceStatus.paid);
-    invoice.setPaidAt(OffsetDateTime.now());
+    invoice.setPaidAt(settledAt);
     auditLogService.record(companyId, userId, "invoice", invoice.getId(), "marked_paid", "{}");
     return toResponse(invoiceRepository.save(invoice));
   }

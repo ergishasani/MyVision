@@ -450,6 +450,60 @@ export type Project = {
   updatedAt: string;
 };
 
+export type DeliveryNoteStatus = "draft" | "sent" | "delivered" | "cancelled";
+
+export type DeliveryNoteItem = {
+  id: string;
+  kind: string;
+  description: string;
+  quantity: number;
+  unit: string | null;
+  unitPrice: number;
+  taxRate: number;
+  discountAmount: number;
+  lineTotal: number;
+  position: number;
+};
+
+/**
+ * A delivery note: what was handed over, and when.
+ *
+ * Not a tax document — nothing is owed because one exists and it never becomes an invoice. The
+ * amounts restate the sale for the customer's benefit.
+ */
+export type DeliveryNote = {
+  id: string;
+  clientId: string;
+  projectId: string | null;
+  /** Set when the note was raised off an existing document. */
+  invoiceId: string | null;
+  quoteId: string | null;
+  deliveryNoteNumber: string;
+  status: DeliveryNoteStatus;
+  subject: string | null;
+  deliveryDate: string;
+  reference: string | null;
+  /** Held apart from the contact's own address: goods go to a site, not to billing. */
+  deliveryAddressLine1: string | null;
+  deliveryAddressLine2: string | null;
+  deliveryPostalCode: string | null;
+  deliveryCity: string | null;
+  deliveryRegion: string | null;
+  deliveryCountryCode: string | null;
+  currency: string;
+  subtotalAmount: number;
+  discountAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  headerText: string | null;
+  footerText: string | null;
+  sentAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: DeliveryNoteItem[];
+};
+
 export type PaymentListItem = {
   id: string;
   invoiceId: string;
@@ -504,6 +558,49 @@ export type CompanyProfile = {
   defaultVatRate: number | null;
   quoteFooter: string | null;
   invoiceFooter: string | null;
+};
+
+/**
+ * One numbered line of the advance-return form.
+ *
+ * The form has two Kennziffer columns — one for the basis of assessment, one for the tax. Most
+ * lines use only one: Kz 81 has a basis box but no tax box, input-tax lines are the reverse. A
+ * null code means the form has no box there; a null amount means MyVision has nothing to put in
+ * it, which is not the same as nil.
+ */
+export type VatReturnLine = {
+  basisCode: string | null;
+  taxCode: string | null;
+  label: string;
+  basis: number | null;
+  tax: number | null;
+  available: boolean;
+};
+
+/** One collapsible block of the form. `derived: false` means MyVision cannot source it at all. */
+export type VatReturnGroup = {
+  label: string;
+  derived: boolean;
+  basis: number | null;
+  tax: number | null;
+  lines: VatReturnLine[];
+};
+
+/**
+ * A German VAT advance return (UStVA) for a period.
+ *
+ * `payable` is null whenever input tax is unavailable: the Zahllast is output tax minus input
+ * tax, and this system holds sales but not purchases, so the subtraction cannot be done.
+ */
+export type VatReturn = {
+  from: string;
+  to: string;
+  currency: string;
+  groups: VatReturnGroup[];
+  outputTaxTotal: number;
+  inputTaxAvailable: boolean;
+  payable: number | null;
+  invoiceCount: number;
 };
 
 export type VatRateLine = {

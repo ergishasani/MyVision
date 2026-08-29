@@ -1,13 +1,12 @@
-import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { redirect } from "next/navigation";
 
+/**
+ * Orders opens on Offers.
+ *
+ * <p>The section's real work is the offer list; order confirmations and delivery notes only exist
+ * once an offer does. The route stays so existing links and bookmarks keep working instead of
+ * landing on a page of headings that linked somewhere else anyway.
+ */
 export default function OrdersPage() {
-  return (
-    <PageShell title="Orders" description="Offers, order confirmations, and delivery notes.">
-      <PanelGrid>
-        <Panel title="Offers" description="Quotes you send to clients, and the ones they have accepted." />
-        <Panel title="Order confirmations" description="Confirming an accepted offer before work begins." />
-        <Panel title="Delivery notes" description="What was delivered, and when." />
-      </PanelGrid>
-    </PageShell>
-  );
+  redirect("/quotes");
 }

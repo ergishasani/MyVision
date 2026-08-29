@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatMoney } from "@/lib/utils/format";
 
@@ -29,6 +30,15 @@ export type RevenueBar = {
 };
 
 /**
+ * A month with nothing in it still needs a ruler.
+ *
+ * <p>Scaling to the data alone collapses an empty chart to a single zero line, which reads as
+ * broken rather than as quiet. A fixed fallback keeps the axis legible until there is something
+ * to scale to.
+ */
+const EMPTY_CEILING = 10_000;
+
+/**
  * Twelve months of invoiced against collected.
  *
  * <p>Both series share one axis, because the point of showing them together is the gap between
@@ -41,59 +51,110 @@ export function RevenueChart({
   data: RevenueBar[];
   currency: string;
 }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+
   const peak = Math.max(0, ...data.map((point) => Math.max(point.invoiced, point.collected)));
-  const ceiling = niceCeiling(peak);
+  const ceiling = peak > 0 ? niceCeiling(peak) : EMPTY_CEILING;
   // Four gridlines plus the baseline. Drawn top-down so the array reads like the axis.
-  const lines = ceiling === 0 ? [0] : [1, 0.75, 0.5, 0.25, 0].map((fraction) => fraction * ceiling);
+  const lines = [1, 0.75, 0.5, 0.25, 0].map((fraction) => fraction * ceiling);
+  const active = hovered === null ? null : data[hovered];
 
   return (
-    <div>
-      <div className="flex gap-3">
-        <div className="flex w-20 shrink-0 flex-col justify-between py-1 text-right text-xs tabular-nums text-muted">
+    <div className="flex gap-3">
+      <div className="flex w-20 shrink-0 flex-col justify-between py-1 text-right text-xs tabular-nums text-muted">
+        {lines.map((line) => (
+          <span key={line}>{compactMoney(line, currency)}</span>
+        ))}
+      </div>
+
+      <div className="relative min-w-0 flex-1">
+        {/* Floats above the plot, tracking the hovered column. Deliberately not clipped by the
+            plot area, so the top row of figures stays readable on the tallest bars. */}
+        {active ? (
+          <div
+            role="tooltip"
+            style={{ left: `${((hovered! + 0.5) / data.length) * 100}%` }}
+            className="pointer-events-none absolute bottom-full z-10 mb-2 w-48 -translate-x-1/2 rounded-xl border border-border bg-card p-3 shadow-lg"
+          >
+            <p className="text-xs font-medium text-foreground">{active.label}</p>
+            <TooltipRow
+              label="Invoiced"
+              value={formatMoney(active.invoiced, currency)}
+              dotClass="bg-primary"
+            />
+            <TooltipRow
+              label="Collected"
+              value={formatMoney(active.collected, currency)}
+              dotClass="bg-emerald-500"
+            />
+          </div>
+        ) : null}
+
+        {/* Gridlines sit behind the bars; the bars are laid out in normal flow on top. */}
+        <div aria-hidden className="absolute inset-0 flex flex-col justify-between">
           {lines.map((line) => (
-            <span key={line}>{compactMoney(line, currency)}</span>
+            <span key={line} className="h-px w-full bg-border" />
           ))}
         </div>
 
-        <div className="relative min-w-0 flex-1">
-          {/* Gridlines sit behind the bars; the bars are laid out in normal flow on top. */}
-          <div aria-hidden className="absolute inset-0 flex flex-col justify-between">
-            {lines.map((line) => (
-              <span key={line} className="h-px w-full bg-border" />
-            ))}
-          </div>
-
-          <div className="relative flex h-52 items-end gap-1">
-            {data.map((point) => (
-              <div key={point.label} className="flex h-full min-w-0 flex-1 items-end justify-center gap-[3px]">
-                <Bar
-                  value={point.invoiced}
-                  ceiling={ceiling}
-                  className="bg-primary"
-                  title={`${point.label} · invoiced ${formatMoney(point.invoiced, currency)}`}
-                />
-                <Bar
-                  value={point.collected}
-                  ceiling={ceiling}
-                  className="bg-emerald-500"
-                  title={`${point.label} · collected ${formatMoney(point.collected, currency)}`}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-2 flex gap-1">
-            {data.map((point) => (
-              <span
-                key={point.label}
-                className="min-w-0 flex-1 truncate text-center text-[11px] text-muted"
-              >
-                {point.label}
+        <div className="relative flex h-52 items-end gap-1">
+          {data.map((point, index) => (
+            <div
+              key={point.label}
+              tabIndex={0}
+              onMouseEnter={() => setHovered(index)}
+              onMouseLeave={() => setHovered((current) => (current === index ? null : current))}
+              // Focus mirrors hover so the figures are reachable without a mouse.
+              onFocus={() => setHovered(index)}
+              onBlur={() => setHovered((current) => (current === index ? null : current))}
+              className={cn(
+                "flex h-full min-w-0 flex-1 items-end justify-center gap-[3px] rounded-t outline-none transition-colors",
+                hovered === index ? "bg-slate-100/70" : "hover:bg-slate-50",
+              )}
+            >
+              <Bar value={point.invoiced} ceiling={ceiling} className="bg-primary" />
+              <Bar value={point.collected} ceiling={ceiling} className="bg-emerald-500" />
+              <span className="sr-only">
+                {`${point.label}: invoiced ${formatMoney(point.invoiced, currency)}, collected ${formatMoney(point.collected, currency)}`}
               </span>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-2 flex gap-1">
+          {data.map((point, index) => (
+            <span
+              key={point.label}
+              className={cn(
+                "min-w-0 flex-1 truncate text-center text-[11px] transition-colors",
+                hovered === index ? "font-medium text-foreground" : "text-muted",
+              )}
+            >
+              {point.label}
+            </span>
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function TooltipRow({
+  label,
+  value,
+  dotClass,
+}: {
+  label: string;
+  value: string;
+  dotClass: string;
+}) {
+  return (
+    <div className="mt-1.5 flex items-center justify-between gap-3 text-xs">
+      <span className="flex items-center gap-1.5 text-muted">
+        <span className={cn("size-1.5 rounded-full", dotClass)} />
+        {label}
+      </span>
+      <span className="tabular-nums text-foreground">{value}</span>
     </div>
   );
 }
@@ -102,24 +163,20 @@ function Bar({
   value,
   ceiling,
   className,
-  title,
 }: {
   value: number;
   ceiling: number;
   className: string;
-  title: string;
 }) {
   const height = ceiling > 0 ? (value / ceiling) * 100 : 0;
   return (
     <span
-      title={title}
+      aria-hidden
       // A month with no revenue keeps a hairline so the column reads as "nothing" rather than as
       // a rendering gap.
       style={{ height: `${Math.max(height, value > 0 ? 1.5 : 0)}%` }}
       className={cn("w-full max-w-4 rounded-t-sm", height === 0 ? "bg-slate-200" : className)}
-    >
-      <span className="sr-only">{title}</span>
-    </span>
+    />
   );
 }
 
