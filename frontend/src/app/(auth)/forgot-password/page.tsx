@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
 import { ApiError } from "@/lib/api/client";
 import { forgotPassword } from "@/lib/api/auth";
 import { AuthEmailInput } from "@/components/auth/auth-email-input";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function ForgotPasswordPage() {
       const response = await forgotPassword(email);
       setSuccess(response.message);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to send reset link");
+      setError(err instanceof ApiError ? err.message : t.auth.forgot.failed);
     } finally {
       setLoading(false);
     }
@@ -39,17 +41,17 @@ export default function ForgotPasswordPage() {
       </AuthFormIcon>
 
       <AuthFormHeader
-        title="Forgot Your Password?"
-        description="Enter your registered email address, and we'll send you a link to reset your password."
+        title={t.auth.forgot.title}
+        description={t.auth.forgot.description}
       />
 
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email">{t.auth.forgot.emailLabel}</Label>
           <AuthEmailInput
             id="email"
             autoComplete="email"
-            placeholder="Enter email address"
+            placeholder={t.auth.forgot.emailPlaceholder}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
@@ -65,19 +67,19 @@ export default function ForgotPasswordPage() {
 
         <Button type="submit" className="h-11 w-full gap-2 text-base" disabled={loading || Boolean(success)}>
           <LinkIcon />
-          {loading ? "Sending..." : "Send Reset Link"}
+          {loading ? t.auth.forgot.submitting : t.auth.forgot.submit}
         </Button>
       </form>
 
       <p className="mt-8 text-center text-sm text-muted">
-        Remember password?{" "}
+        {t.auth.forgot.rememberPassword}{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Sign In
+          {t.auth.forgot.signIn}
         </Link>
       </p>
 
       <div className="mt-8 rounded-full bg-slate-100 px-4 py-3 text-center text-xs text-muted">
-        Your data is protected with industry-grade encryption
+        {t.auth.forgot.encryptionNote}
       </div>
     </AuthSplitLayout>
   );

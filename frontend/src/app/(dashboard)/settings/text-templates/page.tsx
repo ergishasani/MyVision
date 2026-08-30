@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function TextTemplatesPage() {
+  const s = useT().settings.stubs.textTemplates;
+
   return (
-    <PageShell title="Text templates" description="Standard wording reused across documents and email.">
+    <PageShell title={s.title} description={s.description}>
       <PanelGrid>
-        <Panel title="Document footers" description="Payment terms and notes printed under invoice and quote totals." />
-        <Panel title="Email wording" description="Subject and body for invoice, reminder, and verification email." />
+        <Panel title={s.a.title} description={s.a.description} />
+        <Panel title={s.b.title} description={s.b.description} />
       </PanelGrid>
     </PageShell>
   );

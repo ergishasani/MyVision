@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { ApiError } from "@/lib/api/client";
 import { getClient } from "@/lib/api/clients";
 import {
@@ -16,6 +18,7 @@ import { StatusPill } from "@/components/layout/page-shell";
 import { formatDate, formatMoney, humanizeStatus } from "@/lib/utils/format";
 
 export default function DeliveryNoteDetailPage() {
+  const c = useT().deliveryNote;
   const params = useParams<{ deliveryNoteId: string }>();
   const id = params.deliveryNoteId;
 
@@ -45,12 +48,15 @@ export default function DeliveryNoteDetailPage() {
         if (cancelled) return;
         setFailed({
           id,
-          message: err instanceof ApiError ? err.message : "Failed to load this delivery note",
+          message: err instanceof ApiError ? err.message : c.loadError,
         });
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the note for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function act(action: (id: string) => Promise<DeliveryNote>, failure: string) {
@@ -69,14 +75,14 @@ export default function DeliveryNoteDetailPage() {
     return (
       <div className="rounded-xl border border-border bg-card p-16 text-center shadow-sm">
         <p className="text-sm font-medium text-foreground">
-          {error ? "This delivery note could not be loaded" : "Loading delivery note…"}
+          {error ? c.notLoaded : c.loading}
         </p>
         {error ? <p className="mt-1 text-sm text-muted">{error}</p> : null}
         <Link
           href="/orders/delivery-notes"
           className="mt-4 inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50"
         >
-          Back to delivery notes
+          {c.back}
         </Link>
       </div>
     );
@@ -109,7 +115,10 @@ export default function DeliveryNoteDetailPage() {
             <StatusPill status={humanizeStatus(note.status)} />
           </div>
           <p className="mt-1 text-sm text-muted">
-            {note.subject || "Delivery note"} · delivered {formatDate(note.deliveryDate)}
+            {format(c.subtitle, {
+              subject: note.subject || c.fallbackSubject,
+              date: formatDate(note.deliveryDate),
+            })}
           </p>
         </div>
 
@@ -117,26 +126,26 @@ export default function DeliveryNoteDetailPage() {
           {note.status === "draft" ? (
             <ActionButton
               disabled={busy}
-              onClick={() => act(markDeliveryNoteSent, "Could not mark this note as sent")}
+              onClick={() => act(markDeliveryNoteSent, c.markSentError)}
             >
-              Mark as sent
+              {c.markSent}
             </ActionButton>
           ) : null}
           {note.status !== "delivered" && note.status !== "cancelled" ? (
             <ActionButton
               primary
               disabled={busy}
-              onClick={() => act(markDeliveryNoteDelivered, "Could not mark this note delivered")}
+              onClick={() => act(markDeliveryNoteDelivered, c.markDeliveredError)}
             >
-              Mark as delivered
+              {c.markDelivered}
             </ActionButton>
           ) : null}
           {note.status !== "cancelled" ? (
             <ActionButton
               disabled={busy}
-              onClick={() => act(cancelDeliveryNote, "Could not cancel this note")}
+              onClick={() => act(cancelDeliveryNote, c.cancelError)}
             >
-              Cancel
+              {c.cancel}
             </ActionButton>
           ) : null}
         </div>
@@ -160,16 +169,16 @@ export default function DeliveryNoteDetailPage() {
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                  Item
+                  {c.colItem}
                 </th>
                 <th className="w-24 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
-                  Qty
+                  {c.colQty}
                 </th>
                 <th className="w-32 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
-                  Price
+                  {c.colPrice}
                 </th>
                 <th className="w-32 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
-                  Amount
+                  {c.colAmount}
                 </th>
               </tr>
             </thead>
@@ -193,16 +202,16 @@ export default function DeliveryNoteDetailPage() {
 
           <div className="border-t border-border px-5 py-4">
             <div className="ml-auto max-w-xs space-y-1.5 text-sm">
-              <Row label="Net" value={formatMoney(net, note.currency)} />
+              <Row label={c.net} value={formatMoney(net, note.currency)} />
               {Number(note.discountAmount) > 0 ? (
                 <Row
-                  label="Discount"
+                  label={c.discount}
                   value={`− ${formatMoney(note.discountAmount, note.currency)}`}
                 />
               ) : null}
-              <Row label="VAT" value={formatMoney(note.taxAmount, note.currency)} />
+              <Row label={c.vat} value={formatMoney(note.taxAmount, note.currency)} />
               <div className="flex justify-between border-t border-border pt-1.5 font-semibold">
-                <span className="text-foreground">Total</span>
+                <span className="text-foreground">{c.total}</span>
                 <span className="tabular-nums text-foreground">
                   {formatMoney(note.totalAmount, note.currency)}
                 </span>
@@ -218,7 +227,7 @@ export default function DeliveryNoteDetailPage() {
         </section>
 
         <aside className="space-y-6">
-          <Card title="Customer">
+          <Card title={c.customer}>
             {client ? (
               <Link
                 href={`/clients/${note.clientId}`}
@@ -227,11 +236,11 @@ export default function DeliveryNoteDetailPage() {
                 {client.name}
               </Link>
             ) : (
-              <p className="text-sm text-muted">Contact unavailable</p>
+              <p className="text-sm text-muted">{c.contactUnavailable}</p>
             )}
           </Card>
 
-          <Card title="Delivered to">
+          <Card title={c.deliveredTo}>
             {addressLines.length > 0 ? (
               <address className="text-sm not-italic leading-relaxed text-foreground">
                 {addressLines.map((line) => (
@@ -241,20 +250,19 @@ export default function DeliveryNoteDetailPage() {
                 ))}
               </address>
             ) : (
-              <p className="text-sm text-muted">No delivery address recorded.</p>
+              <p className="text-sm text-muted">{c.noAddress}</p>
             )}
           </Card>
 
-          <Card title="Details">
-            <Row label="Delivery date" value={formatDate(note.deliveryDate)} />
-            <Row label="Reference" value={note.reference ?? "—"} />
-            <Row label="Sent" value={note.sentAt ? formatDate(note.sentAt) : "—"} />
-            <Row label="Delivered" value={note.deliveredAt ? formatDate(note.deliveredAt) : "—"} />
+          <Card title={c.details}>
+            <Row label={c.deliveryDate} value={formatDate(note.deliveryDate)} />
+            <Row label={c.reference} value={note.reference ?? "—"} />
+            <Row label={c.sent} value={note.sentAt ? formatDate(note.sentAt) : "—"} />
+            <Row label={c.delivered} value={note.deliveredAt ? formatDate(note.deliveredAt) : "—"} />
           </Card>
 
           <p className="px-1 text-xs text-muted">
-            A delivery note is not an invoice. Nothing is owed because this exists, and it does not
-            become a bill.
+            {c.notInvoiceNote}
           </p>
         </aside>
       </div>

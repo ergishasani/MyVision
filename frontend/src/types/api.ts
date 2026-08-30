@@ -563,6 +563,14 @@ export type StoredDocument = {
   createdAt: string;
 };
 
+export type PaymentMethod =
+  | "bank_transfer"
+  | "cash"
+  | "card"
+  | "paypal"
+  | "stripe"
+  | "other";
+
 export type CompanyProfile = {
   id: string;
   name: string;
@@ -585,10 +593,9 @@ export type CompanyProfile = {
   iban: string | null;
   bic: string | null;
   paymentTermsDays: number;
-  invoicePrefix: string;
-  nextInvoiceNumber: number;
-  quotePrefix: string;
-  nextQuoteNumber: number;
+  // Numbering deliberately absent: prefixes and counters moved to number_ranges and are edited
+  // through the accounting settings endpoint, which refuses to rewind a counter.
+  defaultPaymentMethod: PaymentMethod;
   defaultVatRate: number | null;
   quoteFooter: string | null;
   invoiceFooter: string | null;

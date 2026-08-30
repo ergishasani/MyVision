@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function PaymentsPage() {
+  const p = useT().pages.paymentsAll;
+
   return (
     <PageShell
-      title="Payments"
-      description="Review payments across invoices."
-      tabs={["All", "Bank transfer", "Card", "Cash", "Stripe", "Other"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.bankTransfer, p.tabs.card, p.tabs.cash, p.tabs.stripe, p.tabs.other]}
       columns={[
-        { key: "paid", label: "Date" },
-        { key: "invoice", label: "Invoice" },
-        { key: "client", label: "Client" },
-        { key: "method", label: "Method" },
-        { key: "amount", label: "Amount", numeric: true },
+        { key: "paid", label: p.columns.paid },
+        { key: "invoice", label: p.columns.invoice },
+        { key: "client", label: p.columns.client },
+        { key: "method", label: p.columns.method },
+        { key: "amount", label: p.columns.amount, numeric: true },
       ]}
-      emptyTitle="No payments recorded"
-      emptyHint="Payments are recorded against an invoice, so start from the invoice you were paid for."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

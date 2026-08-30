@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
 import { ApiError } from "@/lib/api/client";
 import { resetPassword } from "@/lib/api/auth";
 import { AuthFormIcon, LockIcon } from "@/components/auth/auth-form-icon";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export function ResetPasswordForm() {
+  const r = useT().resetPassword;
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -26,12 +28,12 @@ export function ResetPasswordForm() {
     setError(null);
 
     if (!token) {
-      setError("Reset link is invalid or missing. Request a new one.");
+      setError(r.invalidLink);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(r.mismatch);
       return;
     }
 
@@ -41,7 +43,7 @@ export function ResetPasswordForm() {
       await resetPassword(token, password);
       router.push("/login");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to reset password");
+      setError(err instanceof ApiError ? err.message : r.failed);
     } finally {
       setLoading(false);
     }
@@ -54,8 +56,8 @@ export function ResetPasswordForm() {
       </AuthFormIcon>
 
       <AuthFormHeader
-        title="Reset Your Password"
-        description="Enter a new password below to regain access to your account."
+        title={r.title}
+        description={r.description}
       />
 
       {!token ? (
@@ -73,11 +75,11 @@ export function ResetPasswordForm() {
       ) : (
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password">{r.newPassword}</Label>
             <PasswordInput
               id="password"
               autoComplete="new-password"
-              placeholder="Enter password"
+              placeholder={r.passwordPlaceholder}
               minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -86,11 +88,11 @@ export function ResetPasswordForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{r.confirmPassword}</Label>
             <PasswordInput
               id="confirmPassword"
               autoComplete="new-password"
-              placeholder="Enter password"
+              placeholder={r.passwordPlaceholder}
               minLength={8}
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
@@ -101,7 +103,7 @@ export function ResetPasswordForm() {
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
           <Button type="submit" className="h-11 w-full text-base" disabled={loading}>
-            {loading ? "Resetting..." : "Reset Password"}
+            {loading ? r.submitting : r.submit}
           </Button>
         </form>
       )}

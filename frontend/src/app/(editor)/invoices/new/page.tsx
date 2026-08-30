@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
+import { getCompanyProfile } from "@/lib/api/company";
 import { listClients } from "@/lib/api/dashboard";
 import {
   createInvoice,
@@ -207,15 +208,32 @@ export default function NewInvoicePage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listClients(), peekNextInvoiceNumber().catch(() => null)])
-      .then(([clientList, preview]) => {
+    Promise.all([
+      listClients(),
+      peekNextInvoiceNumber().catch(() => null),
+      // A failed profile load must not block the editor: the language simply stays at its
+      // default, which is the same outcome as before this was wired up.
+      getCompanyProfile().catch(() => null),
+    ])
+      .then(([clientList, preview, company]) => {
         if (cancelled) return;
         setClients(clientList);
         setNextNumber(preview);
+
+        // New documents start in the company's configured language rather than always English.
+        // Routed through changeLanguage so the shipped covering letter and payment terms switch
+        // with it. An invoice that already exists keeps whatever language it was issued in —
+        // that is a property of the document, not a display preference.
+        const preferred = company?.defaultLanguage;
+        const documentLanguage: DocumentLanguage =
+          preferred === "de" || preferred === "en" ? preferred : "en";
+        if (documentLanguage !== "en") changeLanguage(documentLanguage);
+
         // Prefilled rather than a placeholder, because the reference ships it as real content the
         // operator can edit — a placeholder would save as an empty subject.
         if (preview) {
-          setSubject((current) => (current ? current : `Invoice no. ${preview}`));
+          const heading = DOCUMENT_STRINGS[documentLanguage].invoiceNo;
+          setSubject((current) => (current ? current : `${heading} ${preview}`));
         }
       })
       .catch((err: unknown) => {

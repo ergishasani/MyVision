@@ -1,12 +1,15 @@
+"use client";
+
 import { PageShell, Panel } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function SendQuotePage() {
+  const t = useT();
+  const p = t.scaffold.stubs.quoteSend;
+
   return (
-    <PageShell title="Send quote" description="Send a quote to the client.">
-      <Panel
-        title="Not built yet"
-        description="This screen is scaffolded and routed. The form and its API wiring come next."
-      />
+    <PageShell title={p.title} description={p.description}>
+      <Panel title={t.scaffold.notBuiltTitle} description={t.scaffold.notBuiltDescription} />
     </PageShell>
   );
 }

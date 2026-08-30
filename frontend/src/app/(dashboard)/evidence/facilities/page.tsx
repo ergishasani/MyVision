@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function FacilitiesPage() {
+  const p = useT().pages.evidenceFacilities;
+
   return (
     <PageShell
-      title="Facilities"
-      description="Fixed assets and their depreciation."
-      tabs={["All", "In use", "Disposed"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.inUse, p.tabs.disposed]}
       columns={[
-        { key: "asset", label: "Asset" },
-        { key: "acquired", label: "Acquired" },
-        { key: "cost", label: "Cost", numeric: true },
-        { key: "depreciation", label: "Depreciation", numeric: true },
-        { key: "book", label: "Book value", numeric: true },
+        { key: "asset", label: p.columns.asset },
+        { key: "acquired", label: p.columns.acquired },
+        { key: "cost", label: p.columns.cost, numeric: true },
+        { key: "depreciation", label: p.columns.depreciation, numeric: true },
+        { key: "book", label: p.columns.book, numeric: true },
       ]}
-      emptyTitle="No assets recorded"
-      emptyHint="Asset registers and depreciation schedules are an accounting feature, not part of the invoicing API."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

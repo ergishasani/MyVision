@@ -1,19 +1,24 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function IncompleteBankPage() {
+  const p = useT().pages.bankIncomplete;
+
   return (
     <PageShell
-      title="Incomplete"
-      description="Movements not yet matched to an invoice or receipt."
-      tabs={["All", "Unmatched", "Partially matched"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.unmatched, p.tabs.partial]}
       columns={[
-        { key: "date", label: "Booking day" },
-        { key: "purpose", label: "Name / Purpose" },
-        { key: "amount", label: "Amount", numeric: true },
-        { key: "open", label: "Open", numeric: true },
+        { key: "date", label: p.columns.date },
+        { key: "purpose", label: p.columns.purpose },
+        { key: "amount", label: p.columns.amount, numeric: true },
+        { key: "open", label: p.columns.open, numeric: true },
       ]}
-      emptyTitle="Nothing unmatched"
-      emptyHint="Bank reconciliation requires a bank feed, which is not connected."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

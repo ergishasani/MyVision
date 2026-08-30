@@ -10,10 +10,13 @@ import {
   type ProductUnitInput,
 } from "@/lib/api/products";
 import type { Product, ProductCategory, ProductUnitCode } from "@/types/api";
-import { UNIT_LABELS, UNIT_ORDER } from "@/lib/utils/product-units";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import { UNIT_ORDER } from "@/lib/utils/product-units";
 import { cn } from "@/lib/utils/cn";
 
-const SECTIONS = ["Description", "Other units", "More settings"] as const;
+/** Section keys, deliberately not the visible labels — those change with the language. */
+const SECTIONS = ["description", "otherUnits", "moreSettings"] as const;
 type Section = (typeof SECTIONS)[number];
 
 /** The German rates. Not an exhaustive list of what the column accepts. */
@@ -101,11 +104,13 @@ export function ProductDialog({
   /** When set, the dialog edits this product instead of creating a new one. */
   product?: Product | null;
 }) {
+  const t = useT();
+  const d = t.productDialog;
   const editing = Boolean(product);
   // Seeded once on mount. The parent keys the dialog on the product id, so opening a different
   // one remounts it with fresh values rather than an effect copying props into state.
   const [form, setForm] = useState<Draft>(() => (product ? seedFrom(product) : EMPTY));
-  const [section, setSection] = useState<Section>("Description");
+  const [section, setSection] = useState<Section>("description");
   const [units, setUnits] = useState<ProductUnitInput[]>(() =>
     product ? product.units.map((u) => ({ unit: u.unit, factor: Number(u.factor) })) : [],
   );
@@ -173,13 +178,13 @@ export function ProductDialog({
   function reset() {
     setForm(product ? seedFrom(product) : EMPTY);
     setUnits(product ? product.units.map((u) => ({ unit: u.unit, factor: Number(u.factor) })) : []);
-    setSection("Description");
+    setSection("description");
     setError(null);
   }
 
   async function submit(keepOpen: boolean) {
     if (!form.name.trim()) {
-      setError("A product name is required.");
+      setError(d.nameRequired);
       return;
     }
     setSaving(true);
@@ -215,8 +220,8 @@ export function ProductDialog({
         err instanceof ApiError
           ? err.message
           : product
-            ? "Could not save the product"
-            : "Could not create the product",
+            ? d.saveError
+            : d.createError,
       );
     } finally {
       setSaving(false);
@@ -232,7 +237,7 @@ export function ProductDialog({
         reset();
         onClose();
       }}
-      title={editing ? "Edit product" : "New product"}
+      title={editing ? d.titleEdit : d.titleNew}
       footer={
         <>
           {error ? <p className="mr-auto text-sm text-red-600">{error}</p> : null}
@@ -244,7 +249,7 @@ export function ProductDialog({
             }}
             className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
           >
-            Cancel
+            {d.cancel}
           </button>
           {/* No "and new" when editing: the record already exists. */}
           {!editing ? (
@@ -254,7 +259,7 @@ export function ProductDialog({
               onClick={() => submit(true)}
               className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
             >
-              Create and new
+              {d.createAndNew}
             </button>
           ) : null}
           <button
@@ -263,43 +268,49 @@ export function ProductDialog({
             onClick={() => submit(false)}
             className="h-10 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-60"
           >
-            {saving ? (editing ? "Saving…" : "Creating…") : editing ? "Save changes" : "Create"}
+            {saving
+              ? editing
+                ? d.saving
+                : d.creating
+              : editing
+                ? d.saveChanges
+                : d.create}
           </button>
         </>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
-          label="Product name"
+          label={d.productName}
           required
           value={form.name}
           onChange={(v) => set("name", v)}
-          placeholder="Rehau 80mm windows + roller shutters"
+          placeholder={d.productNamePlaceholder}
         />
         <Select
-          label="Standard unit"
+          label={d.standardUnit}
           value={form.unit}
           onChange={(v) => set("unit", v as ProductUnitCode)}
           options={UNIT_ORDER}
-          labels={UNIT_LABELS}
+          labels={t.units}
         />
 
         <Field
-          label="Art. No."
+          label={d.artNo}
           value={form.articleNumber}
           onChange={(v) => set("articleNumber", v)}
-          placeholder={nextNumber != null ? String(nextNumber) : "Assigned on save"}
+          placeholder={nextNumber != null ? String(nextNumber) : d.assignedOnSave}
           hint={
             // An existing product already has its number; only a new one is waiting for one.
             editing
-              ? "Changing this renumbers the product in your catalogue."
+              ? d.renumberHint
               : nextNumber != null
                 ? `Left blank, this product gets ${nextNumber}.`
-                : "Assigned automatically when you save."
+                : d.autoAssignHint
           }
         />
         <Select
-          label="VAT in %"
+          label={d.vatPercent}
           value={form.taxRate}
           onChange={setTaxRate}
           options={TAX_RATES}
@@ -307,41 +318,41 @@ export function ProductDialog({
         />
 
         <Select
-          label="Category"
+          label={d.category}
           value={form.category}
           onChange={(v) => set("category", v as ProductCategory)}
           options={["article", "service"]}
-          labels={{ article: "Article", service: "Service" }}
+          labels={{ article: d.categoryArticle, service: d.categoryService }}
         />
         <Field
-          label="Selling price (net)"
+          label={d.sellingNet}
           value={form.sellingNet}
           onChange={(v) => setPrice("selling", "net", v)}
-          placeholder="0.00"
+          placeholder={d.pricePlaceholder}
           suffix="EUR"
         />
 
         <Field
-          label="Purchase price (net)"
+          label={d.purchaseNet}
           value={form.purchaseNet}
           onChange={(v) => setPrice("purchase", "net", v)}
-          placeholder="0.00"
+          placeholder={d.pricePlaceholder}
           suffix="EUR"
-          hint="What it costs you. Never printed on a document."
+          hint={d.purchaseHint}
         />
         <Field
-          label="Selling price (gross)"
+          label={d.sellingGross}
           value={form.sellingGross}
           onChange={(v) => setPrice("selling", "gross", v)}
-          placeholder="0.00"
+          placeholder={d.pricePlaceholder}
           suffix="EUR"
         />
 
         <Field
-          label="Purchase price (gross)"
+          label={d.purchaseGross}
           value={form.purchaseGross}
           onChange={(v) => setPrice("purchase", "gross", v)}
-          placeholder="0.00"
+          placeholder={d.pricePlaceholder}
           suffix="EUR"
         />
       </div>
@@ -360,31 +371,31 @@ export function ProductDialog({
                 : "border-transparent text-muted hover:text-foreground",
             )}
           >
-            {name}
+            {d.sections[name]}
           </button>
         ))}
       </div>
 
       <div className="mt-5">
-        {section === "Description" ? (
+        {section === "description" ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <TextArea
-              label="Product description"
+              label={d.productDescription}
               value={form.description}
               onChange={(v) => set("description", v)}
-              placeholder="Printed on quotes and invoices under the line."
+              placeholder={d.productDescriptionPlaceholder}
             />
             <TextArea
-              label="Internal note"
+              label={d.internalNote}
               value={form.internalNote}
               onChange={(v) => set("internalNote", v)}
-              placeholder="Only you see this."
-              hint="Internal only — never printed on a document."
+              placeholder={d.internalNotePlaceholder}
+              hint={d.internalNoteHint}
             />
           </div>
         ) : null}
 
-        {section === "Other units" ? (
+        {section === "otherUnits" ? (
           <UnitTable
             units={units}
             baseUnit={form.unit}
@@ -393,11 +404,11 @@ export function ProductDialog({
           />
         ) : null}
 
-        {section === "More settings" ? (
+        {section === "moreSettings" ? (
           <div className="space-y-4">
             <Toggle
-              label="Inventory activated"
-              hint="Records that this product is stock-tracked. Stock levels are not kept yet."
+              label={d.inventoryActivated}
+              hint={d.inventoryHint}
               checked={form.inventoryEnabled}
               onChange={(v) => set("inventoryEnabled", v)}
             />
@@ -425,6 +436,9 @@ function UnitTable({
   sellingNet: number;
   onChange: (units: ProductUnitInput[]) => void;
 }) {
+  const t = useT();
+  const d = t.productDialog;
+
   function update(index: number, patch: Partial<ProductUnitInput>) {
     onChange(units.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   }
@@ -432,17 +446,19 @@ function UnitTable({
   return (
     <div>
       <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-        <span>Unit</span>
-        <span>Factor</span>
-        <span>Price (net)</span>
+        <span>{d.unitColumn}</span>
+        <span>{d.factorColumn}</span>
+        <span>{d.priceNetColumn}</span>
         <span className="w-10" />
       </div>
 
       <div className="space-y-2">
         {units.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted">
-            One unit of {UNIT_LABELS[baseUnit]} at {sellingNet.toFixed(2)} EUR. Add another to sell
-            the same product by the pack or pallet.
+            {format(d.unitsEmpty, {
+              unit: t.units[baseUnit],
+              price: sellingNet.toFixed(2),
+            })}
           </p>
         ) : null}
 
@@ -450,13 +466,13 @@ function UnitTable({
           <div key={index} className="grid grid-cols-[1fr_1fr_1fr_auto] items-center gap-2">
             <select
               value={row.unit}
-              aria-label={`Unit ${index + 1}`}
+              aria-label={format(d.unitAria, { n: index + 1 })}
               onChange={(event) => update(index, { unit: event.target.value as ProductUnitCode })}
               className="h-10 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
               {UNIT_ORDER.map((code) => (
                 <option key={code} value={code}>
-                  {UNIT_LABELS[code]}
+                  {t.units[code]}
                 </option>
               ))}
             </select>
@@ -465,7 +481,7 @@ function UnitTable({
               min={0}
               step="0.0001"
               value={row.factor}
-              aria-label={`Factor ${index + 1}`}
+              aria-label={format(d.factorAria, { n: index + 1 })}
               onChange={(event) => update(index, { factor: Number(event.target.value) })}
               className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -476,7 +492,7 @@ function UnitTable({
             <button
               type="button"
               onClick={() => onChange(units.filter((_, i) => i !== index))}
-              aria-label={`Remove unit ${index + 1}`}
+              aria-label={format(d.removeUnitAria, { n: index + 1 })}
               className="grid size-10 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 hover:text-red-600"
             >
               <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
@@ -492,7 +508,7 @@ function UnitTable({
         onClick={() => onChange([...units, { unit: baseUnit, factor: 1 }])}
         className="mt-3 text-sm font-medium text-primary hover:underline"
       >
-        + Add unit
+        {d.addUnit}
       </button>
     </div>
   );

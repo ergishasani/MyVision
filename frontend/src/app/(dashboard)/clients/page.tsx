@@ -4,6 +4,8 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { ApiError } from "@/lib/api/client";
 import { archiveClient, deleteClient, listClients } from "@/lib/api/clients";
 import type { Client } from "@/types/api";
@@ -11,14 +13,15 @@ import { ClientDialog } from "@/components/clients/client-dialog";
 import { formatDate } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 
-const TABS = ["All", "Organisations", "People"] as const;
+/** Filter keys, deliberately not the visible labels — those change with the language. */
+const TABS = ["all", "organisations", "people"] as const;
 type Tab = (typeof TABS)[number];
 
 const PAGE_SIZES = [25, 50, 100];
 
 function matchesTab(client: Client, tab: Tab) {
-  if (tab === "All") return true;
-  return tab === "Organisations" ? client.type === "business" : client.type === "individual";
+  if (tab === "all") return true;
+  return tab === "organisations" ? client.type === "business" : client.type === "individual";
 }
 
 function location(client: Client) {
@@ -28,10 +31,12 @@ function location(client: Client) {
 }
 
 export default function ClientsPage() {
+  const t = useT();
+  const c = t.clients;
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("All");
+  const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -57,9 +62,12 @@ export default function ClientsPage() {
     listClients()
       .then(setClients)
       .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load contacts"),
+        setError(err instanceof ApiError ? err.message : c.loadError),
       )
       .finally(() => setLoading(false));
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch every contact for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -99,7 +107,7 @@ export default function ClientsPage() {
       await archiveClient(client.id);
     } catch (err) {
       setClients(previous);
-      setError(err instanceof ApiError ? err.message : "Could not archive the contact");
+      setError(err instanceof ApiError ? err.message : c.archiveError);
     }
   }
 
@@ -112,7 +120,7 @@ export default function ClientsPage() {
       await deleteClient(client.id);
       setClients((list) => list.filter((c) => c.id !== client.id));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not delete the contact");
+      setError(err instanceof ApiError ? err.message : c.deleteError);
     }
   }
 
@@ -126,13 +134,15 @@ export default function ClientsPage() {
     <div className="space-y-6" onClick={() => setMenu(null)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Contacts</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
           {!loading ? (
             <p className="mt-1 text-sm font-medium text-foreground">
-              {clients.length} contact{clients.length === 1 ? "" : "s"}
+              {format(clients.length === 1 ? c.countOne : c.countOther, {
+                count: clients.length,
+              })}
             </p>
           ) : null}
-          <p className="mt-1 text-sm text-muted">Everyone you quote and invoice.</p>
+          <p className="mt-1 text-sm text-muted">{c.description}</p>
         </div>
 
         <div className="flex shrink-0 gap-2">
@@ -140,7 +150,7 @@ export default function ClientsPage() {
             href="/clients/new"
             className="inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
           >
-            Import contacts
+            {c.importContacts}
           </Link>
           <button
             type="button"
@@ -148,7 +158,7 @@ export default function ClientsPage() {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700"
           >
             <PlusIcon className="size-4" />
-            Create contact
+            {c.createContact}
           </button>
         </div>
       </header>
@@ -156,7 +166,7 @@ export default function ClientsPage() {
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -164,7 +174,7 @@ export default function ClientsPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -188,7 +198,7 @@ export default function ClientsPage() {
                     : "text-muted hover:bg-slate-100 hover:text-foreground",
                 )}
               >
-                {name}
+                {c.tabs[name]}
                 <span className="ml-1.5 text-xs opacity-70">{counts[name]}</span>
               </button>
             ))}
@@ -196,7 +206,7 @@ export default function ClientsPage() {
 
           {/* sevdesk hides filtering behind a modal; a live box is faster for the common case. */}
           <label className="relative">
-            <span className="sr-only">Search contacts</span>
+            <span className="sr-only">{c.searchLabel}</span>
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
             <input
               value={query}
@@ -204,7 +214,7 @@ export default function ClientsPage() {
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Search name, email, city…"
+              placeholder={c.searchPlaceholder}
               className="h-9 w-64 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -215,13 +225,13 @@ export default function ClientsPage() {
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
                 <th scope="col" className="w-14 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                  Type
+                  {c.columns.type}
                 </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Name</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Contact</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Location</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Added</th>
-                <th scope="col" className="w-28 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">Actions</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.name}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.contact}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.location}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.added}</th>
+                <th scope="col" className="w-28 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -234,17 +244,17 @@ export default function ClientsPage() {
                       </div>
                       <p className="mt-3 text-sm font-medium text-foreground">
                         {loading
-                          ? "Loading contacts…"
+                          ? c.loadingTitle
                           : clients.length === 0
-                            ? "No contacts yet"
-                            : "Nothing matches those filters"}
+                            ? c.emptyTitle
+                            : c.filteredTitle}
                       </p>
                       <p className="mt-1 text-sm text-muted">
                         {loading
-                          ? "Fetching from the API."
+                          ? c.loadingHint
                           : clients.length === 0
-                            ? "A contact is who you quote and invoice. Create the first one to get started."
-                            : "Try a different tab or clear the search."}
+                            ? c.emptyHint
+                            : c.filteredHint}
                       </p>
                     </div>
                   </td>
@@ -254,7 +264,7 @@ export default function ClientsPage() {
                   <tr key={client.id} className="group border-b border-border last:border-0 hover:bg-slate-50/70">
                     <td className="px-4 py-3">
                       <span
-                        title={client.type === "business" ? "Organisation" : "Person"}
+                        title={client.type === "business" ? c.typeOrganisation : c.typePerson}
                         className="grid size-8 place-items-center rounded-lg bg-slate-100 text-muted"
                       >
                         {client.type === "business" ? (
@@ -335,7 +345,7 @@ export default function ClientsPage() {
                 setPageSize(Number(event.target.value));
                 setPage(1);
               }}
-              aria-label="Rows per page"
+              aria-label={c.rowsPerPage}
               className="h-8 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
               {PAGE_SIZES.map((size) => (
@@ -346,19 +356,23 @@ export default function ClientsPage() {
             </select>
             <p className="text-sm text-muted">
               {filtered.length === 0
-                ? "No entries"
-                : `Showing ${firstRow} – ${lastRow} of ${filtered.length} entries`}
+                ? t.table.noEntries
+                : format(c.showing, {
+                    first: firstRow,
+                    last: lastRow,
+                    total: filtered.length,
+                  })}
             </p>
           </div>
 
           <div className="flex items-center gap-1">
-            <PageBtn label="First" disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
-            <PageBtn label="Previous" disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
+            <PageBtn label={c.first} disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
+            <PageBtn label={t.table.previous} disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
             <span className="px-2 text-sm text-muted">
               {current} / {pageCount}
             </span>
-            <PageBtn label="Next" disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
-            <PageBtn label="Last" disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
+            <PageBtn label={t.table.next} disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
+            <PageBtn label={c.last} disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
           </div>
         </div>
       </section>
@@ -441,36 +455,48 @@ export default function ClientsPage() {
 
       {confirmArchive ? (
         <ConfirmDialog
-          title="Archive this contact?"
-          confirmLabel="Archive"
+          title={c.archive.title}
+          confirmLabel={c.archive.confirm}
           tone="neutral"
           onCancel={() => setConfirmArchive(null)}
           onConfirm={() => handleArchive(confirmArchive)}
         >
-          <span className="font-medium text-foreground">{confirmArchive.name}</span> is hidden from
-          the list but keeps everything attached to them. Invoices and quotes already issued are
-          unaffected, and nothing is lost.
+          <NamedSentence template={c.archive.body} name={confirmArchive.name} />
         </ConfirmDialog>
       ) : null}
 
       {confirmDelete ? (
         <ConfirmDialog
-          title="Delete this contact?"
-          confirmLabel="Delete permanently"
+          title={c.delete.title}
+          confirmLabel={c.delete.confirm}
           tone="danger"
           onCancel={() => setConfirmDelete(null)}
           onConfirm={() => handleDelete(confirmDelete)}
         >
-          <span className="font-medium text-foreground">{confirmDelete.name}</span> and their
-          contact details are removed for good. This cannot be undone.
+          <NamedSentence template={c.delete.body} name={confirmDelete.name} />
           {/* Said up front rather than after the attempt fails, since it is the usual outcome. */}
-          <span className="mt-3 block">
-            If any invoice, quote or project refers to them the delete is refused — those documents
-            have to keep the contact they were issued to. Archive instead.
-          </span>
+          <span className="mt-3 block">{c.delete.refusal}</span>
         </ConfirmDialog>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * A sentence with the contact's name emphasised inside it.
+ *
+ * <p>Split at the placeholder rather than concatenated around it: German puts the name and the
+ * verb in a different order, so "{name} is hidden from the list" and "{name} wird aus der Liste
+ * ausgeblendet" only agree if each language owns the whole sentence.
+ */
+function NamedSentence({ template, name }: { template: string; name: string }) {
+  const [before, after] = template.split("{name}");
+  return (
+    <>
+      {before}
+      <span className="font-medium text-foreground">{name}</span>
+      {after}
+    </>
   );
 }
 
@@ -490,11 +516,12 @@ function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Cancel"
+        aria-label={t.common.cancel}
         onClick={onCancel}
         className="fixed inset-0 cursor-default bg-slate-900/40"
       />

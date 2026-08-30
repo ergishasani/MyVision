@@ -1,19 +1,24 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function QuoteDocumentsPage() {
+  const p = useT().pages.documentsQuotes;
+
   return (
     <PageShell
-      title="Quote documents"
-      description="Browse quote documents."
+      title={p.title}
+      description={p.description}
       columns={[
-        { key: "name", label: "Document" },
-        { key: "quote", label: "Quote" },
-        { key: "client", label: "Client" },
-        { key: "created", label: "Created" },
-        { key: "size", label: "Size", numeric: true },
+        { key: "name", label: p.columns.name },
+        { key: "quote", label: p.columns.quote },
+        { key: "client", label: p.columns.client },
+        { key: "created", label: p.columns.created },
+        { key: "size", label: p.columns.size, numeric: true },
       ]}
-      emptyTitle="No quote PDFs yet"
-      emptyHint="A PDF is stored here each time you generate one from a quote."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

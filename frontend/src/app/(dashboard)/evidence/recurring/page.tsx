@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function RecurringEvidencePage() {
+  const p = useT().pages.evidenceRecurring;
+
   return (
     <PageShell
-      title="Recurring evidence"
-      description="Costs that repeat on a schedule."
-      tabs={["All", "Active", "Ended"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.active, p.tabs.ended]}
       columns={[
-        { key: "name", label: "Name" },
-        { key: "supplier", label: "Supplier" },
-        { key: "interval", label: "Interval" },
-        { key: "next", label: "Next due" },
-        { key: "amount", label: "Amount", numeric: true },
+        { key: "name", label: p.columns.name },
+        { key: "supplier", label: p.columns.supplier },
+        { key: "interval", label: p.columns.interval },
+        { key: "next", label: p.columns.next },
+        { key: "amount", label: p.columns.amount, numeric: true },
       ]}
-      emptyTitle="No recurring costs"
-      emptyHint="Expense capture has no backend yet. This is an invoicing product; costs are a separate domain."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

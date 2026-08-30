@@ -1,19 +1,24 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function AdminAuditLogsPage() {
+  const p = useT().pages.adminAuditLogs;
+
   return (
     <PageShell
-      title="Audit logs"
-      description="Inspect invoice, payment, document, and account changes recorded by the backend."
-      tabs={["All", "Invoices", "Payments", "Documents", "Account"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.invoices, p.tabs.payments, p.tabs.documents, p.tabs.account]}
       columns={[
-        { key: "when", label: "When" },
-        { key: "actor", label: "Actor" },
-        { key: "entity", label: "Entity" },
-        { key: "action", label: "Action" },
+        { key: "when", label: p.columns.when },
+        { key: "actor", label: p.columns.actor },
+        { key: "entity", label: p.columns.entity },
+        { key: "action", label: p.columns.action },
       ]}
-      emptyTitle="No audit entries"
-      emptyHint="The backend records invoice, payment and document changes here."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

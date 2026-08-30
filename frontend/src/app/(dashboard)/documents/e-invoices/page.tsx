@@ -1,19 +1,24 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function EInvoiceDocumentsPage() {
+  const p = useT().pages.documentsEInvoices;
+
   return (
     <PageShell
-      title="E-invoices"
-      description="Browse XML e-invoice exports."
+      title={p.title}
+      description={p.description}
       columns={[
-        { key: "name", label: "Document" },
-        { key: "invoice", label: "Invoice" },
-        { key: "format", label: "Format" },
-        { key: "created", label: "Created" },
-        { key: "size", label: "Size", numeric: true },
+        { key: "name", label: p.columns.name },
+        { key: "invoice", label: p.columns.invoice },
+        { key: "format", label: p.columns.format },
+        { key: "created", label: p.columns.created },
+        { key: "size", label: p.columns.size, numeric: true },
       ]}
-      emptyTitle="No e-invoices exported yet"
-      emptyHint="XRechnung XML exports appear here. They must pass a validator before real delivery."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

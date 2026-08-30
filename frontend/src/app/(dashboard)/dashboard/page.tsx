@@ -13,17 +13,23 @@ import type {
 } from "@/types/api";
 import { DONUT_COLORS, DonutChart, Gauge, RevenueChart } from "@/components/dashboard/charts";
 import { formatDate, formatMoney } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import { Interpolate } from "@/lib/i18n/interpolate";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
-const RANGES = [
-  { months: 12, label: "Last 12 months" },
-  { months: 6, label: "Last 6 months" },
-  { months: 3, label: "Last 3 months" },
+/** Selectable range lengths, with their wording from the dictionary. */
+const ranges = (d: Dictionary["dashboard"]) => [
+  { months: 12, label: d.range12 },
+  { months: 6, label: d.range6 },
+  { months: 3, label: d.range3 },
 ];
 
 const ACTIVITY_PAGE_SIZE = 5;
 
 export default function OverviewPage() {
+  const d = useT().dashboard;
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [activity, setActivity] = useState<DashboardActivity | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +46,15 @@ export default function OverviewPage() {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : "Failed to load the overview");
+          setError(err instanceof ApiError ? err.message : d.loadError);
         }
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the whole overview for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revenueMonths, breakdownMonths]);
 
   useEffect(() => {
@@ -66,13 +75,13 @@ export default function OverviewPage() {
   if (!overview) {
     return error ? (
       <div className="rounded-xl border border-red-200 bg-red-50 p-16 text-center">
-        <p className="text-sm font-medium text-red-700">Could not load the overview</p>
+        <p className="text-sm font-medium text-red-700">{d.loadErrorHeading}</p>
         <p className="mt-1 text-sm text-red-600">{error}</p>
       </div>
     ) : (
       <div className="rounded-xl border border-border bg-card p-16 text-center shadow-sm">
-        <p className="text-sm font-medium text-foreground">Loading your overview…</p>
-        <p className="mt-1 text-sm text-muted">Gathering invoices, payments and activity.</p>
+        <p className="text-sm font-medium text-foreground">{d.overviewLoading}</p>
+        <p className="mt-1 text-sm text-muted">{d.loadingHint}</p>
       </div>
     );
   }
@@ -83,11 +92,13 @@ export default function OverviewPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {overview.greetingName ? `Welcome back, ${overview.greetingName}` : "Overview"}
+          {overview.greetingName
+            ? format(d.welcomeBack, { name: overview.greetingName })
+            : d.overview}
         </h1>
         <Link
           href="/settings"
-          aria-label="Settings"
+          aria-label={d.settingsAria}
           className="grid size-10 place-items-center rounded-lg border border-border bg-card text-muted transition-colors hover:bg-slate-50 hover:text-foreground"
         >
           <SlidersIcon className="size-4" />
@@ -115,10 +126,10 @@ export default function OverviewPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <LockedPanel
-          title="Bank"
-          headline="Account balance"
-          hint="Bank accounts are not connected in this system yet. Once transactions can be imported, balances and matching appear here."
-          cta={{ label: "Recorded payments", href: "/payments" }}
+          title={d.bankTitle}
+          headline={d.bankHeadline}
+          hint={d.bankHint}
+          cta={{ label: d.bankCta, href: "/payments" }}
         />
         <BookkeepingScorePanel />
       </div>
@@ -130,9 +141,9 @@ export default function OverviewPage() {
           onMonthsChange={setBreakdownMonths}
         />
         <LockedPanel
-          title="Top 5 expenses"
-          headline="Expenses"
-          hint="This system records sales, not purchases. There is no expense or receipt data to rank, so nothing is shown rather than a misleading zero."
+          title={d.expensesTitle}
+          headline={d.expensesHeadline}
+          hint={d.expensesHint}
         />
       </div>
 
@@ -150,8 +161,7 @@ export default function OverviewPage() {
       </div>
 
       <p className="pb-2 text-center text-xs text-muted">
-        Figures are computed from the invoices and payments recorded in MyVision, at the moment
-        this page loaded.
+        {d.footnote}
       </p>
     </div>
   );
@@ -160,16 +170,17 @@ export default function OverviewPage() {
 /* --- quick actions -------------------------------------------------------- */
 
 function QuickActions() {
+  const d = useT().dashboard;
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <QuickAction href="/invoices/new" label="Write invoice" icon={<InvoiceIcon className="size-5" />} />
+      <QuickAction href="/invoices/new" label={d.writeInvoice} icon={<InvoiceIcon className="size-5" />} />
       <QuickAction
-        label="Upload expense"
+        label={d.uploadExpense}
         icon={<UploadIcon className="size-5" />}
-        disabledReason="Expenses are not part of this system yet"
+        disabledReason={d.uploadExpenseDisabled}
       />
-      <QuickAction href="/payments" label="Match payments" icon={<BankIcon className="size-5" />} />
-      <QuickAction href="/reports/taxes" label="Prepare VAT return" icon={<TaxIcon className="size-5" />} />
+      <QuickAction href="/payments" label={d.matchPayments} icon={<BankIcon className="size-5" />} />
+      <QuickAction href="/reports/taxes" label={d.prepareVat} icon={<TaxIcon className="size-5" />} />
     </div>
   );
 }
@@ -223,11 +234,12 @@ function RevenuePanel({
   months: number;
   onMonthsChange: (months: number) => void;
 }) {
+  const d = useT().dashboard;
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Invoiced</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">{d.invoiced}</p>
           <p className="mt-1 text-3xl font-semibold tabular-nums text-foreground">
             {formatMoney(overview.revenueInvoicedTotal, overview.currency)}
           </p>
@@ -235,12 +247,12 @@ function RevenuePanel({
 
         <div className="flex gap-2">
           <SeriesChip
-            label="Invoiced"
+            label={d.invoiced}
             value={formatMoney(overview.revenueInvoicedTotal, overview.currency)}
             dotClass="bg-primary"
           />
           <SeriesChip
-            label="Collected"
+            label={d.collected}
             value={formatMoney(overview.revenueCollectedTotal, overview.currency)}
             dotClass="bg-emerald-500"
           />
@@ -252,10 +264,10 @@ function RevenuePanel({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-        <RangeSelect value={months} onChange={onMonthsChange} label="Revenue range" />
+        <RangeSelect value={months} onChange={onMonthsChange} label={d.revenueRange} />
         {/* Stated rather than shown as a zero line: no expenses exist to plot. */}
         <p className="text-xs text-muted">
-          Profit is not shown — this system records sales, not purchases.
+          {d.noProfitNote}
         </p>
       </div>
     </section>
@@ -291,6 +303,8 @@ function RangeSelect({
   onChange: (months: number) => void;
   label: string;
 }) {
+  const d = useT().dashboard;
+
   return (
     <label className="text-sm">
       <span className="sr-only">{label}</span>
@@ -299,7 +313,7 @@ function RangeSelect({
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-8 rounded-lg border border-border bg-card px-2 text-sm text-primary outline-none focus:border-primary"
       >
-        {RANGES.map((range) => (
+        {ranges(d).map((range) => (
           <option key={range.months} value={range.months}>
             {range.label}
           </option>
@@ -324,12 +338,13 @@ function ReceivablesPanel({
   open: ReceivablesBucket;
   partiallyPaid: ReceivablesBucket;
 }) {
+  const d = useT().dashboard;
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Outstanding invoices</h2>
+      <h2 className="text-sm font-semibold text-foreground">{d.outstandingTitle}</h2>
 
       <div className="mt-4 rounded-lg bg-slate-50 p-4">
-        <p className="text-xs text-muted">Outstanding amount</p>
+        <p className="text-xs text-muted">{d.outstandingAmount}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
           {formatMoney(total, currency)}
         </p>
@@ -337,21 +352,21 @@ function ReceivablesPanel({
 
       <div className="mt-2">
         <BucketRow
-          label="Overdue"
+          label={d.bucketOverdue}
           bucket={overdue}
           currency={currency}
           href="/invoices?status=overdue"
           tone="danger"
         />
         <BucketRow
-          label="Open"
+          label={d.bucketOpen}
           bucket={open}
           currency={currency}
           href="/invoices?status=unpaid"
           tone="neutral"
         />
         <BucketRow
-          label="Partially paid"
+          label={d.bucketPartiallyPaid}
           bucket={partiallyPaid}
           currency={currency}
           href="/invoices?status=partially_paid"
@@ -418,21 +433,25 @@ function VatPanel({
   currency: string;
   vat: DashboardOverview["vat"];
 }) {
+  const d = useT().dashboard;
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">VAT advance return</h2>
+      <h2 className="text-sm font-semibold text-foreground">{d.vatTitle}</h2>
 
       <div className="mt-4 grid gap-3 rounded-lg bg-slate-50 p-4 sm:grid-cols-2">
         <div>
           <p className="text-xs text-muted">
-            Output tax {formatDate(vat.periodStart)} – {formatDate(vat.periodEnd)}
+            {format(d.vatOutputPeriod, {
+              from: formatDate(vat.periodStart),
+              to: formatDate(vat.periodEnd),
+            })}
           </p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
             {formatMoney(vat.outputVat, currency)}
           </p>
         </div>
         <div className="sm:border-l sm:border-border sm:pl-4">
-          <p className="text-xs text-muted">Due on</p>
+          <p className="text-xs text-muted">{d.vatDueOn}</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
             {formatDate(vat.dueDate)}
           </p>
@@ -440,11 +459,11 @@ function VatPanel({
       </div>
 
       <div className="mt-2">
-        <VatRow label="Net revenue" value={formatMoney(vat.netRevenue, currency)} />
-        <VatRow label="Output tax" value={formatMoney(vat.outputVat, currency)} />
+        <VatRow label={d.vatNetRevenue} value={formatMoney(vat.netRevenue, currency)} />
+        <VatRow label={d.vatOutputTax} value={formatMoney(vat.outputVat, currency)} />
         {/* Not a zero: input tax genuinely cannot be computed here, and saying "0" would make
             the payable figure look like a complete return. */}
-        <VatRow label="Input tax" value="Not tracked" muted />
+        <VatRow label={d.vatInputTax} value={d.vatNotTracked} muted />
       </div>
 
       <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
@@ -525,9 +544,10 @@ function LockedPanel({
 }
 
 function BookkeepingScorePanel() {
+  const d = useT().dashboard;
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Bookkeeping score</h2>
+      <h2 className="text-sm font-semibold text-foreground">{d.bookkeepingScore}</h2>
 
       <div className="mt-6">
         <Gauge percent={0} muted />
@@ -559,6 +579,7 @@ function TopClientsPanel({
   months: number;
   onMonthsChange: (months: number) => void;
 }) {
+  const d = useT().dashboard;
   const slices = overview.topClients.map((client, index) => ({
     label: client.name,
     value: client.amount,
@@ -572,8 +593,8 @@ function TopClientsPanel({
 
       {overview.topClients.length === 0 ? (
         <EmptyBlock
-          title="No revenue in this period"
-          hint="Once invoices are issued, your largest customers appear here."
+          title={d.noRevenueTitle}
+          hint={d.noRevenueHint}
         />
       ) : (
         <div className="mt-4 flex flex-wrap items-center gap-6">
@@ -602,7 +623,7 @@ function TopClientsPanel({
       )}
 
       <div className="mt-auto pt-4">
-        <RangeSelect value={months} onChange={onMonthsChange} label="Customer ranking range" />
+        <RangeSelect value={months} onChange={onMonthsChange} label={d.customerRange} />
       </div>
     </section>
   );
@@ -617,11 +638,12 @@ function TopProductsPanel({
   currency: string;
   months: number;
 }) {
+  const d = useT().dashboard;
   const peak = Math.max(0, ...products.map((product) => product.amount));
 
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Products and services</h2>
+      <h2 className="text-sm font-semibold text-foreground">{d.productsTitle}</h2>
       {/* Named honestly: invoice lines are free text with no link to the catalogue, so this is a
           ranking of line descriptions, not of catalogue products. */}
       <p className="mt-1 text-xs text-muted">
@@ -630,8 +652,8 @@ function TopProductsPanel({
 
       {products.length === 0 ? (
         <EmptyBlock
-          title="No line revenue in this period"
-          hint="Invoice lines issued in this window are grouped and ranked here."
+          title={d.noLineRevenueTitle}
+          hint={d.noLineRevenueHint}
         />
       ) : (
         <ul className="mt-4 space-y-3">
@@ -683,6 +705,7 @@ function ActivityPanel({
   page: number;
   onPageChange: (page: number) => void;
 }) {
+  const d = useT().dashboard;
   const total = activity?.total ?? 0;
   const size = activity?.size ?? ACTIVITY_PAGE_SIZE;
   const first = total === 0 ? 0 : page * size + 1;
@@ -691,14 +714,14 @@ function ActivityPanel({
 
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Activity</h2>
+      <h2 className="text-sm font-semibold text-foreground">{d.activityTitle}</h2>
 
       {!activity ? (
-        <EmptyBlock title="Loading activity…" hint="Reading the audit trail." />
+        <EmptyBlock title={d.activityLoading} hint={d.activityLoadingHint} />
       ) : activity.entries.length === 0 ? (
         <EmptyBlock
-          title="Nothing recorded yet"
-          hint="Creating and sending documents leaves an entry here."
+          title={d.activityEmpty}
+          hint={d.activityEmptyHint}
         />
       ) : (
         <ul className="mt-4 space-y-4">
@@ -711,7 +734,7 @@ function ActivityPanel({
                 <p className="text-xs uppercase tracking-wide text-muted">
                   {formatDateTime(entry.createdAt)}
                 </p>
-                <p className="mt-0.5 text-sm text-foreground">{describeActivity(entry)}</p>
+                <p className="mt-0.5 text-sm text-foreground"><ActivityDescription entry={entry} /></p>
               </div>
             </li>
           ))}
@@ -720,11 +743,13 @@ function ActivityPanel({
 
       <div className="mt-auto flex items-center justify-end gap-2 pt-4">
         <span className="text-sm text-muted">
-          {total === 0 ? "No entries" : `${first} – ${last} of ${total}`}
+          {total === 0
+            ? d.noEntries
+            : format(d.activityRange, { first, last, total })}
         </span>
         <button
           type="button"
-          aria-label="Previous"
+          aria-label={d.previous}
           disabled={page === 0}
           onClick={() => onPageChange(page - 1)}
           className="grid size-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -733,7 +758,7 @@ function ActivityPanel({
         </button>
         <button
           type="button"
-          aria-label="Next"
+          aria-label={d.next}
           disabled={!hasNext}
           onClick={() => onPageChange(page + 1)}
           className="grid size-8 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -745,11 +770,19 @@ function ActivityPanel({
   );
 }
 
-/** Turns one audit row into a sentence, with the document linked where it still exists. */
-function describeActivity(entry: ActivityEntry) {
-  const actor = entry.actorName ?? "MyVision";
+/**
+ * Turns one audit row into a sentence, with the document linked where it still exists.
+ *
+ * <p>Each language owns the whole sentence rather than having it assembled from fragments here:
+ * German puts the participle at the end ("… hat Rechnung R-14 für Acme erstellt"), so an English
+ * frame with holes in it cannot be reused. {@link Interpolate} drops the linked document node
+ * back into whatever position the translation puts it.
+ */
+function ActivityDescription({ entry }: { entry: ActivityEntry }) {
+  const a = useT().dashboard.activity;
+  const actor = entry.actorName ?? a.actorFallback;
   const isQuote = entry.entityType === "quote";
-  const kind = isQuote ? "quote" : "invoice";
+  const kind = isQuote ? a.kindQuote : a.kindInvoice;
 
   // Payments and refunds are logged against their own id but resolved to the invoice they moved
   // money against, so the link has to point at that invoice rather than at the payment row.
@@ -766,55 +799,51 @@ function describeActivity(entry: ActivityEntry) {
   ) : (
     // Deliberately vague: an unresolved label means the record is gone or is of a kind this
     // screen does not name. Asserting "a deleted invoice" was simply wrong for a payment.
-    <span className="text-muted">a record that no longer exists</span>
+    <span className="text-muted">{a.missingRecord}</span>
   );
 
-  const forClient = entry.clientName ? <> for {entry.clientName}</> : null;
+  const values: Record<string, React.ReactNode> = {
+    actor: <span className="font-medium">{actor}</span>,
+    kind,
+    document,
+    client: entry.clientName,
+    action: entry.action.replace(/_/g, " "),
+  };
+
+  const hasClient = Boolean(entry.clientName);
 
   if (entry.entityType === "company") {
-    return (
-      <>
-        <span className="font-medium">{actor}</span> updated the company profile.
-      </>
-    );
+    return <Interpolate template={a.company} values={values} />;
   }
 
   if (entry.entityType === "payment" || entry.entityType === "refund") {
-    const money = entry.entityType === "payment" ? "a payment" : "a refund";
-    const verb = entry.action === "stripe_captured" ? "captured" : "recorded";
-    return (
-      <>
-        <span className="font-medium">{actor}</span> {verb} {money} on {document}
-        {entry.clientName ? <> for {entry.clientName}</> : null}.
-      </>
-    );
+    // Verb and noun vary together, so each combination is its own sentence rather than two
+    // fragments glued in an order only English accepts.
+    const captured = entry.action === "stripe_captured";
+    const noun = entry.entityType === "payment" ? "payment" : "refund";
+    const verb = captured ? "Captured" : "Recorded";
+    const key = `${noun}${verb}${hasClient ? "For" : ""}` as keyof typeof a;
+    return <Interpolate template={a[key]} values={values} />;
   }
 
-  const phrase: Record<string, React.ReactNode> = {
-    created: <>created {kind} {document}{forClient}.</>,
-    created_from_quote: <>created invoice {document} from a quote{forClient}.</>,
-    updated: <>updated {kind} {document}.</>,
-    marked_sent: <>marked {kind} {document} as sent.</>,
-    sent: <>sent {kind} {document}{forClient}.</>,
-    marked_paid: <>marked {kind} {document} as paid.</>,
-    cancelled: <>cancelled {kind} {document}.</>,
-    accepted: <>recorded {kind} {document} as accepted.</>,
-    rejected: <>recorded {kind} {document} as rejected.</>,
-    pdf_generated: <>generated a PDF for {kind} {document}.</>,
-    xrechnung_exported: <>exported {kind} {document} as XRechnung.</>,
-    stripe_payment_failed: <>saw a payment fail for {kind} {document}.</>,
+  // Actions that name the client have a second wording for it; the rest have one.
+  const PHRASES: Record<string, keyof typeof a> = {
+    created: hasClient ? "createdFor" : "created",
+    created_from_quote: hasClient ? "createdFromQuoteFor" : "createdFromQuote",
+    updated: "updated",
+    marked_sent: "markedSent",
+    sent: hasClient ? "sentFor" : "sent",
+    marked_paid: "markedPaid",
+    cancelled: "cancelled",
+    accepted: "accepted",
+    rejected: "rejected",
+    pdf_generated: "pdfGenerated",
+    xrechnung_exported: "xrechnungExported",
+    stripe_payment_failed: "stripePaymentFailed",
   };
 
-  return (
-    <>
-      <span className="font-medium">{actor}</span>{" "}
-      {phrase[entry.action] ?? (
-        <>
-          recorded &quot;{entry.action.replace(/_/g, " ")}&quot; on {kind} {document}.
-        </>
-      )}
-    </>
-  );
+  const key = PHRASES[entry.action];
+  return <Interpolate template={key ? a[key] : a.fallback} values={values} />;
 }
 
 /** "3 Aug 2026, 07:52" — the feed needs the time of day, which formatDate drops. */

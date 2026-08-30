@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function BillingSettingsPage() {
+  const s = useT().settings.stubs.billing;
+
   return (
-    <PageShell title="Billing settings" description="Manage MyVision plan details, usage, subscription status, and billing contact information.">
+    <PageShell title={s.title} description={s.description}>
       <PanelGrid>
-        <Panel title="Your plan" description="The MyVision subscription for this workspace." />
-        <Panel title="Payment method" description="How your own subscription is charged." />
+        <Panel title={s.a.title} description={s.a.description} />
+        <Panel title={s.b.title} description={s.b.description} />
       </PanelGrid>
     </PageShell>
   );

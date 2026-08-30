@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function InvoicingSettingsPage() {
+  const s = useT().settings.stubs.invoicing;
+
   return (
-    <PageShell title="Invoicing settings" description="Configure invoice numbering, payment terms, quote validity, notes, and document defaults.">
+    <PageShell title={s.title} description={s.description}>
       <PanelGrid>
-        <Panel title="Numbering" description="Prefix and next number. Invoice numbers must be unique and sequential." />
-        <Panel title="Payment terms" description="Default due period, applied when an invoice has no explicit due date." />
+        <Panel title={s.a.title} description={s.a.description} />
+        <Panel title={s.b.title} description={s.b.description} />
       </PanelGrid>
     </PageShell>
   );

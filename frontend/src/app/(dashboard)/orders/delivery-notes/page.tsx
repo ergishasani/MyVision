@@ -14,16 +14,20 @@ import {
 import type { Client, DeliveryNote } from "@/types/api";
 import { StatusPill } from "@/components/layout/page-shell";
 import { formatDate, formatMoney, humanizeStatus } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils/cn";
 
-const TABS = ["All", "Draft", "Sent", "Delivered", "Cancelled"] as const;
+/** Filter keys. These are the stored statuses, so the comparison no longer goes through
+ *  the visible label -- which changes with the language. */
+const TABS = ["all", "draft", "sent", "delivered", "cancelled"] as const;
 type Tab = (typeof TABS)[number];
 
 const PAGE_SIZES = [25, 50, 100];
 
 function matchesTab(note: DeliveryNote, tab: Tab) {
-  if (tab === "All") return true;
-  return note.status === tab.toLowerCase();
+  if (tab === "all") return true;
+  return note.status === tab;
 }
 
 /** Net is what was delivered before VAT: the line totals less any document discount. */
@@ -38,13 +42,15 @@ function subjectOf(note: DeliveryNote) {
 }
 
 export default function DeliveryNotesPage() {
+  const t = useT();
+  const c = t.deliveryNotes;
   const [notes, setNotes] = useState<DeliveryNote[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const [tab, setTab] = useState<Tab>("All");
+  const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -60,7 +66,7 @@ export default function DeliveryNotesPage() {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : "Failed to load delivery notes");
+          setError(err instanceof ApiError ? err.message : c.loadError);
         }
       })
       .finally(() => {
@@ -69,12 +75,15 @@ export default function DeliveryNotesPage() {
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch every note for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clientName = useMemo(() => {
     const byId = new Map(clients.map((client) => [client.id, client.name]));
-    return (id: string) => byId.get(id) ?? "Unknown contact";
-  }, [clients]);
+    return (id: string) => byId.get(id) ?? c.unknownContact;
+  }, [clients, c.unknownContact]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -129,13 +138,15 @@ export default function DeliveryNotesPage() {
     <div className="space-y-6" onClick={() => setMenu(null)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Delivery notes</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
           {!loading ? (
             <p className="mt-1 text-sm font-medium text-foreground">
-              {notes.length} delivery note{notes.length === 1 ? "" : "s"}
+              {format(notes.length === 1 ? c.countOne : c.countOther, {
+                count: notes.length,
+              })}
             </p>
           ) : null}
-          <p className="mt-1 text-sm text-muted">What was handed over, and when.</p>
+          <p className="mt-1 text-sm text-muted">{c.description}</p>
         </div>
 
         <Link
@@ -143,14 +154,14 @@ export default function DeliveryNotesPage() {
           className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700"
         >
           <PlusIcon className="size-4" />
-          Create delivery note
+          {c.create}
         </Link>
       </header>
 
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -158,7 +169,7 @@ export default function DeliveryNotesPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -182,14 +193,14 @@ export default function DeliveryNotesPage() {
                     : "text-muted hover:bg-slate-100 hover:text-foreground",
                 )}
               >
-                {name}
+                {c.tabs[name]}
                 <span className="ml-1.5 text-xs opacity-70">{counts[name]}</span>
               </button>
             ))}
           </div>
 
           <label className="relative">
-            <span className="sr-only">Search delivery notes</span>
+            <span className="sr-only">{c.searchLabel}</span>
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
             <input
               value={query}
@@ -197,7 +208,7 @@ export default function DeliveryNotesPage() {
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Search number, customer, subject…"
+              placeholder={c.searchPlaceholder}
               className="h-9 w-64 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -207,12 +218,12 @@ export default function DeliveryNotesPage() {
           <table className="w-full min-w-[820px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
-                <Th className="w-36">Status</Th>
-                <Th className="w-32">No.</Th>
-                <Th>Customer / Subject</Th>
-                <Th className="w-36">Delivery date</Th>
-                <Th className="w-36 text-right">Amount (net)</Th>
-                <Th className="w-16 text-right">Actions</Th>
+                <Th className="w-36">{c.colStatus}</Th>
+                <Th className="w-32">{c.colNumber}</Th>
+                <Th>{c.colCustomer}</Th>
+                <Th className="w-36">{c.colDeliveryDate}</Th>
+                <Th className="w-36 text-right">{c.colAmountNet}</Th>
+                <Th className="w-16 text-right">{c.colActions}</Th>
               </tr>
             </thead>
             <tbody>
@@ -220,10 +231,10 @@ export default function DeliveryNotesPage() {
                 <tr>
                   <td colSpan={6} className="px-4 py-16 text-center">
                     <p className="text-sm font-medium text-foreground">
-                      {loading ? "Loading delivery notes…" : "Nothing matches those filters"}
+                      {loading ? c.loadingTitle : c.filteredTitle}
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      {loading ? "Fetching from the API." : "Try a different tab or clear the search."}
+                      {loading ? c.loadingHint : c.filteredHint}
                     </p>
                   </td>
                 </tr>
@@ -299,7 +310,7 @@ export default function DeliveryNotesPage() {
                 setPageSize(Number(event.target.value));
                 setPage(1);
               }}
-              aria-label="Rows per page"
+              aria-label={c.rowsPerPage}
               className="h-8 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
               {PAGE_SIZES.map((size) => (
@@ -310,19 +321,19 @@ export default function DeliveryNotesPage() {
             </select>
             <p className="text-sm text-muted">
               {filtered.length === 0
-                ? "No entries"
+                ? t.table.noEntries
                 : `Showing ${firstRow} – ${lastRow} of ${filtered.length} entries`}
             </p>
           </div>
 
           <div className="flex items-center gap-1">
-            <PageBtn label="First" disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
-            <PageBtn label="Previous" disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
+            <PageBtn label={c.first} disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
+            <PageBtn label={t.table.previous} disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
             <span className="px-2 text-sm text-muted">
               {current} / {pageCount}
             </span>
-            <PageBtn label="Next" disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
-            <PageBtn label="Last" disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
+            <PageBtn label={t.table.next} disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
+            <PageBtn label={c.last} disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
           </div>
         </div>
       </section>
@@ -343,33 +354,33 @@ export default function DeliveryNotesPage() {
                     href={`/orders/delivery-notes/${note.id}`}
                     className="block px-4 py-2 text-sm text-foreground hover:bg-slate-50"
                   >
-                    View delivery note
+                    {c.view}
                   </Link>
                   {/* Only transitions the server accepts are offered. */}
                   {note.status === "draft" ? (
                     <MenuButton
                       onClick={() =>
-                        act(note, markDeliveryNoteSent, "Could not mark this note as sent")
+                        act(note, markDeliveryNoteSent, c.markSentError)
                       }
                     >
-                      Mark as sent
+                      {c.markSent}
                     </MenuButton>
                   ) : null}
                   {note.status !== "delivered" && note.status !== "cancelled" ? (
                     <MenuButton
                       onClick={() =>
-                        act(note, markDeliveryNoteDelivered, "Could not mark this note delivered")
+                        act(note, markDeliveryNoteDelivered, c.markDeliveredError)
                       }
                     >
-                      Mark as delivered
+                      {c.markDelivered}
                     </MenuButton>
                   ) : null}
                   {note.status !== "cancelled" ? (
                     <MenuButton
                       tone="danger"
-                      onClick={() => act(note, cancelDeliveryNote, "Could not cancel this note")}
+                      onClick={() => act(note, cancelDeliveryNote, c.cancelError)}
                     >
-                      Cancel delivery note
+                      {c.cancelNote}
                     </MenuButton>
                   ) : null}
                 </div>
@@ -384,28 +395,28 @@ export default function DeliveryNotesPage() {
 
 /** Shown until the first delivery note exists. */
 function FirstRun() {
+  const c = useT().deliveryNotes;
   return (
     <div className="mx-auto max-w-3xl py-16 text-center">
       <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-        Create your first delivery note.
+        {c.firstRunTitle}
       </h1>
 
       <ul className="mt-8 flex flex-wrap items-start justify-center gap-x-8 gap-y-3 text-sm text-foreground">
-        <Benefit>Show customers exactly what was handed over</Benefit>
-        <Benefit>Raise one from an offer or an invoice</Benefit>
-        <Benefit>Paperless, or printed for the site</Benefit>
+        <Benefit>{c.benefit1}</Benefit>
+        <Benefit>{c.benefit2}</Benefit>
+        <Benefit>{c.benefit3}</Benefit>
       </ul>
 
       <Link
         href="/orders/delivery-notes/new"
         className="mt-10 inline-flex h-11 items-center rounded-lg bg-slate-800 px-6 text-sm font-medium text-white transition-colors hover:bg-slate-900"
       >
-        Create delivery note
+        {c.create}
       </Link>
 
       <p className="mx-auto mt-10 max-w-xl border-t border-border pt-6 text-sm text-muted">
-        A delivery note is not an invoice. Nothing is owed because you issued one, and it never
-        turns into a bill — it is the evidence of what arrived when a customer asks months later.
+        {c.firstRunNote}
       </p>
     </div>
   );

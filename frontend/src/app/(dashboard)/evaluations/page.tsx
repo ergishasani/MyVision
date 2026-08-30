@@ -1,12 +1,17 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function EvaluationsPage() {
+  const p = useT().scaffold.hubs.evaluations;
+
   return (
-    <PageShell title="Evaluations" description="Reports and accounting summaries.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Reports" description="Revenue, outstanding balances, clients, projects, and tax." />
-        <Panel title="SuSa" description="Trial balance across accounting accounts." />
-        <Panel title="BWA" description="Business assessment: revenue against costs." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
+        <Panel title={p.panels.p1.title} description={p.panels.p1.description} />
+        <Panel title={p.panels.p2.title} description={p.panels.p2.description} />
       </PanelGrid>
     </PageShell>
   );

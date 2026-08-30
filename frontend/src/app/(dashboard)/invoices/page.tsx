@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { ApiError } from "@/lib/api/client";
 import { listClients } from "@/lib/api/dashboard";
 import { listInvoices } from "@/lib/api/invoices";
@@ -16,17 +18,9 @@ import {
 } from "@/components/layout/page-shell";
 import { daysOverdue, formatDate, formatMoney } from "@/lib/utils/format";
 
-const TABS = ["All", "Draft", "Sent", "Unpaid", "Overdue", "Paid", "Cancelled"] as const;
-
-const COLUMNS = [
-  { key: "status", label: "Status" },
-  { key: "number", label: "Invoice no." },
-  { key: "client", label: "Client" },
-  { key: "issued", label: "Issue date" },
-  { key: "due", label: "Due date" },
-  { key: "total", label: "Total", numeric: true },
-  { key: "balance", label: "Balance", numeric: true },
-];
+/** Filter keys. Deliberately not the visible labels — those change with the language. */
+const TABS = ["all", "draft", "sent", "unpaid", "overdue", "paid", "cancelled"] as const;
+type TabKey = (typeof TABS)[number];
 
 /** Statuses that still owe money, used for the outstanding figure and the Unpaid tab. */
 const OPEN_STATUSES = new Set(["sent", "unpaid", "partially_paid", "overdue"]);
@@ -46,19 +40,19 @@ function isOverdue(invoice: Invoice) {
 
 function matchesTab(invoice: Invoice, tab: string) {
   switch (tab) {
-    case "All":
+    case "all":
       return true;
-    case "Draft":
+    case "draft":
       return invoice.status === "draft";
-    case "Sent":
+    case "sent":
       return invoice.status === "sent";
-    case "Unpaid":
+    case "unpaid":
       return OPEN_STATUSES.has(invoice.status);
-    case "Overdue":
+    case "overdue":
       return isOverdue(invoice) || invoice.status === "overdue";
-    case "Paid":
+    case "paid":
       return invoice.status === "paid";
-    case "Cancelled":
+    case "cancelled":
       return invoice.status === "cancelled";
     default:
       return true;
@@ -66,11 +60,12 @@ function matchesTab(invoice: Invoice, tab: string) {
 }
 
 export default function InvoicesPage() {
+  const t = useT();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<string>("All");
+  const [tab, setTab] = useState<TabKey | string>("all");
 
   useEffect(() => {
     Promise.all([listInvoices(), listClients()])
@@ -79,10 +74,31 @@ export default function InvoicesPage() {
         setClients(clientList);
       })
       .catch((err: unknown) => {
-        setError(err instanceof ApiError ? err.message : "Failed to load invoices");
+        setError(err instanceof ApiError ? err.message : t.invoices.loadError);
       })
       .finally(() => setLoading(false));
+    // The dictionary is only read for the failure message; re-running on a language switch would
+    // refetch every invoice for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const columns = useMemo(
+    () => [
+      { key: "status", label: t.invoices.columns.status },
+      { key: "number", label: t.invoices.columns.number },
+      { key: "client", label: t.invoices.columns.client },
+      { key: "issued", label: t.invoices.columns.issued },
+      { key: "due", label: t.invoices.columns.due },
+      { key: "total", label: t.invoices.columns.total, numeric: true },
+      { key: "balance", label: t.invoices.columns.balance, numeric: true },
+    ],
+    [t],
+  );
+
+  const tabItems = useMemo(
+    () => TABS.map((key) => ({ key, label: t.invoices.tabs[key] })),
+    [t],
+  );
 
   const clientName = useMemo(() => {
     const byId = new Map(clients.map((c) => [c.id, c.name]));
@@ -137,7 +153,7 @@ export default function InvoicesPage() {
                 <span className={overdue ? "text-red-600" : undefined}>
                   {formatDate(invoice.dueDate)}
                   {overdue && late !== null ? (
-                    <span className="ml-1 text-xs">({late}d late)</span>
+                    <span className="ml-1 text-xs">{format(t.invoices.daysLate, { days: late })}</span>
                   ) : null}
                 </span>
               </Cell>
@@ -155,36 +171,40 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Invoices"
+        title={t.invoices.title}
         summary={
           loading || outstanding === 0
             ? undefined
-            : `Outstanding: ${formatMoney(outstanding, currency)}`
+            : format(t.invoices.outstanding, {
+                amount: formatMoney(outstanding, currency),
+              })
         }
-        description="Issue invoices and monitor payment status."
-        action={{ label: "Write an invoice", href: "/invoices/new" }}
+        description={t.invoices.description}
+        action={{ label: t.invoices.writeInvoice, href: "/invoices/new" }}
       />
 
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-medium text-red-700">Could not load invoices</p>
+          <p className="text-sm font-medium text-red-700">{t.invoices.errorHeading}</p>
           <p className="mt-1 text-sm text-red-600">{error}</p>
         </div>
       ) : null}
 
       <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <TabBar tabs={[...TABS]} value={tab} onChange={setTab} counts={counts} />
+        <TabBar tabs={tabItems} value={tab} onChange={setTab} counts={counts} />
         <DataTable
-          columns={COLUMNS}
+          columns={columns}
           rows={rows}
           total={visible.length}
-          emptyTitle={loading ? "Loading invoices…" : "No invoices here"}
+          emptyTitle={loading ? t.invoices.loadingTitle : t.invoices.emptyTitle}
           emptyHint={
             loading
-              ? "Fetching your invoices from the API."
-              : tab === "All"
-                ? "Create an invoice, or convert an accepted quote into one."
-                : `No invoices match the ${tab.toLowerCase()} filter.`
+              ? t.invoices.loadingHint
+              : tab === "all"
+                ? t.invoices.emptyAllHint
+                : format(t.invoices.emptyFilterHint, {
+                    filter: t.invoices.tabs[tab as TabKey] ?? tab,
+                  })
           }
         />
       </section>

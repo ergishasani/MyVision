@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function OrderConfirmationsPage() {
+  const p = useT().pages.ordersConfirmations;
+
   return (
     <PageShell
-      title="Order confirmations"
-      description="Confirm an accepted offer before work begins."
-      tabs={["All", "Draft", "Sent"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.draft, p.tabs.sent]}
       columns={[
-        { key: "status", label: "Status" },
-        { key: "number", label: "No." },
-        { key: "client", label: "Client" },
-        { key: "date", label: "Date" },
-        { key: "amount", label: "Amount", numeric: true },
+        { key: "status", label: p.columns.status },
+        { key: "number", label: p.columns.number },
+        { key: "client", label: p.columns.client },
+        { key: "date", label: p.columns.date },
+        { key: "amount", label: p.columns.amount, numeric: true },
       ]}
-      emptyTitle="No order confirmations"
-      emptyHint="Confirmations are created from an accepted offer. Nothing is stored for them yet."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

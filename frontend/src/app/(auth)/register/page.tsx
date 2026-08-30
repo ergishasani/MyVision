@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
 import { ApiError } from "@/lib/api/client";
 import { register } from "@/lib/api/auth";
 import { AuthFormHeader, AuthSplitLayout } from "@/components/auth/auth-split-layout";
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
+  const t = useT();
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -35,7 +37,7 @@ export default function RegisterPage() {
       });
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to create account");
+      setError(err instanceof ApiError ? err.message : t.auth.register.failed);
     } finally {
       setLoading(false);
     }
@@ -44,17 +46,17 @@ export default function RegisterPage() {
   return (
     <AuthSplitLayout>
       <AuthFormHeader
-        title="Create Your Account"
-        description="Enter your details to register your company and start managing projects."
+        title={t.auth.register.title}
+        description={t.auth.register.description}
       />
 
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
+          <Label htmlFor="fullName">{t.auth.register.fullName}</Label>
           <Input
             id="fullName"
             autoComplete="name"
-            placeholder="John Smith"
+            placeholder={t.auth.register.fullNamePlaceholder}
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
             required
@@ -63,24 +65,25 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <Label htmlFor="companyName">
-            Company Name <span className="text-muted">(Optional)</span>
+            {t.auth.register.companyName}{" "}
+            <span className="text-muted">{t.auth.register.optional}</span>
           </Label>
           <Input
             id="companyName"
             autoComplete="organization"
-            placeholder="Acme Construction Ltd."
+            placeholder={t.auth.register.companyPlaceholder}
             value={companyName}
             onChange={(event) => setCompanyName(event.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t.auth.email}</Label>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="you@company.com"
+            placeholder={t.auth.emailPlaceholder}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
@@ -88,11 +91,11 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t.auth.password}</Label>
           <PasswordInput
             id="password"
             autoComplete="new-password"
-            placeholder="At least 8 characters"
+            placeholder={t.auth.register.passwordPlaceholder}
             minLength={8}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -103,20 +106,20 @@ export default function RegisterPage() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
         <Button type="submit" className="h-11 w-full text-base" disabled={loading}>
-          {loading ? "Creating account..." : "Register"}
+          {loading ? t.auth.register.submitting : t.auth.register.submit}
         </Button>
       </form>
 
       <AuthSocialSection
-        label="Or Register With"
+        label={t.auth.register.socialLabel}
         companyName={companyName}
         onError={setError}
       />
 
       <p className="mt-8 text-center text-sm text-muted">
-        Already Have An Account?{" "}
+        {t.auth.register.haveAccount}{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Log In.
+          {t.auth.register.logIn}
         </Link>
       </p>
     </AuthSplitLayout>

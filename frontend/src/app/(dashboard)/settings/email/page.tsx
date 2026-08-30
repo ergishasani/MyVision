@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function EmailSettingsPage() {
+  const s = useT().settings.stubs.email;
+
   return (
-    <PageShell title="Email settings" description="Manage sender identity, verification emails, password reset emails, and invoice delivery templates.">
+    <PageShell title={s.title} description={s.description}>
       <PanelGrid>
-        <Panel title="Sending domain" description="The verified domain outgoing mail is sent from." />
-        <Panel title="Templates" description="Wording for invoice, reminder, and verification emails." />
+        <Panel title={s.a.title} description={s.a.description} />
+        <Panel title={s.b.title} description={s.b.description} />
       </PanelGrid>
     </PageShell>
   );

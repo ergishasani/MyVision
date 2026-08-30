@@ -1,12 +1,17 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function BankPage() {
+  const p = useT().scaffold.hubs.bank;
+
   return (
-    <PageShell title="Bank" description="Account movements, cash book, and unmatched entries.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Content" description="Payments recorded against your invoices." />
-        <Panel title="Cash book" description="Cash taken and paid out, outside the bank." />
-        <Panel title="Incomplete" description="Movements that have not been matched to a document." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
+        <Panel title={p.panels.p1.title} description={p.panels.p1.description} />
+        <Panel title={p.panels.p2.title} description={p.panels.p2.description} />
       </PanelGrid>
     </PageShell>
   );

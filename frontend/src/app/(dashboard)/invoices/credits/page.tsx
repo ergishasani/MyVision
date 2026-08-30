@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function CreditNotesPage() {
+  const p = useT().pages.invoicesCredits;
+
   return (
     <PageShell
-      title="Credits"
-      description="Credit notes and cancellation invoices."
-      tabs={["All", "Draft", "Issued"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.draft, p.tabs.issued]}
       columns={[
-        { key: "status", label: "Status" },
-        { key: "number", label: "Credit no." },
-        { key: "invoice", label: "Against invoice" },
-        { key: "client", label: "Client" },
-        { key: "amount", label: "Amount", numeric: true },
+        { key: "status", label: p.columns.status },
+        { key: "number", label: p.columns.number },
+        { key: "invoice", label: p.columns.invoice },
+        { key: "client", label: p.columns.client },
+        { key: "amount", label: p.columns.amount, numeric: true },
       ]}
-      emptyTitle="No credit notes"
-      emptyHint="A credit note reverses an issued invoice. The compliance rules for this are in docs/invoice-compliance-checklist.md."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

@@ -2,29 +2,33 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { ApiError } from "@/lib/api/client";
 import { archiveProduct, deleteProduct, listProducts } from "@/lib/api/products";
 import type { Product } from "@/types/api";
 import { ProductDialog } from "@/components/products/product-dialog";
-import { UNIT_LABELS } from "@/lib/utils/product-units";
 import { formatMoney } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 
-const TABS = ["All", "Article", "Service"] as const;
+/** Filter keys, deliberately not the visible labels — those change with the language. */
+const TABS = ["all", "article", "service"] as const;
 type Tab = (typeof TABS)[number];
 
 const PAGE_SIZES = [25, 50, 100];
 
 function matchesTab(product: Product, tab: Tab) {
-  if (tab === "All") return true;
-  return tab === "Article" ? product.category === "article" : product.category === "service";
+  if (tab === "all") return true;
+  return tab === "article" ? product.category === "article" : product.category === "service";
 }
 
 export default function ProductsPage() {
+  const t = useT();
+  const c = t.products;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("All");
+  const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -43,9 +47,12 @@ export default function ProductsPage() {
     listProducts()
       .then(setProducts)
       .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load products"),
+        setError(err instanceof ApiError ? err.message : c.loadError),
       )
       .finally(() => setLoading(false));
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the whole catalogue for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -85,7 +92,7 @@ export default function ProductsPage() {
       await archiveProduct(product.id);
     } catch (err) {
       setProducts(previous);
-      setError(err instanceof ApiError ? err.message : "Could not archive the product");
+      setError(err instanceof ApiError ? err.message : c.archiveError);
     }
   }
 
@@ -98,7 +105,7 @@ export default function ProductsPage() {
       await deleteProduct(product.id);
     } catch (err) {
       setProducts(previous);
-      setError(err instanceof ApiError ? err.message : "Could not delete the product");
+      setError(err instanceof ApiError ? err.message : c.deleteError);
     }
   }
 
@@ -106,14 +113,16 @@ export default function ProductsPage() {
     <div className="space-y-6" onClick={() => setMenu(null)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Products</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
           {!loading ? (
             <p className="mt-1 text-sm font-medium text-foreground">
-              {products.length} product{products.length === 1 ? "" : "s"}
+              {format(products.length === 1 ? c.countOne : c.countOther, {
+                count: products.length,
+              })}
             </p>
           ) : null}
           <p className="mt-1 text-sm text-muted">
-            Reusable priced lines, so a quote does not mean retyping the same item.
+            {c.description}
           </p>
         </div>
 
@@ -124,7 +133,7 @@ export default function ProductsPage() {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700"
           >
             <PlusIcon className="size-4" />
-            Create product
+            {c.createProduct}
           </button>
         </div>
       </header>
@@ -132,7 +141,7 @@ export default function ProductsPage() {
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -140,7 +149,7 @@ export default function ProductsPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -164,14 +173,14 @@ export default function ProductsPage() {
                     : "text-muted hover:bg-slate-100 hover:text-foreground",
                 )}
               >
-                {name}
+                {c.tabs[name]}
                 <span className="ml-1.5 text-xs opacity-70">{counts[name]}</span>
               </button>
             ))}
           </div>
 
           <label className="relative">
-            <span className="sr-only">Search products</span>
+            <span className="sr-only">{c.searchLabel}</span>
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
             <input
               value={query}
@@ -179,7 +188,7 @@ export default function ProductsPage() {
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Search name or number…"
+              placeholder={c.searchPlaceholder}
               className="h-9 w-64 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -189,13 +198,13 @@ export default function ProductsPage() {
           <table className="w-full min-w-[820px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
-                <th scope="col" className="w-24 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">No.</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Name</th>
-                <th scope="col" className="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Category</th>
-                <th scope="col" className="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Unit</th>
-                <th scope="col" className="w-20 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">VAT</th>
-                <th scope="col" className="w-40 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">Price (net)</th>
-                <th scope="col" className="w-28 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">Actions</th>
+                <th scope="col" className="w-24 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.number}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.name}</th>
+                <th scope="col" className="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.category}</th>
+                <th scope="col" className="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.unit}</th>
+                <th scope="col" className="w-20 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.vat}</th>
+                <th scope="col" className="w-40 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.priceNet}</th>
+                <th scope="col" className="w-28 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.columns.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -208,17 +217,17 @@ export default function ProductsPage() {
                       </div>
                       <p className="mt-3 text-sm font-medium text-foreground">
                         {loading
-                          ? "Loading products…"
+                          ? c.loadingTitle
                           : products.length === 0
-                            ? "No products yet"
-                            : "Nothing matches those filters"}
+                            ? c.emptyTitle
+                            : c.filteredTitle}
                       </p>
                       <p className="mt-1 text-sm text-muted">
                         {loading
-                          ? "Fetching from the API."
+                          ? c.loadingHint
                           : products.length === 0
-                            ? "Add the items and services you sell, and they become one click on a quote."
-                            : "Try a different tab or clear the search."}
+                            ? c.emptyHint
+                            : c.filteredHint}
                       </p>
                     </div>
                   </td>
@@ -244,10 +253,10 @@ export default function ProductsPage() {
                             : "bg-slate-100 text-slate-700",
                         )}
                       >
-                        {product.category === "service" ? "Service" : "Article"}
+                        {product.category === "service" ? c.categoryService : c.categoryArticle}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-muted">{UNIT_LABELS[product.unit]}</td>
+                    <td className="px-4 py-3 text-muted">{t.units[product.unit]}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-muted">
                       {Number(product.taxRate)}%
                     </td>
@@ -316,7 +325,7 @@ export default function ProductsPage() {
                 setPageSize(Number(event.target.value));
                 setPage(1);
               }}
-              aria-label="Rows per page"
+              aria-label={c.rowsPerPage}
               className="h-8 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
               {PAGE_SIZES.map((size) => (
@@ -327,19 +336,23 @@ export default function ProductsPage() {
             </select>
             <p className="text-sm text-muted">
               {filtered.length === 0
-                ? "No entries"
-                : `Showing ${firstRow} – ${lastRow} of ${filtered.length} entries`}
+                ? t.table.noEntries
+                : format(c.showing, {
+                    first: firstRow,
+                    last: lastRow,
+                    total: filtered.length,
+                  })}
             </p>
           </div>
 
           <div className="flex items-center gap-1">
-            <PageBtn label="First" disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
-            <PageBtn label="Previous" disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
+            <PageBtn label={c.first} disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
+            <PageBtn label={t.table.previous} disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
             <span className="px-2 text-sm text-muted">
               {current} / {pageCount}
             </span>
-            <PageBtn label="Next" disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
-            <PageBtn label="Last" disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
+            <PageBtn label={t.table.next} disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
+            <PageBtn label={c.last} disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
           </div>
         </div>
       </section>
@@ -408,37 +421,43 @@ export default function ProductsPage() {
 
       {confirmArchive ? (
         <ConfirmDialog
-          title="Archive this product?"
-          confirmLabel="Archive"
+          title={c.archive.title}
+          confirmLabel={c.archive.confirm}
           tone="neutral"
           onCancel={() => setConfirmArchive(null)}
           onConfirm={() => handleArchive(confirmArchive)}
         >
-          <span className="font-medium text-foreground">{confirmArchive.name}</span> is hidden from
-          the catalogue but kept, so you can still see what it was. Use this for something you have
-          stopped selling.
+          <NamedSentence template={c.archive.body} name={confirmArchive.name} />
         </ConfirmDialog>
       ) : null}
 
       {confirmDelete ? (
         <ConfirmDialog
-          title="Delete this product?"
-          confirmLabel="Delete permanently"
+          title={c.delete.title}
+          confirmLabel={c.delete.confirm}
           tone="danger"
           onCancel={() => setConfirmDelete(null)}
           onConfirm={() => handleDelete(confirmDelete)}
         >
-          <span className="font-medium text-foreground">{confirmDelete.name}</span> and its
-          alternative units are removed for good. This cannot be undone.
+          <NamedSentence template={c.delete.body} name={confirmDelete.name} />
           {/* Worth saying, because the equivalent warning on a contact is the opposite. */}
-          <span className="mt-3 block">
-            Quotes and invoices are unaffected — a line keeps the description and price it was
-            written with rather than pointing at this entry.
-          </span>
+          <span className="mt-3 block">{c.delete.note}</span>
         </ConfirmDialog>
       ) : null}
 
     </div>
+  );
+}
+
+/** A sentence with the product's name emphasised inside it. See the contacts page for why. */
+function NamedSentence({ template, name }: { template: string; name: string }) {
+  const [before, after] = template.split("{name}");
+  return (
+    <>
+      {before}
+      <span className="font-medium text-foreground">{name}</span>
+      {after}
+    </>
   );
 }
 
@@ -458,11 +477,12 @@ function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Cancel"
+        aria-label={t.common.cancel}
         onClick={onCancel}
         className="fixed inset-0 cursor-default bg-slate-900/40"
       />

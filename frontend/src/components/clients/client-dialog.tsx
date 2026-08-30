@@ -11,14 +11,18 @@ import {
   type ContactDetailInput,
 } from "@/lib/api/clients";
 import type { Client, DiscountUnit } from "@/types/api";
+import { useT } from "@/components/providers/locale-provider";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { format } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils/cn";
 
+/** Section keys, deliberately not the visible labels — those change with the language. */
 const SECTIONS = [
-  "Address",
-  "Contact details",
-  "Payment information",
-  "Terms and conditions",
-  "Notes",
+  "address",
+  "contactDetails",
+  "paymentInformation",
+  "termsAndConditions",
+  "notes",
 ] as const;
 type Section = (typeof SECTIONS)[number];
 
@@ -30,28 +34,27 @@ type Section = (typeof SECTIONS)[number];
  * on a letter to a German customer.
  */
 const SALUTATIONS = ["", "Frau", "Herr", "Divers"];
-const SALUTATION_LABELS: Record<string, string> = {
-  "": "No salutation",
-  Frau: "Ms (Frau)",
-  Herr: "Mr (Herr)",
-  Divers: "Non-binary (Divers)",
-};
 
-const ROLES = [
-  ["customer", "Customer"],
-  ["supplier", "Supplier"],
-  ["partner", "Partner"],
-  ["prospect", "Interested party"],
-] as const;
+/** Maps each stored salutation to its label in the active language. */
+const salutationLabels = (d: Dictionary["clientDialog"]): Record<string, string> => ({
+  "": d.salutations.none,
+  Frau: d.salutations.frau,
+  Herr: d.salutations.herr,
+  Divers: d.salutations.divers,
+});
 
+/** Stored role values. Their labels come from the dictionary. */
+const ROLES = ["customer", "supplier", "partner", "prospect"] as const;
+
+/** Stored contact-detail labels. Their wording comes from the dictionary. */
 const DETAIL_LABELS = [
-  ["work", "Work"],
-  ["mobile", "Mobile"],
-  ["fax", "Fax"],
-  ["personal", "Private"],
-  ["billing", "Billing address"],
-  ["newsletter", "Newsletter"],
-  ["other", "Other"],
+  "work",
+  "mobile",
+  "fax",
+  "personal",
+  "billing",
+  "newsletter",
+  "other",
 ] as const;
 
 const EMPTY: ClientInput = {
@@ -157,8 +160,10 @@ export function ClientDialog({
   // Seeded once on mount rather than synchronised by an effect. The parent gives the dialog a
   // key of the contact's id, so opening a different contact remounts it with fresh values —
   // which is React's own answer to "reset state when the subject changes".
+  const t = useT();
+  const d = t.clientDialog;
   const [form, setForm] = useState<ClientInput>(() => (client ? seedFrom(client) : EMPTY));
-  const [section, setSection] = useState<Section>("Address");
+  const [section, setSection] = useState<Section>("address");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextNumber, setNextNumber] = useState<number | null>(null);
@@ -207,7 +212,7 @@ export function ClientDialog({
 
   function reset() {
     setForm(client ? seedFrom(client) : EMPTY);
-    setSection("Address");
+    setSection("address");
     setError(null);
     setDetails(
       client && client.contactDetails.length > 0
@@ -222,11 +227,11 @@ export function ClientDialog({
   async function submit(keepOpen: boolean) {
     const isPerson = form.type === "individual";
     if (isPerson && !(form.lastName ?? "").trim()) {
-      setError("A last name is required.");
+      setError(d.lastNameRequired);
       return;
     }
     if (!isPerson && !form.name.trim()) {
-      setError("An organisation name is required.");
+      setError(d.orgNameRequired);
       return;
     }
     setSaving(true);
@@ -265,8 +270,8 @@ export function ClientDialog({
         err instanceof ApiError
           ? err.message
           : client
-            ? "Could not save the contact"
-            : "Could not create the contact",
+            ? d.saveError
+            : d.createError,
       );
     } finally {
       setSaving(false);
@@ -282,15 +287,15 @@ export function ClientDialog({
         reset();
         onClose();
       }}
-      title={editing ? "Edit contact" : "Create contact"}
+      title={editing ? d.titleEdit : d.titleCreate}
       headerAside={
         /* Pinned rather than sitting in the body: it changes which fields exist, so it has to
            stay reachable once the form is scrolled. */
         <div className="inline-flex rounded-lg border border-border p-1">
           {(
             [
-              ["individual", "Person"],
-              ["business", "Organisation"],
+              ["individual", d.typePerson],
+              ["business", d.typeOrganisation],
             ] as const
           ).map(([value, label]) => (
             <button
@@ -321,7 +326,7 @@ export function ClientDialog({
             }}
             className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
           >
-            Cancel
+            {d.cancel}
           </button>
           {/* No "and new" when editing: the record already exists. */}
           {!editing ? (
@@ -331,7 +336,7 @@ export function ClientDialog({
               onClick={() => submit(true)}
               className="h-10 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-slate-50 disabled:opacity-60"
             >
-              Create and new
+              {d.createAndNew}
             </button>
           ) : null}
           <button
@@ -340,7 +345,13 @@ export function ClientDialog({
             onClick={() => submit(false)}
             className="h-10 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-60"
           >
-            {saving ? (editing ? "Saving…" : "Creating…") : editing ? "Save changes" : "Create"}
+            {saving
+              ? editing
+                ? d.saving
+                : d.creating
+              : editing
+                ? d.saveChanges
+                : d.create}
           </button>
         </>
       }
@@ -348,67 +359,67 @@ export function ClientDialog({
       {isOrganisation ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Name of the organisation"
+            label={d.orgName}
             required
             value={form.name}
             onChange={(v) => set("name", v)}
-            placeholder="Acme Construction Ltd"
+            placeholder={d.orgNamePlaceholder}
           />
           <Field
-            label="Contact person"
+            label={d.contactPerson}
             value={form.contactName ?? ""}
             onChange={(v) => set("contactName", v)}
-            placeholder="Who you deal with"
+            placeholder={d.contactPersonPlaceholder}
           />
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
-            label="Salutation"
+            label={d.salutation}
             value={form.salutation ?? ""}
             onChange={(v) => set("salutation", v)}
             options={SALUTATIONS}
-            labels={SALUTATION_LABELS}
+            labels={salutationLabels(d)}
           />
           <Field
-            label="Title"
+            label={d.titleField}
             value={form.academicTitle ?? ""}
             onChange={(v) => set("academicTitle", v)}
-            placeholder="Dr."
+            placeholder={d.titlePlaceholder}
           />
           <Field
-            label="First name"
+            label={d.firstName}
             value={form.firstName ?? ""}
             onChange={(v) => set("firstName", v)}
-            placeholder="Anna"
+            placeholder={d.firstNamePlaceholder}
           />
           <Field
-            label="Last name"
+            label={d.lastName}
             required
             value={form.lastName ?? ""}
             onChange={(v) => set("lastName", v)}
-            placeholder="Schmidt"
+            placeholder={d.lastNamePlaceholder}
           />
           <Field
-            label="Name suffix"
+            label={d.nameSuffix}
             value={form.nameSuffix ?? ""}
             onChange={(v) => set("nameSuffix", v)}
-            placeholder="Jr."
+            placeholder={d.nameSuffixPlaceholder}
           />
           <div className="sm:col-span-2">
             <Field
-              label="Organisation"
+              label={d.organisation}
               value={form.contactName ?? ""}
               onChange={(v) => set("contactName", v)}
-              placeholder="Where they work"
+              placeholder={d.organisationPlaceholder}
             />
           </div>
           <div className="sm:col-span-2">
             <Field
-              label="Position"
+              label={d.position}
               value={form.position ?? ""}
               onChange={(v) => set("position", v)}
-              placeholder="Head of procurement"
+              placeholder={d.positionPlaceholder}
             />
           </div>
         </div>
@@ -420,34 +431,34 @@ export function ClientDialog({
         </p>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Field
-            label="Customer No."
+            label={d.customerNo}
             value={form.customerNumber != null ? String(form.customerNumber) : ""}
             onChange={(v) => set("customerNumber", v.trim() === "" ? null : Number(v))}
             placeholder={nextNumber != null ? String(nextNumber) : "auto"}
             hint={
               // An existing contact already has its number; only a new one is waiting for one.
               editing
-                ? "Changing this renumbers the contact in your books."
+                ? d.renumberHint
                 : nextNumber != null
                   ? `Blank uses ${nextNumber}`
-                  : "Assigned automatically"
+                  : d.autoAssigned
             }
           />
           <Select
-            label="Type"
+            label={d.typeLabel}
             value={form.contactRole ?? "customer"}
             onChange={(v) => set("contactRole", v)}
-            options={ROLES.map(([value]) => value)}
-            labels={Object.fromEntries(ROLES)}
+            options={[...ROLES]}
+            labels={d.roles}
           />
           <Field
-            label="Debtor No."
+            label={d.debtorNo}
             value={form.debtorNumber ?? ""}
             onChange={(v) => set("debtorNumber", v)}
-            hint="Your accountant's reference"
+            hint={d.accountantRef}
           />
           <Field
-            label="Creditor No."
+            label={d.creditorNo}
             value={form.creditorNumber ?? ""}
             onChange={(v) => set("creditorNumber", v)}
           />
@@ -456,8 +467,8 @@ export function ClientDialog({
 
       <div className="mt-6">
         <Toggle
-          label="E-invoice standard"
-          hint="Send this contact a structured e-invoice (XRechnung) instead of a PDF."
+          label={d.eInvoiceStandard}
+          hint={d.eInvoiceHint}
           checked={Boolean(form.einvoiceStandard)}
           onChange={(v) => set("einvoiceStandard", v)}
         />
@@ -478,124 +489,124 @@ export function ClientDialog({
                 : "border-transparent text-muted hover:text-foreground",
             )}
           >
-            {name}
+            {d.sections[name]}
           </button>
         ))}
       </div>
 
       <div className="pt-5">
-        {section === "Address" ? (
+        {section === "address" ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Street and number" value={form.addressLine1 ?? ""} onChange={(v) => set("addressLine1", v)} />
-            <Field label="Address line 2" value={form.addressLine2 ?? ""} onChange={(v) => set("addressLine2", v)} />
-            <Field label="Postcode" value={form.postalCode ?? ""} onChange={(v) => set("postalCode", v)} placeholder="36119" />
-            <Field label="City" value={form.city ?? ""} onChange={(v) => set("city", v)} placeholder="Berlin" />
-            <Field label="Region" value={form.region ?? ""} onChange={(v) => set("region", v)} />
+            <Field label={d.street} value={form.addressLine1 ?? ""} onChange={(v) => set("addressLine1", v)} />
+            <Field label={d.addressLine2} value={form.addressLine2 ?? ""} onChange={(v) => set("addressLine2", v)} />
+            <Field label={d.postcode} value={form.postalCode ?? ""} onChange={(v) => set("postalCode", v)} placeholder={d.postcodePlaceholder} />
+            <Field label={d.city} value={form.city ?? ""} onChange={(v) => set("city", v)} placeholder={d.cityPlaceholder} />
+            <Field label={d.region} value={form.region ?? ""} onChange={(v) => set("region", v)} />
             <Field
-              label="Country code"
+              label={d.countryCode}
               value={form.countryCode ?? ""}
               onChange={(v) => set("countryCode", v.toUpperCase().slice(0, 2))}
-              placeholder="DE"
-              hint="Two letters, ISO 3166"
+              placeholder={d.countryCodePlaceholder}
+              hint={d.countryHint}
             />
           </div>
         ) : null}
 
-        {section === "Contact details" ? (
+        {section === "contactDetails" ? (
           <div className="space-y-6">
             <DetailGroup
-              title="Telephone"
+              title={d.telephone}
               kind="phone"
               details={details}
               onChange={setDetail}
               onAdd={() => addDetail("phone")}
               onRemove={removeDetail}
-              addLabel="Add phone"
-              placeholder="+49 661 …"
+              addLabel={d.addPhone}
+              placeholder={d.phonePlaceholder}
             />
             <DetailGroup
-              title="Email address"
+              title={d.emailAddress}
               kind="email"
               details={details}
               onChange={setDetail}
               onAdd={() => addDetail("email")}
               onRemove={removeDetail}
-              addLabel="Add email address"
-              placeholder="billing@customer.com"
+              addLabel={d.addEmail}
+              placeholder={d.emailPlaceholder}
               type="email"
             />
             <DetailGroup
-              title="Website"
+              title={d.website}
               kind="website"
               details={details}
               onChange={setDetail}
               onAdd={() => addDetail("website")}
               onRemove={removeDetail}
-              addLabel="Add domain"
-              placeholder="https://customer.com"
+              addLabel={d.addDomain}
+              placeholder={d.websitePlaceholder}
             />
           </div>
         ) : null}
 
-        {section === "Payment information" ? (
+        {section === "paymentInformation" ? (
           <div className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
-                label="IBAN"
+                label={d.iban}
                 value={form.iban ?? ""}
                 onChange={(v) => set("iban", v.toUpperCase())}
-                placeholder="DE89 3704 0044 0532 0130 00"
-                hint="Used when money goes back to them, on a refund or credit note."
+                placeholder={d.ibanPlaceholder}
+                hint={d.ibanHint}
               />
               <Field
-                label="BIC"
+                label={d.bic}
                 value={form.bic ?? ""}
                 onChange={(v) => set("bic", v.toUpperCase())}
-                placeholder="COBADEFFXXX"
+                placeholder={d.bicPlaceholder}
               />
               <Field
-                label="VAT ID"
+                label={d.vatId}
                 value={form.vatNumber ?? ""}
                 onChange={(v) => set("vatNumber", v.toUpperCase())}
-                placeholder="DE123456789"
+                placeholder={d.vatIdPlaceholder}
                 hint="The EU VAT identification number (USt-IdNr.). Required on reverse-charge and intra-EU invoices."
               />
               <Field
-                label="Tax ID number"
+                label={d.taxId}
                 value={form.taxNumber ?? ""}
                 onChange={(v) => set("taxNumber", v)}
-                placeholder="013/815/08154"
+                placeholder={d.taxIdPlaceholder}
                 hint="The domestic tax number from your local tax office (Steuernummer). Not the same as the VAT ID."
               />
             </div>
 
             <Toggle
-              label="Show VAT ID"
-              hint="Prints their VAT ID on documents. Required for reverse charge."
+              label={d.showVatId}
+              hint={d.showVatIdHint}
               checked={Boolean(form.showVatId)}
               onChange={(v) => set("showVatId", v)}
             />
           </div>
         ) : null}
 
-        {section === "Terms and conditions" ? (
+        {section === "termsAndConditions" ? (
           <div className="space-y-5">
             <div>
-              <p className="mb-1 text-sm font-medium text-foreground">Early payment discount</p>
+              <p className="mb-1 text-sm font-medium text-foreground">{d.earlyPaymentDiscount}</p>
               <p className="mb-3 text-xs text-muted">
                 Deducted only if they actually pay inside the window, so the invoice total is
                 unchanged when it is issued. Known in Germany as Skonto.
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <NumberField
-                  label="Discount within (days)"
+                  label={d.discountWithin}
                   value={form.discountDays}
                   onChange={(v) => set("discountDays", v)}
-                  placeholder="10"
+                  placeholder={d.discountWithinPlaceholder}
                   min={0}
                 />
                 <NumberField
-                  label="Discount percent"
+                  label={d.discountPercent}
                   value={form.discountPercent}
                   onChange={(v) => set("discountPercent", v)}
                   placeholder="2.00"
@@ -609,12 +620,12 @@ export function ClientDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <NumberField
-                label="Payment term in days"
+                label={d.paymentTermDays}
                 value={form.paymentTermsDays}
                 onChange={(v) => set("paymentTermsDays", v)}
-                placeholder="Company default"
+                placeholder={d.paymentTermPlaceholder}
                 min={0}
-                hint="Leave blank to follow the company setting."
+                hint={d.paymentTermHint}
               />
               <div>
                 <span className="mb-1.5 block text-sm font-medium text-foreground">
@@ -626,7 +637,7 @@ export function ClientDialog({
                     min={0}
                     step="0.01"
                     value={form.customerDiscount ?? ""}
-                    aria-label="Customer discount"
+                    aria-label={d.customerDiscountAria}
                     onChange={(event) =>
                       set(
                         "customerDiscount",
@@ -638,7 +649,7 @@ export function ClientDialog({
                   {/* The unit sits against the amount because the number means nothing alone. */}
                   <select
                     value={form.customerDiscountUnit ?? "percent"}
-                    aria-label="Customer discount unit"
+                    aria-label={d.customerDiscountUnitAria}
                     onChange={(event) =>
                       set("customerDiscountUnit", event.target.value as DiscountUnit)
                     }
@@ -662,21 +673,21 @@ export function ClientDialog({
                 rows={4}
                 value={form.terms ?? ""}
                 onChange={(event) => set("terms", event.target.value)}
-                placeholder="Payable within 30 days without deduction."
+                placeholder={d.termsPlaceholder}
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </label>
           </div>
         ) : null}
 
-        {section === "Notes" ? (
+        {section === "notes" ? (
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-foreground">Notes</span>
+            <span className="mb-1.5 block text-sm font-medium text-foreground">{d.notesLabel}</span>
             <textarea
               rows={5}
               value={form.notes ?? ""}
               onChange={(event) => set("notes", event.target.value)}
-              placeholder="Internal only — never printed on a document."
+              placeholder={d.notesPlaceholder}
               className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -797,7 +808,9 @@ function Select({
       >
         {options.map((option) => (
           <option key={option} value={option}>
-            {labels?.[option] || option || "No salutation"}
+            {/* `labels` covers every option this is used with, including the empty
+                salutation; falling back to the raw value keeps it generic. */}
+            {labels?.[option] || option}
           </option>
         ))}
       </select>
@@ -832,6 +845,9 @@ function DetailGroup({
   placeholder: string;
   type?: string;
 }) {
+  const t = useT();
+  const d = t.clientDialog;
+
   const rows = details
     .map((row, index) => ({ row, index }))
     .filter(({ row }) => row.kind === kind);
@@ -847,18 +863,18 @@ function DetailGroup({
               value={row.value}
               placeholder={placeholder}
               onChange={(event) => onChange(index, { value: event.target.value })}
-              aria-label={`${title} value`}
+              aria-label={format(d.valueAria, { kind: title })}
               className="h-10 min-w-0 flex-1 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <select
               value={row.label}
               onChange={(event) => onChange(index, { label: event.target.value })}
-              aria-label={`${title} label`}
+              aria-label={format(d.labelAria, { kind: title })}
               className="h-10 w-40 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
-              {DETAIL_LABELS.map(([value, text]) => (
+              {DETAIL_LABELS.map((value) => (
                 <option key={value} value={value}>
-                  {text}
+                  {d.detailLabels[value]}
                 </option>
               ))}
             </select>
@@ -866,8 +882,8 @@ function DetailGroup({
               type="button"
               onClick={() => onRemove(index)}
               disabled={rows.length === 1}
-              aria-label={`Remove this ${title.toLowerCase()}`}
-              title={rows.length === 1 ? "Keep at least one row" : "Remove"}
+              aria-label={format(d.removeThisAria, { kind: title })}
+              title={rows.length === 1 ? d.keepAtLeastOne : d.remove}
               className="grid size-10 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">

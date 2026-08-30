@@ -1,19 +1,24 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function SusaPage() {
+  const p = useT().pages.evaluationsSusa;
+
   return (
     <PageShell
-      title="SuSa"
-      description="Trial balance across accounting accounts."
+      title={p.title}
+      description={p.description}
       columns={[
-        { key: "account", label: "Account" },
-        { key: "name", label: "Name" },
-        { key: "debit", label: "Debit", numeric: true },
-        { key: "credit", label: "Credit", numeric: true },
-        { key: "balance", label: "Balance", numeric: true },
+        { key: "account", label: p.columns.account },
+        { key: "name", label: p.columns.name },
+        { key: "debit", label: p.columns.debit, numeric: true },
+        { key: "credit", label: p.columns.credit, numeric: true },
+        { key: "balance", label: p.columns.balance, numeric: true },
       ]}
-      emptyTitle="No trial balance available"
-      emptyHint="A trial balance needs a double-entry ledger with an SKR account plan. MyVision records invoices and payments, not bookkeeping entries, so there is nothing to total."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

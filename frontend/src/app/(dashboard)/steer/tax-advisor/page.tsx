@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function TaxAdvisorPage() {
+  const p = useT().scaffold.hubs.taxAdvisor;
+
   return (
-    <PageShell title="My tax advisor" description="Share figures with whoever prepares your filings.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Adviser access" description="Who can read your books, and what they can see." />
-        <Panel title="Exports" description="Handing over data in a format an adviser can import." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
+        <Panel title={p.panels.p1.title} description={p.panels.p1.description} />
       </PanelGrid>
     </PageShell>
   );

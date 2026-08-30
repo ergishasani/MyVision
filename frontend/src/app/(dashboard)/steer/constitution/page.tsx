@@ -1,12 +1,17 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function ConstitutionPage() {
+  const p = useT().scaffold.hubs.constitution;
+
   return (
-    <PageShell title="Constitution" description="How this business is set up for tax purposes.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Tax scheme" description="Standard or small-business, which changes the wording on every invoice." />
-        <Panel title="Filing period" description="Monthly or quarterly advance returns." />
-        <Panel title="Obligations" description="E-invoicing duties phase in from 2027; see docs/provider-and-compliance-decisions.md." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
+        <Panel title={p.panels.p1.title} description={p.panels.p1.description} />
+        <Panel title={p.panels.p2.title} description={p.panels.p2.description} />
       </PanelGrid>
     </PageShell>
   );

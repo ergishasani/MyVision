@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function OutstandingReportPage() {
+  const p = useT().pages.reportsOutstanding;
+
   return (
     <PageShell
-      title="Outstanding invoices"
-      description="Monitor unpaid, overdue, and partially paid invoices by client and due date."
-      tabs={["All", "Due soon", "Overdue"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.dueSoon, p.tabs.overdue]}
       columns={[
-        { key: "invoice", label: "Invoice" },
-        { key: "client", label: "Client" },
-        { key: "due", label: "Due date" },
-        { key: "days", label: "Days overdue", numeric: true },
-        { key: "balance", label: "Balance", numeric: true },
+        { key: "invoice", label: p.columns.invoice },
+        { key: "client", label: p.columns.client },
+        { key: "due", label: p.columns.due },
+        { key: "days", label: p.columns.days, numeric: true },
+        { key: "balance", label: p.columns.balance, numeric: true },
       ]}
-      emptyTitle="Nothing outstanding"
-      emptyHint="Unpaid and overdue invoices are listed here with their balances."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }

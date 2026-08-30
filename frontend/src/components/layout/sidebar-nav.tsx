@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
 import { clearSession, getSession } from "@/lib/auth/session";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------------------------------------------------------------------------
@@ -55,107 +57,111 @@ type NavItem = {
   children?: NavChild[];
 };
 
-const PRIMARY_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Overview", Icon: HomeIcon },
+const primaryNav = (t: Dictionary): NavItem[] => [
+  { href: "/dashboard", label: t.nav.overview, Icon: HomeIcon },
   {
     // Opening Orders lands on Offers, because that is the section's real work — the other two
     // screens are downstream of an offer existing. /orders itself redirects here.
     href: "/quotes",
-    label: "Orders",
+    label: t.nav.orders,
     Icon: MailIcon,
     children: [
       // "Offers" is the customer-facing word; the route stays /quotes, which is what the API and
       // every existing link already call them.
-      { href: "/quotes", label: "Offers" },
-      { href: "/orders/confirmations", label: "Order confirmations" },
-      { href: "/orders/delivery-notes", label: "Delivery notes" },
+      { href: "/quotes", label: t.nav.offers },
+      { href: "/orders/confirmations", label: t.nav.orderConfirmations },
+      { href: "/orders/delivery-notes", label: t.nav.deliveryNotes },
     ],
   },
   {
     href: "/invoices",
-    label: "Invoices",
+    label: t.nav.invoices,
     Icon: InvoiceIcon,
     children: [
-      { href: "/invoices", label: "All invoices" },
-      { href: "/invoices/recurring", label: "Recurring" },
-      { href: "/invoices/reminders", label: "Reminders" },
-      { href: "/invoices/credits", label: "Credits" },
+      { href: "/invoices", label: t.nav.allInvoices },
+      { href: "/invoices/recurring", label: t.nav.invoicesRecurring },
+      { href: "/invoices/reminders", label: t.nav.reminders },
+      { href: "/invoices/credits", label: t.nav.credits },
     ],
   },
   {
     href: "/evidence",
-    label: "Evidence",
+    label: t.nav.evidence,
     Icon: ArchiveIcon,
     children: [
-      { href: "/documents", label: "Documents" },
-      { href: "/evidence/recurring", label: "Recurring" },
-      { href: "/evidence/facilities", label: "Facilities" },
+      { href: "/documents", label: t.nav.documents },
+      { href: "/evidence/recurring", label: t.nav.evidenceRecurring },
+      { href: "/evidence/facilities", label: t.nav.facilities },
     ],
   },
   {
     href: "/bank",
-    label: "Bank",
+    label: t.nav.bank,
     Icon: BankIcon,
     children: [
-      { href: "/payments", label: "Transactions" },
-      { href: "/bank/cash-book", label: "Cash book" },
-      { href: "/bank/incomplete", label: "Incomplete" },
+      { href: "/payments", label: t.nav.transactions },
+      { href: "/bank/cash-book", label: t.nav.cashBook },
+      { href: "/bank/incomplete", label: t.nav.incomplete },
     ],
   },
   {
     href: "/steer",
-    label: "Taxes",
+    label: t.nav.taxes,
     Icon: PercentIcon,
     children: [
-      { href: "/steer/constitution", label: "Constitution" },
+      { href: "/steer/constitution", label: t.nav.constitution },
       // UStVA, the advance VAT return, is backed by /api/reports/vat.
-      { href: "/reports/taxes", label: "VAT return" },
-      { href: "/steer/tax-advisor", label: "My tax advisor" },
+      { href: "/reports/taxes", label: t.nav.vatReturn },
+      { href: "/steer/tax-advisor", label: t.nav.taxAdvisor },
     ],
   },
   {
     href: "/evaluations",
-    label: "Evaluations",
+    label: t.nav.evaluations,
     Icon: ChartIcon,
     children: [
-      { href: "/reports", label: "Reports" },
-      { href: "/evaluations/susa", label: "Trial balance" },
-      { href: "/evaluations/bwa", label: "Management report" },
+      { href: "/reports", label: t.nav.reports },
+      { href: "/evaluations/susa", label: t.nav.trialBalance },
+      { href: "/evaluations/bwa", label: t.nav.managementReport },
     ],
   },
 ];
 
-const ADMIN_NAV: NavItem[] = [
+const adminNav = (t: Dictionary): NavItem[] => [
   // Contact is the client list under sevdesk's naming.
-  { href: "/clients", label: "Contact", Icon: UsersIcon },
-  { href: "/products", label: "Products", Icon: BoxIcon },
+  { href: "/clients", label: t.nav.contact, Icon: UsersIcon },
+  { href: "/products", label: t.nav.products, Icon: BoxIcon },
   {
     href: "/extensions",
-    label: "Extensions",
+    label: t.nav.extensions,
     Icon: GridIcon,
     children: [
-      { href: "/extensions/add-ons", label: "Add-ons" },
-      { href: "/settings/integrations", label: "Integrations" },
-      { href: "/extensions/api", label: "API" },
+      { href: "/extensions/add-ons", label: t.nav.addOns },
+      { href: "/settings/integrations", label: t.nav.integrations },
+      { href: "/extensions/api", label: t.nav.api },
     ],
   },
   {
     href: "/settings",
-    label: "Settings",
+    label: t.nav.settings,
     Icon: CogIcon,
     children: [
-      { href: "/settings/team", label: "Users" },
-      { href: "/settings/accounting", label: "Accounting" },
+      // First in the list because it holds the interface language, which is what someone who
+      // cannot read the rest of this menu is looking for.
+      { href: "/settings/general", label: t.nav.general },
+      { href: "/settings/team", label: t.nav.users },
+      { href: "/settings/accounting", label: t.nav.accounting },
       // Was "Pursue", a machine translation of Unternehmen.
-      { href: "/settings/company", label: "Company" },
-      { href: "/admin/system-health", label: "System" },
-      { href: "/settings/stationery", label: "Stationery" },
-      { href: "/settings/text-templates", label: "Text templates" },
+      { href: "/settings/company", label: t.nav.company },
+      { href: "/admin/system-health", label: t.nav.system },
+      { href: "/settings/stationery", label: t.nav.stationery },
+      { href: "/settings/text-templates", label: t.nav.textTemplates },
     ],
   },
 ];
 
 export function SidebarNav() {
+  const t = useT();
   const pathname = usePathname();
   const router = useRouter();
   const session = getSession();
@@ -298,8 +304,8 @@ export function SidebarNav() {
     });
   }
 
-  const primary = renderItems(PRIMARY_NAV);
-  const admin = renderItems(ADMIN_NAV);
+  const primary = renderItems(primaryNav(t));
+  const admin = renderItems(adminNav(t));
 
   const userName = session?.user.fullName ?? "Account";
   const companyName = session?.company.name ?? "Your company";
@@ -327,13 +333,13 @@ export function SidebarNav() {
       {/* Search with the shortcut badge */}
       <div className="px-4 pb-4">
         <label className="relative flex items-center">
-          <span className="sr-only">Search menu</span>
+          <span className="sr-only">{t.nav.search}</span>
           <SearchIcon className="pointer-events-none absolute left-3 size-[18px] text-sidebar-muted" />
           <input
             ref={searchRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search"
+            placeholder={t.nav.search}
             className="h-11 w-full rounded-xl border border-border bg-sidebar pl-10 pr-14 text-sm text-sidebar-foreground outline-none placeholder:text-sidebar-muted focus:border-sidebar-accent"
           />
           <kbd className="pointer-events-none absolute right-3 rounded border border-border px-1.5 py-0.5 text-[0.7rem] font-medium text-sidebar-muted">

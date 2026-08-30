@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------------------------------------------------------------------------
@@ -22,7 +24,7 @@ type PageShellProps = {
   /** Small figure shown under the title, e.g. "Outstanding: EUR 12,340.00". */
   summary?: string;
   action?: { label: string; href?: string };
-  tabs?: string[];
+  tabs?: readonly Tab[];
   columns?: Column[];
   /** Message for the empty table. Defaults to a neutral "nothing here yet". */
   emptyTitle?: string;
@@ -112,59 +114,81 @@ export function PageHeader({
  * <p>Uncontrolled by default so scaffold pages need no state. Pass value/onChange when the
  * selection has to drive real filtering.
  */
+/**
+ * A tab is either a bare string, or a key/label pair.
+ *
+ * <p>The pair matters once the UI is translated: filtering switches on the key, so it must not
+ * change when the label does. A page that filters on the visible English word breaks the moment
+ * someone selects German.
+ */
+export type Tab = string | { key: string; label: string };
+
+function tabKey(tab: Tab) {
+  return typeof tab === "string" ? tab : tab.key;
+}
+
+function tabLabel(tab: Tab) {
+  return typeof tab === "string" ? tab : tab.label;
+}
+
 export function TabBar({
   tabs,
   value,
   onChange,
   counts,
 }: {
-  tabs: string[];
+  tabs: readonly Tab[];
   value?: string;
   onChange?: (tab: string) => void;
   counts?: Record<string, number>;
 }) {
-  const [internal, setInternal] = useState(tabs[0]);
+  const t = useT();
+  const [internal, setInternal] = useState(tabKey(tabs[0]));
   const active = value ?? internal;
   const setActive = (tab: string) => (onChange ? onChange(tab) : setInternal(tab));
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
       <div className="flex flex-wrap items-center gap-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActive(tab)}
-            aria-pressed={active === tab}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-sm transition-colors",
-              active === tab
-                ? "bg-primary/10 font-medium text-primary"
-                : "text-muted hover:bg-slate-100 hover:text-foreground",
-            )}
-          >
-            {tab}
-            {counts && counts[tab] !== undefined ? (
-              <span className="ml-1.5 text-xs opacity-70">{counts[tab]}</span>
-            ) : null}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const key = tabKey(tab);
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActive(key)}
+              aria-pressed={active === key}
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                active === key
+                  ? "bg-primary/10 font-medium text-primary"
+                  : "text-muted hover:bg-slate-100 hover:text-foreground",
+              )}
+            >
+              {tabLabel(tab)}
+              {counts && counts[key] !== undefined ? (
+                <span className="ml-1.5 text-xs opacity-70">{counts[key]}</span>
+              ) : null}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-2">
-        <ToolbarButton icon={<FilterIcon className="size-4" />} label="Filter" />
-        <ToolbarButton icon={<ExportIcon className="size-4" />} label="Export" />
+        <ToolbarButton icon={<FilterIcon className="size-4" />} label={t.table.filter} />
+        <ToolbarButton icon={<ExportIcon className="size-4" />} label={t.table.export} />
       </div>
     </div>
   );
 }
 
 function ToolbarButton({ icon, label }: { icon: React.ReactNode; label: string }) {
+  const t = useT();
   return (
     <button
       type="button"
       disabled
-      title={`${label} becomes available once this section is connected to the API`}
+      title={format(t.table.disabledHint, { label })}
       className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm text-muted disabled:cursor-not-allowed disabled:opacity-60"
     >
       {icon}
@@ -192,6 +216,7 @@ export function DataTable({
   rows?: React.ReactNode;
   total?: number;
 }) {
+  const t = useT();
   return (
     <>
       <div className="overflow-x-auto">
@@ -222,10 +247,10 @@ export function DataTable({
                     <InboxIcon className="size-5 text-muted" />
                   </div>
                   <p className="mt-3 text-sm font-medium text-foreground">
-                    {emptyTitle ?? "Nothing here yet"}
+                    {emptyTitle ?? t.table.emptyTitle}
                   </p>
                   <p className="mt-1 text-sm text-muted">
-                    {emptyHint ?? "Records will appear here once this section is connected to the API."}
+                    {emptyHint ?? t.table.emptyHint}
                   </p>
                 </div>
               </td>
@@ -259,19 +284,22 @@ export function Cell({
 }
 
 export function Pagination({ total = 0 }: { total?: number }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
       <p className="text-sm text-muted">
-        {total === 0 ? "No entries" : `Showing 1 – ${Math.min(25, total)} of ${total} entries`}
+        {total === 0
+          ? t.table.noEntries
+          : format(t.table.showing, { shown: Math.min(25, total), total })}
       </p>
       <div className="flex items-center gap-1">
-        <PageButton label="Previous" disabled>
+        <PageButton label={t.table.previous} disabled>
           <ChevronLeftIcon className="size-4" />
         </PageButton>
         <span className="grid size-8 place-items-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
           1
         </span>
-        <PageButton label="Next" disabled>
+        <PageButton label={t.table.next} disabled>
           <ChevronRightIcon className="size-4" />
         </PageButton>
       </div>
@@ -302,10 +330,14 @@ function PageButton({
 
 /** Coloured status badge, matching the invoice, quote and project lifecycles. */
 export function StatusPill({ status }: { status: string }) {
+  const t = useT();
   // Takes the raw status or a humanised label ("Partially paid"), so a screen can print a
   // readable word without the badge losing the colour that belongs to it.
-  const tone =
-    STATUS_TONES[status.toLowerCase().replace(/ /g, "_")] ?? "bg-slate-100 text-slate-700";
+  const key = status.toLowerCase().replace(/ /g, "_");
+  const tone = STATUS_TONES[key] ?? "bg-slate-100 text-slate-700";
+  // Falls back to whatever was passed for a status the dictionary does not know, which is better
+  // than a blank badge on a lifecycle this component has not been taught yet.
+  const label = (t.status as Record<string, string>)[key] ?? status;
   return (
     <span
       className={cn(
@@ -314,7 +346,7 @@ export function StatusPill({ status }: { status: string }) {
       )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {status}
+      {label}
     </span>
   );
 }

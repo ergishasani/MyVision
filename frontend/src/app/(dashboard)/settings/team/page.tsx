@@ -5,14 +5,19 @@ import { ApiError } from "@/lib/api/client";
 import { listTeamMembers, removeTeamMember, updateTeamMemberRole } from "@/lib/api/settings";
 import type { CompanyMemberRole, TeamMember } from "@/types/api";
 import { formatDate } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
-const ROLES: { value: CompanyMemberRole; label: string; description: string }[] = [
-  { value: "owner", label: "Owner", description: "Full access, including billing and team." },
-  { value: "admin", label: "Administrator", description: "Everything except billing." },
-  { value: "member", label: "Member", description: "Creates and edits documents." },
-  { value: "accountant", label: "Accountant", description: "Reads the books and exports them." },
-];
+/** Stored role values. Their wording comes from the dictionary. */
+const ROLE_VALUES: CompanyMemberRole[] = ["owner", "admin", "member", "accountant"];
+
+const roles = (t: Dictionary["team"]) =>
+  ROLE_VALUES.map((value) => ({
+    value,
+    label: t.roles[value].label,
+    description: t.roles[value].description,
+  }));
 
 function initials(member: TeamMember) {
   const source = member.fullName?.trim() || member.email;
@@ -24,7 +29,20 @@ function initials(member: TeamMember) {
     .join("");
 }
 
+/** A sentence with the member's name emphasised inside it. See the contacts page for why. */
+function NamedSentence({ template, name }: { template: string; name: string }) {
+  const [before, after] = template.split("{name}");
+  return (
+    <>
+      {before}
+      <span className="font-medium text-foreground">{name}</span>
+      {after}
+    </>
+  );
+}
+
 export default function TeamSettingsPage() {
+  const c = useT().team;
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +52,12 @@ export default function TeamSettingsPage() {
     listTeamMembers()
       .then(setMembers)
       .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load team members"),
+        setError(err instanceof ApiError ? err.message : c.loadError),
       )
       .finally(() => setLoading(false));
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the member list for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function changeRole(member: TeamMember, role: CompanyMemberRole) {
@@ -49,7 +70,7 @@ export default function TeamSettingsPage() {
       setMembers((list) => list.map((m) => (m.id === updated.id ? updated : m)));
     } catch (err) {
       setMembers(previous);
-      setError(err instanceof ApiError ? err.message : "Could not change the role");
+      setError(err instanceof ApiError ? err.message : c.roleError);
     }
   }
 
@@ -61,7 +82,7 @@ export default function TeamSettingsPage() {
       await removeTeamMember(member.id);
     } catch (err) {
       setMembers(previous);
-      setError(err instanceof ApiError ? err.message : "Could not remove the member");
+      setError(err instanceof ApiError ? err.message : c.removeError);
     }
   }
 
@@ -69,9 +90,9 @@ export default function TeamSettingsPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Users</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
           <p className="mt-1 text-sm text-muted">
-            Who can reach this workspace, and what each of them may do.
+            {c.description}
           </p>
         </div>
       </header>
@@ -79,7 +100,7 @@ export default function TeamSettingsPage() {
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -87,7 +108,7 @@ export default function TeamSettingsPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -97,11 +118,11 @@ export default function TeamSettingsPage() {
           <table className="w-full min-w-[780px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Name</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Email address</th>
-                <th scope="col" className="w-48 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Role</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">Last sign-in</th>
-                <th scope="col" className="w-24 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">Actions</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colName}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colEmail}</th>
+                <th scope="col" className="w-48 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colRole}</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colLastSignIn}</th>
+                <th scope="col" className="w-24 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.colActions}</th>
               </tr>
             </thead>
             <tbody>
@@ -126,7 +147,7 @@ export default function TeamSettingsPage() {
                           {/* An unverified address cannot receive a password reset, which is
                               worth surfacing before someone is locked out. */}
                           {!member.emailVerified ? (
-                            <span className="text-xs text-amber-700">Email not verified</span>
+                            <span className="text-xs text-amber-700">{c.emailNotVerified}</span>
                           ) : null}
                         </span>
                       </div>
@@ -141,7 +162,7 @@ export default function TeamSettingsPage() {
                         }
                         className="h-9 w-full rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
                       >
-                        {ROLES.map((role) => (
+                        {roles(c).map((role) => (
                           <option key={role.value} value={role.value}>
                             {role.label}
                           </option>
@@ -149,7 +170,7 @@ export default function TeamSettingsPage() {
                       </select>
                     </td>
                     <td className="px-4 py-3 text-muted">
-                      {member.lastLoginAt ? formatDate(member.lastLoginAt) : "Never"}
+                      {member.lastLoginAt ? formatDate(member.lastLoginAt) : c.never}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -157,7 +178,7 @@ export default function TeamSettingsPage() {
                         onClick={() => setConfirmRemove(member)}
                         className="rounded-md px-2 py-1 text-sm font-medium text-red-600 hover:bg-red-50"
                       >
-                        Remove
+                        {c.remove}
                       </button>
                     </td>
                   </tr>
@@ -169,9 +190,9 @@ export default function TeamSettingsPage() {
       </section>
 
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-foreground">What each role can do</h2>
+        <h2 className="text-sm font-semibold text-foreground">{c.rolesHeading}</h2>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-          {ROLES.map((role) => (
+          {roles(c).map((role) => (
             <div key={role.value} className="rounded-lg border border-border p-3">
               <dt className="text-sm font-medium text-foreground">{role.label}</dt>
               <dd className="mt-0.5 text-sm text-muted">{role.description}</dd>
@@ -179,11 +200,10 @@ export default function TeamSettingsPage() {
           ))}
         </dl>
         <p className="mt-4 text-sm text-muted">
-          A company always keeps at least one owner, and nobody can remove their own owner role —
-          otherwise a workspace can be left with no one able to restore access to it.
+          {c.ownerNote}
         </p>
         <p className="mt-2 text-sm text-muted">
-          Inviting someone new needs an email to reach them, which is not wired up yet.
+          {c.inviteNote}
         </p>
       </section>
 
@@ -191,7 +211,7 @@ export default function TeamSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <button
             type="button"
-            aria-label="Cancel"
+            aria-label={c.cancel}
             onClick={() => setConfirmRemove(null)}
             className="fixed inset-0 cursor-default bg-slate-900/40"
           />
@@ -202,13 +222,12 @@ export default function TeamSettingsPage() {
               "relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl",
             )}
           >
-            <h2 className="text-lg font-semibold text-foreground">Remove this person?</h2>
+            <h2 className="text-lg font-semibold text-foreground">{c.confirmTitle}</h2>
             <p className="mt-2 text-sm text-muted">
-              <span className="font-medium text-foreground">
-                {confirmRemove.fullName || confirmRemove.email}
-              </span>{" "}
-              loses access to this workspace. Their user account and the documents they created
-              stay as they are.
+              <NamedSentence
+                template={c.confirmBody}
+                name={confirmRemove.fullName || confirmRemove.email}
+              />
             </p>
             <div className="mt-6 flex justify-end gap-2">
               <button
@@ -216,14 +235,14 @@ export default function TeamSettingsPage() {
                 onClick={() => setConfirmRemove(null)}
                 className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
               >
-                Cancel
+                {c.cancel}
               </button>
               <button
                 type="button"
                 onClick={() => remove(confirmRemove)}
                 className="h-10 rounded-lg bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700"
               >
-                Remove
+                {c.remove}
               </button>
             </div>
           </div>

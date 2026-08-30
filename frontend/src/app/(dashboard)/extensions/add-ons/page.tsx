@@ -1,10 +1,15 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function AddOnsPage() {
+  const p = useT().scaffold.hubs.addOns;
+
   return (
-    <PageShell title="Add-ons" description="Optional features for this workspace.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Nothing to add yet" description="Add-ons need a subscription and billing system for your own customers, which is separate from invoicing theirs." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
       </PanelGrid>
     </PageShell>
   );

@@ -13,31 +13,31 @@ import {
   updateNumberRange,
 } from "@/lib/api/settings";
 import type { BookingAccount, CostCenter, NumberRange } from "@/types/api";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
+/** Tab keys, deliberately not the visible labels -- those change with the language. */
 const TABS = [
-  "Number ranges",
-  "Booking accounts",
-  "Payment methods",
-  "Cost centres",
+  "numberRanges",
+  "bookingAccounts",
+  "paymentMethods",
+  "costCentres",
 ] as const;
 type Tab = (typeof TABS)[number];
 
 /** What each counter is called on screen, and what it numbers. */
-const RANGE_LABELS: Record<string, { label: string; hint: string }> = {
-  invoice: { label: "Invoice", hint: "Numbers every invoice you issue" },
-  quote: { label: "Quote", hint: "Numbers quotes sent to customers" },
-  credit_note: { label: "Credit note", hint: "Numbers refunds and corrections" },
-  order_confirmation: { label: "Order confirmation", hint: "Numbers accepted orders" },
-  delivery_note: { label: "Delivery note", hint: "Numbers goods sent out" },
-  contact: { label: "Contact", hint: "Customer number on a contact" },
-  product: { label: "Product", hint: "Article number in the catalogue" },
-  debtor: { label: "Debtor", hint: "Customer ledger account" },
-  creditor: { label: "Creditor", hint: "Supplier ledger account" },
-};
+type RangeMeta = { label: string; hint: string };
+
+function rangeMeta(t: Dictionary["accounting"], type: string): RangeMeta {
+  const labels = t.rangeLabels as Record<string, RangeMeta | undefined>;
+  return labels[type] ?? { label: type, hint: "" };
+}
 
 export default function AccountingSettingsPage() {
-  const [tab, setTab] = useState<Tab>("Number ranges");
+  const c = useT().accounting;
+  const [tab, setTab] = useState<Tab>("numberRanges");
   const [ranges, setRanges] = useState<NumberRange[]>([]);
   const [accounts, setAccounts] = useState<BookingAccount[]>([]);
   const [centers, setCenters] = useState<CostCenter[]>([]);
@@ -52,24 +52,27 @@ export default function AccountingSettingsPage() {
         setCenters(c);
       })
       .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : "Failed to load accounting settings"),
+        setError(err instanceof ApiError ? err.message : c.loadError),
       )
       .finally(() => setLoading(false));
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch every setting for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Accounting</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
         <p className="mt-1 text-sm text-muted">
-          How documents are numbered, and the accounts and cost centres they are booked against.
+          {c.description}
         </p>
       </header>
 
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -77,7 +80,7 @@ export default function AccountingSettingsPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -97,19 +100,19 @@ export default function AccountingSettingsPage() {
                   : "border-transparent text-muted hover:text-foreground",
               )}
             >
-              {name}
+              {c.tabs[name]}
             </button>
           ))}
         </div>
 
         <div className="p-4 sm:p-5">
           {loading ? (
-            <p className="py-12 text-center text-sm text-muted">Loading…</p>
-          ) : tab === "Number ranges" ? (
+            <p className="py-12 text-center text-sm text-muted">{c.loading}</p>
+          ) : tab === "numberRanges" ? (
             <NumberRanges ranges={ranges} onChange={setRanges} onError={setError} />
-          ) : tab === "Booking accounts" ? (
+          ) : tab === "bookingAccounts" ? (
             <BookingAccounts accounts={accounts} onChange={setAccounts} onError={setError} />
-          ) : tab === "Payment methods" ? (
+          ) : tab === "paymentMethods" ? (
             <PaymentMethods />
           ) : (
             <CostCenters centers={centers} onChange={setCenters} onError={setError} />
@@ -118,9 +121,7 @@ export default function AccountingSettingsPage() {
       </section>
 
       <p className="text-sm text-muted">
-        Payment accounts, transaction assignment, and private transaction rules all configure how
-        imported bank transactions are matched. There is no bank import yet, so those screens would
-        have nothing to act on — they will land with it.
+        {c.bankNote}
       </p>
     </div>
   );
@@ -141,6 +142,7 @@ function NumberRanges({
   onChange: (ranges: NumberRange[]) => void;
   onError: (message: string | null) => void;
 }) {
+  const c = useT().accounting;
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState({ format: "", padding: 0, nextNumber: 1 });
   const [saving, setSaving] = useState(false);
@@ -162,7 +164,7 @@ function NumberRanges({
       onChange(ranges.map((r) => (r.type === updated.type ? updated : r)));
       setEditing(null);
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not update the number range");
+      onError(err instanceof ApiError ? err.message : c.rangeUpdateError);
     } finally {
       setSaving(false);
     }
@@ -181,16 +183,16 @@ function NumberRanges({
       <table className="w-full min-w-[720px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-border">
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">Type</th>
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">Format</th>
-            <th scope="col" className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-muted">Next number</th>
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">Next document</th>
+            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colType}</th>
+            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colFormat}</th>
+            <th scope="col" className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wide text-muted">{c.colNextNumber}</th>
+            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted">{c.colNextDocument}</th>
             <th scope="col" className="w-20 px-3 py-2" />
           </tr>
         </thead>
         <tbody>
           {ranges.map((range) => {
-            const meta = RANGE_LABELS[range.type] ?? { label: range.type, hint: "" };
+            const meta = rangeMeta(c, range.type);
             return (
               <tr key={range.type} className="border-b border-border last:border-0">
                 <td className="px-3 py-3">
@@ -226,23 +228,23 @@ function NumberRanges({
       {current ? (
         <div className="mt-5 rounded-xl border border-border bg-slate-50/60 p-4">
           <p className="text-sm font-medium text-foreground">
-            {RANGE_LABELS[current.type]?.label ?? current.type} numbering
+            {format(c.editHeading, { type: rangeMeta(c, current.type).label })}
           </p>
 
           <div className="mt-3 grid gap-4 sm:grid-cols-3">
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-foreground">Format</span>
+              <span className="mb-1.5 block text-sm font-medium text-foreground">{c.colFormat}</span>
               <input
                 value={draft.format}
                 onChange={(event) => setDraft({ ...draft, format: event.target.value })}
                 className="h-10 w-full rounded-lg border border-border bg-card px-3 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
               <span className="mt-1 block text-xs text-muted">
-                Must contain <code>%NUMBER</code>. Everything else is printed literally.
+                {c.formatHint}
               </span>
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-foreground">Zero-padding</span>
+              <span className="mb-1.5 block text-sm font-medium text-foreground">{c.padding}</span>
               <input
                 type="number"
                 min={0}
@@ -252,11 +254,11 @@ function NumberRanges({
                 className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
               <span className="mt-1 block text-xs text-muted">
-                4 renders 7 as 0007. 0 leaves it plain.
+                {c.paddingHint}
               </span>
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-foreground">Next number</span>
+              <span className="mb-1.5 block text-sm font-medium text-foreground">{c.colNextNumber}</span>
               <input
                 type="number"
                 min={current.nextNumber}
@@ -288,7 +290,7 @@ function NumberRanges({
               onClick={() => setEditing(null)}
               className="h-9 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
             >
-              Cancel
+              {c.cancel}
             </button>
             <button
               type="button"
@@ -296,7 +298,7 @@ function NumberRanges({
               onClick={save}
               className="h-9 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-60"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? c.saving : c.save}
             </button>
           </div>
         </div>
@@ -314,12 +316,13 @@ function BookingAccounts({
   onChange: (accounts: BookingAccount[]) => void;
   onError: (message: string | null) => void;
 }) {
+  const c = useT().accounting;
   const [draft, setDraft] = useState({ displayName: "", name: "", skrAccount: "" });
   const [saving, setSaving] = useState(false);
 
   async function add() {
     if (!draft.displayName.trim()) {
-      onError("A display name is required.");
+      onError(c.displayNameRequired);
       return;
     }
     setSaving(true);
@@ -333,7 +336,7 @@ function BookingAccounts({
       onChange([...accounts, created]);
       setDraft({ displayName: "", name: "", skrAccount: "" });
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not add the booking account");
+      onError(err instanceof ApiError ? err.message : c.accountAddError);
     } finally {
       setSaving(false);
     }
@@ -346,15 +349,15 @@ function BookingAccounts({
       await deleteBookingAccount(account.id);
     } catch (err) {
       onChange(previous);
-      onError(err instanceof ApiError ? err.message : "Could not remove the booking account");
+      onError(err instanceof ApiError ? err.message : c.accountRemoveError);
     }
   }
 
   return (
     <div>
       <SimpleTable
-        headers={["Display name", "Name", "SKR account", ""]}
-        empty="No booking accounts yet. Add the revenue and expense accounts your bookkeeper uses."
+        headers={[c.colDisplayName, c.colName, c.colSkr, ""]}
+        empty={c.accountsEmpty}
         rows={accounts.map((account) => [
           <span key="d" className="font-medium text-foreground">{account.displayName}</span>,
           <span key="n" className="text-muted">{account.name || "—"}</span>,
@@ -367,22 +370,22 @@ function BookingAccounts({
         <input
           value={draft.displayName}
           onChange={(event) => setDraft({ ...draft, displayName: event.target.value })}
-          placeholder="Sales 19%"
-          aria-label="Display name"
+          placeholder={c.phDisplayName}
+          aria-label={c.colDisplayName}
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <input
           value={draft.name}
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-          placeholder="Revenue, 19% VAT"
-          aria-label="Name"
+          placeholder={c.phAccountName}
+          aria-label={c.colName}
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <input
           value={draft.skrAccount}
           onChange={(event) => setDraft({ ...draft, skrAccount: event.target.value })}
-          placeholder="8400"
-          aria-label="SKR account"
+          placeholder={c.phSkr}
+          aria-label={c.colSkr}
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <button
@@ -407,12 +410,13 @@ function CostCenters({
   onChange: (centers: CostCenter[]) => void;
   onError: (message: string | null) => void;
 }) {
+  const c = useT().accounting;
   const [draft, setDraft] = useState({ name: "", number: "" });
   const [saving, setSaving] = useState(false);
 
   async function add() {
     if (!draft.name.trim()) {
-      onError("A name is required.");
+      onError(c.centreNameRequired);
       return;
     }
     setSaving(true);
@@ -425,7 +429,7 @@ function CostCenters({
       onChange([...centers, created]);
       setDraft({ name: "", number: "" });
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not add the cost centre");
+      onError(err instanceof ApiError ? err.message : c.centreAddError);
     } finally {
       setSaving(false);
     }
@@ -438,15 +442,15 @@ function CostCenters({
       await deleteCostCenter(center.id);
     } catch (err) {
       onChange(previous);
-      onError(err instanceof ApiError ? err.message : "Could not remove the cost centre");
+      onError(err instanceof ApiError ? err.message : c.centreRemoveError);
     }
   }
 
   return (
     <div>
       <SimpleTable
-        headers={["Name", "Number", ""]}
-        empty="No cost centres yet. Add one per site or job to split revenue and costs across them."
+        headers={[c.colCentreName, c.colCentreNumber, ""]}
+        empty={c.centresEmpty}
         rows={centers.map((center) => [
           <span key="n" className="font-medium text-foreground">{center.name}</span>,
           <span key="no" className="tabular-nums text-muted">{center.number || "—"}</span>,
@@ -458,15 +462,15 @@ function CostCenters({
         <input
           value={draft.name}
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-          placeholder="North site"
-          aria-label="Cost centre name"
+          placeholder={c.phCentreName}
+          aria-label={c.ariaCentreName}
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <input
           value={draft.number}
           onChange={(event) => setDraft({ ...draft, number: event.target.value })}
-          placeholder="K100"
-          aria-label="Cost centre number"
+          placeholder={c.phCentreNumber}
+          aria-label={c.ariaCentreNumber}
           className="h-10 rounded-lg border border-border bg-card px-3 text-sm tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <button
@@ -489,30 +493,23 @@ function CostCenters({
  * reference, so this lists what exists rather than pretending they can be edited.
  */
 function PaymentMethods() {
-  const methods = [
-    ["SEPA transfer", "bank_transfer", "The default on a new invoice."],
-    ["Cash", "cash", "Recorded against the cash book."],
-    ["Card", "card", "Terminal or manual card payment."],
-    ["PayPal", "paypal", ""],
-    ["Stripe", "stripe", "Set automatically when a Stripe payment link is paid."],
-    ["Other", "other", ""],
-  ] as const;
+  const c = useT().accounting;
+  // The stored enum values; their wording comes from the dictionary.
+  const methods = ["bank_transfer", "cash", "card", "paypal", "stripe", "other"] as const;
 
   return (
     <div>
       <SimpleTable
-        headers={["Name", "Stored as", "Notes"]}
+        headers={[c.colName, c.colStoredAs, c.colNotes]}
         empty=""
-        rows={methods.map(([label, value, note]) => [
-          <span key="l" className="font-medium text-foreground">{label}</span>,
+        rows={methods.map((value) => [
+          <span key="l" className="font-medium text-foreground">{c.methods[value].label}</span>,
           <code key="v" className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-muted">{value}</code>,
-          <span key="n" className="text-muted">{note || "—"}</span>,
+          <span key="n" className="text-muted">{c.methods[value].note || "—"}</span>,
         ])}
       />
       <p className="mt-4 text-sm text-muted">
-        These are fixed: a payment method is a database enum that invoices and recorded payments
-        both point at, so adding one is a schema change rather than a setting. The default for new
-        invoices is set under company settings.
+        {c.methodsNote}
       </p>
     </div>
   );
@@ -568,14 +565,15 @@ function SimpleTable({
 }
 
 function RemoveButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const c = useT().accounting;
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Remove ${label}`}
+      aria-label={format(c.removeAria, { label })}
       className="rounded-md px-2 py-1 text-sm font-medium text-red-600 hover:bg-red-50"
     >
-      Remove
+      {c.remove}
     </button>
   );
 }

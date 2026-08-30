@@ -1,11 +1,16 @@
+"use client";
+
 import { PageShell, Panel, PanelGrid } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function ClientReportsPage() {
+  const p = useT().scaffold.hubs.reportsClients;
+
   return (
-    <PageShell title="Client reports" description="Analyze client revenue, outstanding balances, payment history, and document volume.">
+    <PageShell title={p.title} description={p.description}>
       <PanelGrid>
-        <Panel title="Top clients" description="Ranked by invoiced value." />
-        <Panel title="Payment behaviour" description="Who pays on time and who does not." />
+        <Panel title={p.panels.p0.title} description={p.panels.p0.description} />
+        <Panel title={p.panels.p1.title} description={p.panels.p1.description} />
       </PanelGrid>
     </PageShell>
   );

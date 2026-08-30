@@ -1,20 +1,25 @@
+"use client";
+
 import { PageShell } from "@/components/layout/page-shell";
+import { useT } from "@/components/providers/locale-provider";
 
 export default function RecurringInvoicesPage() {
+  const p = useT().pages.invoicesRecurring;
+
   return (
     <PageShell
-      title="Recurring invoices"
-      description="Invoices issued automatically on a schedule."
-      tabs={["All", "Active", "Paused"]}
+      title={p.title}
+      description={p.description}
+      tabs={[p.tabs.all, p.tabs.active, p.tabs.paused]}
       columns={[
-        { key: "status", label: "Status" },
-        { key: "client", label: "Client" },
-        { key: "interval", label: "Interval" },
-        { key: "next", label: "Next issue" },
-        { key: "amount", label: "Amount", numeric: true },
+        { key: "status", label: p.columns.status },
+        { key: "client", label: p.columns.client },
+        { key: "interval", label: p.columns.interval },
+        { key: "next", label: p.columns.next },
+        { key: "amount", label: p.columns.amount, numeric: true },
       ]}
-      emptyTitle="No recurring invoices"
-      emptyHint="Recurring billing is not implemented in the API yet. The invoice engine it would drive is."
+      emptyTitle={p.emptyTitle}
+      emptyHint={p.emptyHint}
     />
   );
 }
