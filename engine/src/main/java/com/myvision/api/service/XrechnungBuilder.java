@@ -13,7 +13,16 @@ final class XrechnungBuilder {
   private XrechnungBuilder() {
   }
 
-  static String build(Company company, Client client, Invoice invoice, List<InvoiceItem> items) {
+  /**
+   * @param senderName the supplier name as printed on the PDF, so the XML names the same party.
+   */
+  static String build(
+      Company company,
+      Client client,
+      Invoice invoice,
+      List<InvoiceItem> items,
+      String senderName
+  ) {
     StringBuilder xml = new StringBuilder();
     xml.append("""
         <?xml version="1.0" encoding="UTF-8"?>
@@ -58,7 +67,7 @@ final class XrechnungBuilder {
       xml.append("    </ram:IncludedSupplyChainTradeLineItem>\n");
     }
     xml.append("    <ram:ApplicableHeaderTradeAgreement>\n");
-    party(xml, "ram:SellerTradeParty", companyName(company), company.getVatNumber(), company.getEmail(), company.getAddressLine1(),
+    party(xml, "ram:SellerTradeParty", senderName, company.getVatNumber(), company.getEmail(), company.getAddressLine1(),
         company.getPostalCode(), company.getCity(), company.getCountryCode(), 6);
     party(xml, "ram:BuyerTradeParty", client.getName(), client.getVatNumber(), client.getEmail(), client.getAddressLine1(),
         client.getPostalCode(), client.getCity(), client.getCountryCode(), 6);
@@ -144,12 +153,6 @@ final class XrechnungBuilder {
 
   private static StringBuilder spaces(StringBuilder xml, int indent) {
     return xml.append(" ".repeat(indent));
-  }
-
-  private static String companyName(Company company) {
-    return company.getLegalName() != null && !company.getLegalName().isBlank()
-        ? company.getLegalName()
-        : company.getName();
   }
 
   private static String unitCode(String unit) {

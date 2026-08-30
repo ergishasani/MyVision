@@ -80,6 +80,87 @@ public class Invoice extends BaseEntity {
   @Column(nullable = false)
   private BigDecimal balanceDue = BigDecimal.ZERO;
 
+  /**
+   * The date of supply, or the period it covers.
+   *
+   * <p>Sec. 14 UStG requires one of these on an invoice. Nullable only because rows written
+   * before the column existed cannot have it; anything issued from the editor carries it.
+   */
+  private LocalDate deliveryDate;
+
+  private LocalDate servicePeriodStart;
+  private LocalDate servicePeriodEnd;
+
+  private String subject;
+  private String reference;
+
+  /** Drives the VAT note the document has to print. */
+  @Enumerated(EnumType.STRING)
+  @JdbcType(PostgreSQLEnumJdbcType.class)
+  @Column(nullable = false, columnDefinition = "invoice_tax_scheme")
+  private InvoiceTaxScheme taxScheme = InvoiceTaxScheme.domestic_taxable;
+
+  @Enumerated(EnumType.STRING)
+  @JdbcType(PostgreSQLEnumJdbcType.class)
+  @Column(nullable = false, columnDefinition = "payment_method")
+  private PaymentMethod paymentMethod = PaymentMethod.bank_transfer;
+
+  @JdbcTypeCode(SqlTypes.CHAR)
+  @Column(nullable = false, length = 2)
+  private String language = "de";
+
+  @Column(name = "cost_center_id")
+  private UUID costCenterId;
+
+  @Column(name = "contact_person_user_id")
+  private UUID contactPersonUserId;
+
+  private Integer skontoDays;
+  private BigDecimal skontoPercent;
+
+  /** XRechnung mode. Makes the recipient and their email mandatory. */
+  @Column(nullable = false)
+  private boolean eInvoice = false;
+
+  /**
+   * Whether the document is issued under the company name or the owner's own.
+   *
+   * <p>The supplier's name itself is not optional: turning this off swaps the company name for the
+   * account owner's, so a sole trader can invoice as a person without dropping a required field.
+   */
+  @Column(nullable = false)
+  private boolean showCompanyName = true;
+
+  private String recipientEmail;
+
+  /**
+   * The recipient as printed on the document.
+   *
+   * <p>A snapshot taken when the invoice is raised, not a live lookup. The invoice has to keep
+   * the name and address it was issued to even after the contact moves — the same rule that stops
+   * an invoiced contact being deleted.
+   */
+  private String recipientName;
+
+  private String recipientAddressLine1;
+  private String recipientAddressLine2;
+  private String recipientPostalCode;
+  private String recipientCity;
+
+  @JdbcTypeCode(SqlTypes.CHAR)
+  @Column(length = 2)
+  private String recipientCountryCode;
+
+  /**
+   * The operator's own filing labels.
+   *
+   * <p>Not part of the document, so unlike everything else here they stay editable after the
+   * invoice is issued — filing something is usually something you want to do afterwards.
+   */
+  @JdbcTypeCode(SqlTypes.ARRAY)
+  @Column(columnDefinition = "text[]", nullable = false)
+  private String[] tags = new String[0];
+
   private String notes;
   private String terms;
   private OffsetDateTime sentAt;
@@ -296,5 +377,181 @@ public class Invoice extends BaseEntity {
 
   public void setLastPaymentErrorAt(OffsetDateTime lastPaymentErrorAt) {
     this.lastPaymentErrorAt = lastPaymentErrorAt;
+  }
+
+  public LocalDate getDeliveryDate() {
+    return deliveryDate;
+  }
+
+  public void setDeliveryDate(LocalDate deliveryDate) {
+    this.deliveryDate = deliveryDate;
+  }
+
+  public LocalDate getServicePeriodStart() {
+    return servicePeriodStart;
+  }
+
+  public void setServicePeriodStart(LocalDate servicePeriodStart) {
+    this.servicePeriodStart = servicePeriodStart;
+  }
+
+  public LocalDate getServicePeriodEnd() {
+    return servicePeriodEnd;
+  }
+
+  public void setServicePeriodEnd(LocalDate servicePeriodEnd) {
+    this.servicePeriodEnd = servicePeriodEnd;
+  }
+
+  public String getSubject() {
+    return subject;
+  }
+
+  public void setSubject(String subject) {
+    this.subject = subject;
+  }
+
+  public String getReference() {
+    return reference;
+  }
+
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
+  public InvoiceTaxScheme getTaxScheme() {
+    return taxScheme;
+  }
+
+  public void setTaxScheme(InvoiceTaxScheme taxScheme) {
+    this.taxScheme = taxScheme;
+  }
+
+  public PaymentMethod getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(PaymentMethod paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  public UUID getCostCenterId() {
+    return costCenterId;
+  }
+
+  public void setCostCenterId(UUID costCenterId) {
+    this.costCenterId = costCenterId;
+  }
+
+  public UUID getContactPersonUserId() {
+    return contactPersonUserId;
+  }
+
+  public void setContactPersonUserId(UUID contactPersonUserId) {
+    this.contactPersonUserId = contactPersonUserId;
+  }
+
+  public Integer getSkontoDays() {
+    return skontoDays;
+  }
+
+  public void setSkontoDays(Integer skontoDays) {
+    this.skontoDays = skontoDays;
+  }
+
+  public BigDecimal getSkontoPercent() {
+    return skontoPercent;
+  }
+
+  public void setSkontoPercent(BigDecimal skontoPercent) {
+    this.skontoPercent = skontoPercent;
+  }
+
+  public String getRecipientEmail() {
+    return recipientEmail;
+  }
+
+  public void setRecipientEmail(String recipientEmail) {
+    this.recipientEmail = recipientEmail;
+  }
+
+  public String getRecipientName() {
+    return recipientName;
+  }
+
+  public void setRecipientName(String recipientName) {
+    this.recipientName = recipientName;
+  }
+
+  public String getRecipientAddressLine1() {
+    return recipientAddressLine1;
+  }
+
+  public void setRecipientAddressLine1(String recipientAddressLine1) {
+    this.recipientAddressLine1 = recipientAddressLine1;
+  }
+
+  public String getRecipientAddressLine2() {
+    return recipientAddressLine2;
+  }
+
+  public void setRecipientAddressLine2(String recipientAddressLine2) {
+    this.recipientAddressLine2 = recipientAddressLine2;
+  }
+
+  public String getRecipientPostalCode() {
+    return recipientPostalCode;
+  }
+
+  public void setRecipientPostalCode(String recipientPostalCode) {
+    this.recipientPostalCode = recipientPostalCode;
+  }
+
+  public String getRecipientCity() {
+    return recipientCity;
+  }
+
+  public void setRecipientCity(String recipientCity) {
+    this.recipientCity = recipientCity;
+  }
+
+  public String getRecipientCountryCode() {
+    return recipientCountryCode;
+  }
+
+  public void setRecipientCountryCode(String recipientCountryCode) {
+    this.recipientCountryCode = recipientCountryCode;
+  }
+
+  public boolean isEInvoice() {
+    return eInvoice;
+  }
+
+  public void setEInvoice(boolean eInvoice) {
+    this.eInvoice = eInvoice;
+  }
+
+  public boolean isShowCompanyName() {
+    return showCompanyName;
+  }
+
+  public void setShowCompanyName(boolean showCompanyName) {
+    this.showCompanyName = showCompanyName;
+  }
+
+  public String[] getTags() {
+    return tags;
+  }
+
+  public void setTags(String[] tags) {
+    this.tags = tags == null ? new String[0] : tags;
   }
 }

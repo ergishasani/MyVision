@@ -17,7 +17,7 @@ export async function register(input: {
   fullName: string;
   email: string;
   password: string;
-  companyName: string;
+  companyName?: string;
 }) {
   const response = await apiFetch<AuthResponse>("/auth/register", {
     method: "POST",

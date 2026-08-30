@@ -88,6 +88,23 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
   }
 
   @Test
+  void registerWithoutCompanyNameDerivesCompanyFromFullName() throws Exception {
+    mockMvc.perform(post("/api/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "fullName": "Solo Trader",
+                  "email": "no-company@myvision.dev",
+                  "password": "Password123!"
+                }
+                """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").isNotEmpty())
+        .andExpect(jsonPath("$.user.email").value("no-company@myvision.dev"))
+        .andExpect(jsonPath("$.company.name").value("Solo Trader's Company"));
+  }
+
+  @Test
   void registerRejectsDuplicateEmail() throws Exception {
     registerAndGetToken("duplicate@myvision.dev", "First Company");
 

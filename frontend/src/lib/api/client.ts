@@ -71,7 +71,11 @@ export async function apiFetch<T>(
   const send = () => {
     const headers = new Headers(initHeaders);
 
-    if (!headers.has("Content-Type") && rest.body) {
+    // FormData is the exception: the browser has to set the header itself so it can include the
+    // multipart boundary. Stamping application/json here would strip that and the upload would
+    // arrive unparseable.
+    const isFormData = typeof FormData !== "undefined" && rest.body instanceof FormData;
+    if (!headers.has("Content-Type") && rest.body && !isFormData) {
       headers.set("Content-Type", "application/json");
     }
 

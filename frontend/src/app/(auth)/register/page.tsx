@@ -27,7 +27,12 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register({ fullName, companyName, email, password });
+      await register({
+        fullName,
+        companyName: companyName.trim() || undefined,
+        email,
+        password,
+      });
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Unable to create account");
@@ -57,14 +62,15 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="companyName">Company Name</Label>
+          <Label htmlFor="companyName">
+            Company Name <span className="text-muted">(Optional)</span>
+          </Label>
           <Input
             id="companyName"
             autoComplete="organization"
             placeholder="Acme Construction Ltd."
             value={companyName}
             onChange={(event) => setCompanyName(event.target.value)}
-            required
           />
         </div>
 

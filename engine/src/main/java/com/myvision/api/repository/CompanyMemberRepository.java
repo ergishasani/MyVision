@@ -21,4 +21,7 @@ public interface CompanyMemberRepository extends JpaRepository<CompanyMember, UU
   Optional<CompanyMember> findByIdAndCompany_Id(UUID id, UUID companyId);
 
   long countByCompany_IdAndRole(UUID companyId, CompanyMemberRole role);
+
+  Optional<CompanyMember> findFirstByCompany_IdAndRoleOrderByCreatedAtAsc(
+      UUID companyId, CompanyMemberRole role);
 }

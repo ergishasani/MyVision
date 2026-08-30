@@ -88,7 +88,7 @@ public class InvoiceService {
     Company company = companyRepository.findByIdForUpdate(companyId)
         .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-    clientService.requireActiveClient(request.clientId(), companyId);
+    Client client = clientService.requireActiveClient(request.clientId(), companyId);
     if (request.projectId() != null) {
       projectService.requireProject(request.projectId(), companyId);
     }
@@ -116,7 +116,18 @@ public class InvoiceService {
     invoice.setTerms(request.terms());
     invoice = invoiceRepository.save(invoice);
 
+    applyDocumentFields(invoice, request, client);
+
     List<InvoiceItem> items = saveItems(invoice.getId(), request.items());
+    // A supply that is not domestically taxable carries no VAT, whatever the lines say. Zeroing
+    // the rates here rather than trusting the caller means a reverse-charge invoice cannot leave
+    // this method with 19% on it, which is the kind of error that reaches a tax office.
+    if (invoice.getTaxScheme() != InvoiceTaxScheme.domestic_taxable) {
+      for (InvoiceItem item : items) {
+        item.setTaxRate(BigDecimal.ZERO);
+      }
+      items = invoiceItemRepository.saveAll(items);
+    }
     applyTotals(invoice, items);
     invoice = invoiceRepository.save(invoice);
     auditLogService.record(
@@ -400,5 +411,109 @@ public class InvoiceService {
           .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
     }
     return tax.setScale(2, RoundingMode.HALF_UP);
+  }
+
+  /**
+   * The fields that make the document a document rather than a row of totals.
+   *
+   * <p>Two defaults are worth naming. The delivery date falls back to the issue date, because
+   * Sec. 14 UStG wants one and an invoice raised for work done today is the overwhelmingly common
+   * case — an operator who needs a different one sets it. Skonto falls back to the contact's own
+   * agreed terms, so the discount a customer was promised does not have to be retyped per invoice.
+   *
+   * <p>The recipient block is copied, not referenced. The invoice must keep the name and address
+   * it was issued to even if the contact later moves.
+   */
+  private void applyDocumentFields(Invoice invoice, InvoiceRequest request, Client client) {
+    invoice.setDeliveryDate(
+        request.deliveryDate() != null ? request.deliveryDate() : invoice.getIssueDate());
+    invoice.setServicePeriodStart(request.servicePeriodStart());
+    invoice.setServicePeriodEnd(request.servicePeriodEnd());
+    invoice.setSubject(request.subject());
+    invoice.setReference(request.reference());
+
+    invoice.setTaxScheme(request.taxScheme() != null
+        ? request.taxScheme()
+        : InvoiceTaxScheme.domestic_taxable);
+    invoice.setPaymentMethod(request.paymentMethod() != null
+        ? request.paymentMethod()
+        : PaymentMethod.bank_transfer);
+    invoice.setLanguage(request.language() != null
+        ? request.language().toLowerCase()
+        : "de");
+    invoice.setCostCenterId(request.costCenterId());
+    invoice.setContactPersonUserId(request.contactPersonUserId());
+
+    invoice.setSkontoDays(request.skontoDays() != null
+        ? request.skontoDays()
+        : client.getDiscountDays());
+    invoice.setSkontoPercent(request.skontoPercent() != null
+        ? request.skontoPercent()
+        : client.getDiscountPercent());
+
+    boolean eInvoice = Boolean.TRUE.equals(request.eInvoice());
+    invoice.setEInvoice(eInvoice);
+    // Absent means the company name, which is what every invoice raised before this option
+    // existed carried.
+    invoice.setShowCompanyName(!Boolean.FALSE.equals(request.showCompanyName()));
+    String email = request.recipientEmail() != null ? request.recipientEmail() : client.getEmail();
+    invoice.setRecipientEmail(email);
+    // XRechnung has nowhere to put a document without a recipient address to send it to, so the
+    // requirement is refused up front rather than failing later at export time.
+    if (eInvoice && (email == null || email.isBlank())) {
+      throw new BadRequestException(
+          "An e-invoice needs a recipient email address. Add one to the contact, or enter it on "
+              + "the invoice.");
+    }
+
+    invoice.setRecipientName(firstNonBlank(request.recipientName(), client.getName()));
+    invoice.setRecipientAddressLine1(
+        firstNonBlank(request.recipientAddressLine1(), client.getAddressLine1()));
+    invoice.setRecipientAddressLine2(
+        firstNonBlank(request.recipientAddressLine2(), client.getAddressLine2()));
+    invoice.setRecipientPostalCode(
+        firstNonBlank(request.recipientPostalCode(), client.getPostalCode()));
+    invoice.setRecipientCity(firstNonBlank(request.recipientCity(), client.getCity()));
+    String country = firstNonBlank(request.recipientCountryCode(), client.getCountryCode());
+    invoice.setRecipientCountryCode(country != null ? country.toUpperCase() : null);
+  }
+
+  private static String firstNonBlank(String preferred, String fallback) {
+    if (preferred != null && !preferred.isBlank()) {
+      return preferred;
+    }
+    return fallback == null || fallback.isBlank() ? null : fallback;
+  }
+
+  /**
+   * Replaces an invoice's tags.
+   *
+   * <p>Allowed at any status, unlike every other edit. Tags describe how the operator files the
+   * invoice, not what it says, so freezing them when the document freezes would make them useless
+   * — the point at which you want to label something is usually after it has gone out.
+   *
+   * <p>Trimmed, de-duplicated case-insensitively and emptied of blanks, so "Roof", "roof " and ""
+   * cannot all end up on the same invoice.
+   */
+  @Transactional
+  public InvoiceResponse replaceTags(UUID userId, UUID invoiceId, List<String> tags) {
+    UUID companyId = companyAccessService.currentCompanyId(userId);
+    Invoice invoice = requireInvoice(invoiceId, companyId);
+
+    java.util.LinkedHashMap<String, String> unique = new java.util.LinkedHashMap<>();
+    if (tags != null) {
+      for (String tag : tags) {
+        if (tag == null) {
+          continue;
+        }
+        String trimmed = tag.trim();
+        if (!trimmed.isEmpty()) {
+          unique.putIfAbsent(trimmed.toLowerCase(java.util.Locale.ROOT), trimmed);
+        }
+      }
+    }
+
+    invoice.setTags(unique.values().toArray(new String[0]));
+    return toResponse(invoiceRepository.save(invoice));
   }
 }

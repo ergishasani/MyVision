@@ -380,6 +380,14 @@ export type InvoiceItem = {
   position: number;
 };
 
+/** Which VAT treatment an invoice falls under. Each obliges a different note on the document. */
+export type InvoiceTaxScheme =
+  | "domestic_taxable"
+  | "domestic_exempt"
+  | "reverse_charge_13b"
+  | "eu_b2b"
+  | "export_non_eu";
+
 export type Invoice = {
   id: string;
   clientId: string;
@@ -390,6 +398,32 @@ export type Invoice = {
   status: InvoiceStatus;
   issueDate: string;
   dueDate: string | null;
+  /** Date of supply. Sec. 14 UStG requires this or a service period. */
+  deliveryDate: string | null;
+  servicePeriodStart: string | null;
+  servicePeriodEnd: string | null;
+  subject: string | null;
+  reference: string | null;
+  taxScheme: InvoiceTaxScheme;
+  paymentMethod: string;
+  language: string;
+  costCenterId: string | null;
+  contactPersonUserId: string | null;
+  skontoDays: number | null;
+  skontoPercent: number | null;
+  eInvoice: boolean;
+  /** False issues the document under the owner's own name instead of the company's. */
+  showCompanyName: boolean;
+  recipientEmail: string | null;
+  /** The recipient as printed — a snapshot, so it does not follow the contact if they move. */
+  recipientName: string | null;
+  recipientAddressLine1: string | null;
+  recipientAddressLine2: string | null;
+  recipientPostalCode: string | null;
+  recipientCity: string | null;
+  recipientCountryCode: string | null;
+  /** The operator's filing labels. Editable after issue, unlike the document itself. */
+  tags: string[];
   currency: string;
   subtotalAmount: number;
   discountAmount: number;

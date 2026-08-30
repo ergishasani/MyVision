@@ -26,7 +26,6 @@ public record RegisterRequest(
     @Size(min = 8, max = 120)
     String password,
 
-    @NotBlank
     @Size(max = 180)
     String companyName
 ) {

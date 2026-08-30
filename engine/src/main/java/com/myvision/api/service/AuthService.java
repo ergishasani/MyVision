@@ -83,8 +83,12 @@ public class AuthService {
     user.setStatus(UserStatus.active);
     user = userRepository.save(user);
 
+    String resolvedCompanyName = request.companyName() == null || request.companyName().isBlank()
+        ? user.getFullName() + "'s Company"
+        : request.companyName().trim();
+
     Company company = new Company();
-    company.setName(request.companyName().trim());
+    company.setName(resolvedCompanyName);
     company.setEmail(email);
     company = companyRepository.save(company);
 
