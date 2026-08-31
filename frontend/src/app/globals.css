@@ -36,6 +36,22 @@
   --font-mono: "Courier New", Courier, monospace;
 }
 
+/*
+ * The canvas is the surface the browser paints outside the body box: the overscroll gutter, and
+ * on iOS the bands behind the notch and the home indicator. A background on `body` alone only
+ * reaches it by propagation, and those bands were coming through pale instead of picking it up.
+ * Declaring it on `html` paints them directly, on every browser, at no cost to the ones that
+ * were already getting it right.
+ *
+ * `color-scheme` tells Safari the interface is light. Without it, a Mac or phone in Dark Mode
+ * gets dark UA surfaces — scrollbars, date pickers, form control interiors, the bands themselves —
+ * against a palette that has no dark mode to match them to.
+ */
+html {
+  background-color: var(--background);
+  color-scheme: light;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

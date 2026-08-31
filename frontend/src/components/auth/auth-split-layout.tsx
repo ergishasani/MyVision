@@ -7,7 +7,7 @@ export function AuthSplitLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="flex min-h-screen flex-col bg-white">
-        <header className="px-8 py-8 lg:px-12 xl:px-16">
+        <header className="px-8 pb-8 pt-[calc(2rem_+_env(safe-area-inset-top))] lg:px-12 xl:px-16">
           <AuthLogo />
         </header>
 
@@ -15,7 +15,7 @@ export function AuthSplitLayout({ children }: { children: ReactNode }) {
           <div className="mx-auto w-full max-w-md">{children}</div>
         </main>
 
-        <footer className="flex flex-col gap-2 px-8 py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between lg:px-12 xl:px-16">
+        <footer className="flex flex-col gap-2 px-8 pt-6 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] text-xs text-muted sm:flex-row sm:items-center sm:justify-between lg:px-12 xl:px-16">
           <p>Copyright &copy; {new Date().getFullYear()} MyVision Enterprises LTD.</p>
           <Link href="/privacy" className="hover:text-foreground hover:underline">
             Privacy Policy

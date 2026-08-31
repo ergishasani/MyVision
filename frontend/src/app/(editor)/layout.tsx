@@ -13,7 +13,9 @@ import { AuthGuard } from "@/components/layout/auth-guard";
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div className="h-dvh overflow-hidden bg-background">{children}</div>
+      <div className="h-dvh overflow-hidden bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        {children}
+      </div>
     </AuthGuard>
   );
 }

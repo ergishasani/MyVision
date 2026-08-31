@@ -387,6 +387,10 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
         id="app-sidebar"
         className={cn(
           "fixed inset-y-0 left-0 z-40 flex w-[250px] shrink-0 flex-col border-r border-border bg-sidebar",
+          // The panel runs the full height of the screen, so its own background fills the notch
+          // and home-indicator bands while the padding keeps the brand and the account row clear
+          // of them. Both insets are 0 everywhere except iOS, so the desktop column is untouched.
+          "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]",
           // box-shadow rides along so the panel does not snap its edge on at the last frame, and
           // the curve is the one drawers usually use: quick to leave, settling rather than
           // stopping. Closing is a touch faster than opening — getting out of the way should not
@@ -545,7 +549,9 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
 export function MobileTopBar({ onOpen }: { onOpen: () => void }) {
   const t = useT();
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-sidebar px-4 lg:hidden">
+    // The bar keeps its 3.5rem of content and grows by the top inset, rather than having the
+    // notch eat into it — padding alone against a fixed height would squash the row.
+    <header className="flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 items-center gap-2 border-b border-border bg-sidebar px-4 pt-[env(safe-area-inset-top)] lg:hidden">
       <button
         type="button"
         onClick={onOpen}

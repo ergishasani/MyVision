@@ -43,8 +43,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               band of empty background under the shell. Making this the containing block clips them. */}
           <main className="relative flex-1 overflow-y-auto">
             {/* Near full width. The cap only bites on ultrawide displays, where a table
-                stretched across 3000px becomes hard to read across a row. */}
-            <div className="mx-auto w-full max-w-[1800px] px-6 py-7 xl:px-8">{children}</div>
+                stretched across 3000px becomes hard to read across a row. The bottom inset adds to
+                the padding rather than replacing it, so the last row of a table clears the home
+                indicator instead of sitting under it. */}
+            <div className="mx-auto w-full max-w-[1800px] px-6 pt-7 pb-[calc(1.75rem_+_env(safe-area-inset-bottom))] xl:px-8">
+              {children}
+            </div>
           </main>
         </div>
       </div>
