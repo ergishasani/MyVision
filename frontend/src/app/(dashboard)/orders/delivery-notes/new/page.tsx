@@ -12,6 +12,8 @@ import {
   type DeliveryNoteItemInput,
 } from "@/lib/api/delivery-notes";
 import type { Client } from "@/types/api";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { formatMoney } from "@/lib/utils/format";
 
 /** The VAT rates a German document realistically uses. */
@@ -48,6 +50,7 @@ function lineNet(line: Line) {
 }
 
 export default function NewDeliveryNotePage() {
+  const c = useT().newDeliveryNote;
   const router = useRouter();
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -84,11 +87,14 @@ export default function NewDeliveryNotePage() {
         setNextNumber(preview);
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load contacts");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : c.loadContactsError);
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the contact list for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const client = clients.find((c) => c.id === clientId) ?? null;
@@ -172,7 +178,7 @@ export default function NewDeliveryNotePage() {
       }
       router.push("/orders/delivery-notes");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not save this delivery note");
+      setError(err instanceof ApiError ? err.message : c.saveError);
       setSaving(false);
     }
   }
@@ -186,10 +192,10 @@ export default function NewDeliveryNotePage() {
             className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground"
           >
             <ChevronLeftIcon className="size-4" />
-            Delivery notes
+            {c.back}
           </Link>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
-            New delivery note
+            {c.title}
           </h1>
         </div>
 
@@ -200,7 +206,7 @@ export default function NewDeliveryNotePage() {
             onClick={() => save(false)}
             className="inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save as draft"}
+            {saving ? c.saving : c.saveDraft}
           </button>
           <button
             type="button"
@@ -208,22 +214,22 @@ export default function NewDeliveryNotePage() {
             onClick={() => save(true)}
             className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Save and mark sent
+            {c.saveAndSend}
           </button>
         </div>
       </header>
 
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-medium text-red-700">Could not save</p>
+          <p className="text-sm font-medium text-red-700">{c.saveErrorHeading}</p>
           <p className="mt-1 text-sm text-red-600">{error}</p>
         </div>
       ) : null}
 
-      <Section title="Contact and delivery information">
+      <Section title={c.contactSection}>
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="space-y-4">
-            <Field label="Customer" required>
+            <Field label={c.customer} required>
               <select
                 value={clientId}
                 onChange={(event) => setClientId(event.target.value)}
@@ -239,11 +245,11 @@ export default function NewDeliveryNotePage() {
             </Field>
 
             <Field
-              label="Delivery address"
+              label={c.deliveryAddress}
               hint={
                 addressTouched
-                  ? "Using the address typed here"
-                  : "Taken from the contact. Edit to deliver somewhere else, such as a site."
+                  ? c.addressTyped
+                  : c.addressFromContact
               }
             >
               <div className="space-y-2">
@@ -253,7 +259,7 @@ export default function NewDeliveryNotePage() {
                     setAddressTouched(true);
                     setAddress({ ...effectiveAddress, line1: event.target.value });
                   }}
-                  placeholder="Street and number"
+                  placeholder={c.phStreet}
                   className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
                 />
                 <div className="flex gap-2">
@@ -263,7 +269,7 @@ export default function NewDeliveryNotePage() {
                       setAddressTouched(true);
                       setAddress({ ...effectiveAddress, postalCode: event.target.value });
                     }}
-                    placeholder="Postcode"
+                    placeholder={c.phPostcode}
                     className="h-10 w-32 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
                   />
                   <input
@@ -272,7 +278,7 @@ export default function NewDeliveryNotePage() {
                       setAddressTouched(true);
                       setAddress({ ...effectiveAddress, city: event.target.value });
                     }}
-                    placeholder="City"
+                    placeholder={c.phCity}
                     className="h-10 flex-1 rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
                   />
                 </div>
@@ -290,17 +296,21 @@ export default function NewDeliveryNotePage() {
           </div>
 
           <div className="space-y-4">
-            <Field label="Subject">
+            <Field label={c.subject}>
               <input
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
-                placeholder={nextNumber ? `Delivery note ${nextNumber}` : "Delivery note"}
+                placeholder={
+                  nextNumber
+                    ? format(c.subjectPlaceholder, { number: nextNumber })
+                    : c.subjectFallback
+                }
                 className="h-10 w-full rounded-lg border border-border bg-card px-3 text-sm outline-none focus:border-primary"
               />
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Number" hint="Assigned when you save">
+              <Field label={c.number} hint={c.numberHint}>
                 <input
                   value={nextNumber ?? "—"}
                   readOnly
@@ -308,7 +318,7 @@ export default function NewDeliveryNotePage() {
                   className="h-10 w-full cursor-not-allowed rounded-lg border border-border bg-slate-50 px-3 text-sm text-muted outline-none"
                 />
               </Field>
-              <Field label="Delivery date">
+              <Field label={c.deliveryDate}>
                 <input
                   type="date"
                   value={deliveryDate}
@@ -318,7 +328,7 @@ export default function NewDeliveryNotePage() {
               </Field>
             </div>
 
-            <Field label="Reference / order number">
+            <Field label={c.reference}>
               <input
                 value={reference}
                 onChange={(event) => setReference(event.target.value)}
@@ -329,28 +339,28 @@ export default function NewDeliveryNotePage() {
         </div>
       </Section>
 
-      <Section title="Header text">
+      <Section title={c.headerText}>
         <textarea
           value={headerText}
           onChange={(event) => setHeaderText(event.target.value)}
           rows={3}
-          placeholder="Shown above the lines on the printed note."
+          placeholder={c.headerPlaceholder}
           className="w-full rounded-lg border border-border bg-card p-3 text-sm outline-none focus:border-primary"
         />
       </Section>
 
-      <Section title="Items">
+      <Section title={c.items}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="w-8 pb-2 text-left text-xs font-semibold uppercase text-muted">#</th>
-                <th className="pb-2 text-left text-xs font-semibold uppercase text-muted">Item or service</th>
-                <th className="w-24 pb-2 text-left text-xs font-semibold uppercase text-muted">Qty</th>
-                <th className="w-28 pb-2 text-left text-xs font-semibold uppercase text-muted">Unit</th>
-                <th className="w-32 pb-2 text-left text-xs font-semibold uppercase text-muted">Price (net)</th>
-                <th className="w-24 pb-2 text-left text-xs font-semibold uppercase text-muted">VAT</th>
-                <th className="w-28 pb-2 text-right text-xs font-semibold uppercase text-muted">Amount</th>
+                <th className="pb-2 text-left text-xs font-semibold uppercase text-muted">{c.colItem}</th>
+                <th className="w-24 pb-2 text-left text-xs font-semibold uppercase text-muted">{c.colQty}</th>
+                <th className="w-28 pb-2 text-left text-xs font-semibold uppercase text-muted">{c.colUnit}</th>
+                <th className="w-32 pb-2 text-left text-xs font-semibold uppercase text-muted">{c.colPriceNet}</th>
+                <th className="w-24 pb-2 text-left text-xs font-semibold uppercase text-muted">{c.colVat}</th>
+                <th className="w-28 pb-2 text-right text-xs font-semibold uppercase text-muted">{c.colAmount}</th>
                 <th className="w-10" />
               </tr>
             </thead>
@@ -362,7 +372,7 @@ export default function NewDeliveryNotePage() {
                     <input
                       value={line.description}
                       onChange={(event) => updateLine(index, { description: event.target.value })}
-                      placeholder="What was delivered"
+                      placeholder={c.itemPlaceholder}
                       className="h-9 w-full rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
                     />
                   </td>
@@ -414,7 +424,7 @@ export default function NewDeliveryNotePage() {
                   <td className="py-2 text-right">
                     <button
                       type="button"
-                      aria-label={`Remove line ${index + 1}`}
+                      aria-label={format(c.removeLineAria, { n: index + 1 })}
                       // The last line is kept: a note with no lines cannot be saved anyway, and an
                       // empty table gives nowhere to start typing again.
                       disabled={lines.length === 1}
@@ -435,26 +445,26 @@ export default function NewDeliveryNotePage() {
           onClick={() => setLines((c) => [...c, { ...EMPTY_LINE }])}
           className="mt-3 text-sm font-medium text-primary hover:underline"
         >
-          + Add line
+          {c.addLine}
         </button>
       </Section>
 
-      <Section title="Footer text">
+      <Section title={c.footerText}>
         <textarea
           value={footerText}
           onChange={(event) => setFooterText(event.target.value)}
           rows={3}
-          placeholder="Shown below the lines, e.g. who signed for the delivery."
+          placeholder={c.footerPlaceholder}
           className="w-full rounded-lg border border-border bg-card p-3 text-sm outline-none focus:border-primary"
         />
       </Section>
 
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <div className="ml-auto max-w-sm space-y-2 text-sm">
-          <TotalRow label="Net total" value={formatMoney(totals.subtotal, currency)} />
+          <TotalRow label={c.netTotal} value={formatMoney(totals.subtotal, currency)} />
           <div className="flex items-center justify-between gap-4">
             <label className="text-muted" htmlFor="doc-discount">
-              Discount
+              {c.discount}
             </label>
             <input
               id="doc-discount"
@@ -464,16 +474,15 @@ export default function NewDeliveryNotePage() {
               className="h-9 w-28 rounded-lg border border-border bg-card px-2 text-right text-sm outline-none focus:border-primary"
             />
           </div>
-          <TotalRow label="VAT" value={formatMoney(totals.tax, currency)} />
+          <TotalRow label={c.vat} value={formatMoney(totals.tax, currency)} />
           <div className="flex items-center justify-between gap-4 border-t border-border pt-2 text-base font-semibold">
-            <span className="text-foreground">Total</span>
+            <span className="text-foreground">{c.total}</span>
             <span className="tabular-nums text-foreground">
               {formatMoney(totals.total, currency)}
             </span>
           </div>
           <p className="pt-2 text-xs text-muted">
-            Amounts describe what was delivered. A delivery note is not an invoice — nothing is
-            owed because you issued one.
+            {c.totalsNote}
           </p>
         </div>
       </section>

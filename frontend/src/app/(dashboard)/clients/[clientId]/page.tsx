@@ -17,9 +17,13 @@ import type {
 import { ClientDialog } from "@/components/clients/client-dialog";
 import { StatusPill } from "@/components/layout/page-shell";
 import { daysOverdue, formatDate, formatMoney, humanizeStatus } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
-const TABS = ["Invoices", "Quotes", "Projects"] as const;
+/** Tab keys, deliberately not the visible labels -- those change with the language. */
+const TABS = ["invoices", "quotes", "projects"] as const;
 type Tab = (typeof TABS)[number];
 
 /** Statuses that still owe money. Mirrors the invoice list and the server's own definition. */
@@ -39,6 +43,7 @@ function effectiveStatus(invoice: ClientInvoiceSummary) {
 }
 
 export default function ClientDetailPage() {
+  const c = useT().clientDetail;
   const params = useParams<{ clientId: string }>();
   const clientId = params.clientId;
 
@@ -47,7 +52,7 @@ export default function ClientDetailPage() {
   // invoices under the new contact's name for as long as the second request takes.
   const [loaded, setLoaded] = useState<{ id: string; data: ClientOverview } | null>(null);
   const [failed, setFailed] = useState<{ id: string; message: string } | null>(null);
-  const [tab, setTab] = useState<Tab>("Invoices");
+  const [tab, setTab] = useState<Tab>("invoices");
   const [editing, setEditing] = useState(false);
 
   const overview = loaded?.id === clientId ? loaded.data : null;
@@ -63,19 +68,22 @@ export default function ClientDetailPage() {
         if (cancelled) return;
         setFailed({
           id: clientId,
-          message: err instanceof ApiError ? err.message : "Failed to load this contact",
+          message: err instanceof ApiError ? err.message : c.loadError,
         });
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the contact for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
   const counts = useMemo(
     () => ({
-      Invoices: overview?.invoices.length ?? 0,
-      Quotes: overview?.quotes.length ?? 0,
-      Projects: overview?.projects.length ?? 0,
+      invoices: overview?.invoices.length ?? 0,
+      quotes: overview?.quotes.length ?? 0,
+      projects: overview?.projects.length ?? 0,
     }),
     [overview],
   );
@@ -83,12 +91,12 @@ export default function ClientDetailPage() {
   if (!overview) {
     return error ? (
       <Placeholder
-        title="This contact could not be loaded"
+        title={c.notLoaded}
         hint={error}
-        action={{ href: "/clients", label: "Back to contacts" }}
+        action={{ href: "/clients", label: c.back }}
       />
     ) : (
-      <Placeholder title="Loading contact…" hint="Fetching their details and history." />
+      <Placeholder title={c.loading} hint={c.loadingHint} />
     );
   }
 
@@ -107,7 +115,7 @@ export default function ClientDetailPage() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 gap-4">
           <span
-            title={client.type === "business" ? "Organisation" : "Person"}
+            title={client.type === "business" ? c.typeOrganisation : c.typePerson}
             className="grid size-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-muted"
           >
             {client.type === "business" ? (
@@ -126,7 +134,7 @@ export default function ClientDetailPage() {
               ) : null}
               {client.contactName ? <span>{client.contactName}</span> : null}
               {client.position ? <span>{client.position}</span> : null}
-              <span>Customer since {formatDate(client.createdAt)}</span>
+              <span>{format(c.customerSince, { date: formatDate(client.createdAt) })}</span>
             </div>
           </div>
         </div>
@@ -136,13 +144,13 @@ export default function ClientDetailPage() {
             href={`/quotes/new?clientId=${client.id}`}
             className="inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
           >
-            New quote
+            {c.newQuote}
           </Link>
           <Link
             href={`/invoices/new?clientId=${client.id}`}
             className="inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
           >
-            New invoice
+            {c.newInvoice}
           </Link>
           <button
             type="button"
@@ -150,17 +158,16 @@ export default function ClientDetailPage() {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700"
           >
             <PencilIcon className="size-4" />
-            Edit contact
+            {c.editContact}
           </button>
         </div>
       </header>
 
       {client.archivedAt ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-800">This contact is archived</p>
+          <p className="text-sm font-medium text-amber-800">{c.archivedTitle}</p>
           <p className="mt-1 text-sm text-amber-700">
-            Archived on {formatDate(client.archivedAt)}. They no longer appear in the contact list,
-            but everything issued to them is unchanged and still counted below.
+            {format(c.archivedBody, { date: formatDate(client.archivedAt) })}
           </p>
         </div>
       ) : null}
@@ -183,15 +190,15 @@ export default function ClientDetailPage() {
                     : "text-muted hover:bg-slate-100 hover:text-foreground",
                 )}
               >
-                {name}
+                {c.tabs[name]}
                 <span className="ml-1.5 text-xs opacity-70">{counts[name]}</span>
               </button>
             ))}
           </div>
 
-          {tab === "Invoices" ? <InvoiceTable invoices={invoices} /> : null}
-          {tab === "Quotes" ? <QuoteTable quotes={quotes} /> : null}
-          {tab === "Projects" ? <ProjectTable projects={projects} /> : null}
+          {tab === "invoices" ? <InvoiceTable invoices={invoices} /> : null}
+          {tab === "quotes" ? <QuoteTable quotes={quotes} /> : null}
+          {tab === "projects" ? <ProjectTable projects={projects} /> : null}
         </section>
 
         <aside className="space-y-6">
@@ -200,7 +207,7 @@ export default function ClientDetailPage() {
           <TermsCard client={client} stats={stats} />
           <TaxAndBankCard client={client} />
           {client.notes ? (
-            <Card title="Notes">
+            <Card title={c.cardNotes}>
               <p className="whitespace-pre-wrap text-sm text-foreground">{client.notes}</p>
             </Card>
           ) : null}
@@ -229,40 +236,53 @@ export default function ClientDetailPage() {
 /* --- headline figures ----------------------------------------------------- */
 
 function Stats({ stats }: { stats: ClientStats }) {
+  const c = useT().clientDetail;
   return (
     <section>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
-          label="Total invoiced"
+          label={c.totalInvoiced}
           value={formatMoney(stats.totalInvoiced, stats.currency)}
           hint={
             stats.lastInvoiceDate
-              ? `${stats.invoiceCount} invoice${stats.invoiceCount === 1 ? "" : "s"}, last ${formatDate(stats.lastInvoiceDate)}`
-              : "Nothing issued yet"
+              ? format(
+                  stats.invoiceCount === 1 ? c.invoiceCountOne : c.invoiceCountOther,
+                  { count: stats.invoiceCount, date: formatDate(stats.lastInvoiceDate) },
+                )
+              : c.nothingIssued
           }
         />
         <StatTile
-          label="Paid"
+          label={c.paid}
           value={formatMoney(stats.totalPaid, stats.currency)}
           hint={
             stats.averageDaysToPay !== null
-              ? `Settles in ${stats.averageDaysToPay} day${stats.averageDaysToPay === 1 ? "" : "s"} on average`
-              : "No payment recorded yet"
+              ? format(
+                  stats.averageDaysToPay === 1 ? c.settlesOne : c.settlesOther,
+                  { days: stats.averageDaysToPay },
+                )
+              : c.noPaymentYet
           }
         />
         <StatTile
-          label="Outstanding"
+          label={c.outstanding}
           value={formatMoney(stats.outstanding, stats.currency)}
-          hint={`${stats.openInvoiceCount} open invoice${stats.openInvoiceCount === 1 ? "" : "s"}`}
+          hint={format(
+            stats.openInvoiceCount === 1 ? c.openCountOne : c.openCountOther,
+            { count: stats.openInvoiceCount },
+          )}
           tone={stats.outstanding > 0 ? "warn" : "neutral"}
         />
         <StatTile
-          label="Overdue"
+          label={c.overdue}
           value={formatMoney(stats.overdue, stats.currency)}
           hint={
             stats.overdueInvoiceCount === 0
-              ? "Nothing late"
-              : `${stats.overdueInvoiceCount} invoice${stats.overdueInvoiceCount === 1 ? "" : "s"} past due`
+              ? c.nothingLate
+              : format(
+                  stats.overdueInvoiceCount === 1 ? c.overdueCountOne : c.overdueCountOther,
+                  { count: stats.overdueInvoiceCount },
+                )
           }
           tone={stats.overdue > 0 ? "danger" : "neutral"}
         />
@@ -314,18 +334,19 @@ function StatTile({
 /* --- history tables ------------------------------------------------------- */
 
 function InvoiceTable({ invoices }: { invoices: ClientInvoiceSummary[] }) {
+  const c = useT().clientDetail;
   if (invoices.length === 0) {
     return (
       <EmptyRow
-        title="No invoices yet"
-        hint="Every invoice issued to this contact appears here, newest first."
+        title={c.noInvoices}
+        hint={c.noInvoicesHint}
       />
     );
   }
 
   return (
     <TableFrame
-      headers={["Status", "Invoice no.", "Issued", "Due", "Total", "Balance"]}
+      headers={[c.colStatus, c.colInvoiceNo, c.colIssued, c.colDue, c.colTotal, c.colBalance]}
       numericFrom={4}
     >
       {invoices.map((invoice) => {
@@ -372,17 +393,18 @@ function InvoiceTable({ invoices }: { invoices: ClientInvoiceSummary[] }) {
 }
 
 function QuoteTable({ quotes }: { quotes: ClientQuoteSummary[] }) {
+  const c = useT().clientDetail;
   if (quotes.length === 0) {
     return (
       <EmptyRow
-        title="No quotes yet"
-        hint="Quotes sent to this contact appear here, including the ones already converted."
+        title={c.noQuotes}
+        hint={c.noQuotesHint}
       />
     );
   }
 
   return (
-    <TableFrame headers={["Status", "Quote no.", "Issued", "Valid until", "Total"]} numericFrom={4}>
+    <TableFrame headers={[c.colStatus, c.colQuoteNo, c.colIssued, c.colValidUntil, c.colTotal]} numericFrom={4}>
       {quotes.map((quote) => (
         <tr key={quote.id} className="border-b border-border last:border-0 hover:bg-slate-50/70">
           <td className="px-4 py-3">
@@ -408,17 +430,18 @@ function QuoteTable({ quotes }: { quotes: ClientQuoteSummary[] }) {
 }
 
 function ProjectTable({ projects }: { projects: Project[] }) {
+  const c = useT().clientDetail;
   if (projects.length === 0) {
     return (
       <EmptyRow
-        title="No projects yet"
-        hint="Jobs run for this contact appear here, with the budget agreed for each."
+        title={c.noProjects}
+        hint={c.noProjectsHint}
       />
     );
   }
 
   return (
-    <TableFrame headers={["Status", "Project", "Site", "Dates", "Budget"]} numericFrom={4}>
+    <TableFrame headers={[c.colStatus, c.colProject, c.colSite, c.colDates, c.colBudget]} numericFrom={4}>
       {projects.map((project) => (
         <tr key={project.id} className="border-b border-border last:border-0 hover:bg-slate-50/70">
           <td className="px-4 py-3">
@@ -518,14 +541,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ContactCard({ client }: { client: Client }) {
+  const c = useT().clientDetail;
   // The primary email and phone are already shown above; a duplicate row adds nothing.
   const extras = client.contactDetails.filter(
     (detail) => detail.value !== client.email && detail.value !== client.phone,
   );
 
   return (
-    <Card title="Contact">
-      <Field label="Email">
+    <Card title={c.cardContact}>
+      <Field label={c.email}>
         {client.email ? (
           <a href={`mailto:${client.email}`} className="text-primary hover:underline">
             {client.email}
@@ -534,7 +558,7 @@ function ContactCard({ client }: { client: Client }) {
           "—"
         )}
       </Field>
-      <Field label="Phone">
+      <Field label={c.phone}>
         {client.phone ? (
           <a href={`tel:${client.phone}`} className="text-primary hover:underline">
             {client.phone}
@@ -544,7 +568,7 @@ function ContactCard({ client }: { client: Client }) {
         )}
       </Field>
       {extras.map((detail) => (
-        <Field key={detail.id} label={detailLabel(detail)}>
+        <Field key={detail.id} label={detailLabel(detail, c)}>
           <span className="break-all">{detail.value}</span>
         </Field>
       ))}
@@ -553,12 +577,14 @@ function ContactCard({ client }: { client: Client }) {
 }
 
 /** "Email · billing" — the kind alone would not say which of three numbers this is. */
-function detailLabel(detail: ContactDetail) {
-  const kind = detail.kind === "website" ? "Website" : detail.kind === "email" ? "Email" : "Phone";
-  return detail.label ? `${kind} · ${detail.label}` : kind;
+function detailLabel(detail: ContactDetail, c: Dictionary["clientDetail"]) {
+  const kind =
+    detail.kind === "website" ? c.website : detail.kind === "email" ? c.email : c.phone;
+  return detail.label ? format(c.detailWithLabel, { kind, label: detail.label }) : kind;
 }
 
 function AddressCard({ client }: { client: Client }) {
+  const c = useT().clientDetail;
   const lines = [
     client.addressLine1,
     client.addressLine2,
@@ -568,7 +594,7 @@ function AddressCard({ client }: { client: Client }) {
   ].filter((line): line is string => Boolean(line && line.trim().length > 0));
 
   return (
-    <Card title="Address">
+    <Card title={c.cardAddress}>
       {lines.length === 0 ? (
         <p className="text-sm text-muted">
           No address on file. An invoice needs one, so add it before issuing.
@@ -587,25 +613,36 @@ function AddressCard({ client }: { client: Client }) {
 }
 
 function TermsCard({ client, stats }: { client: Client; stats: ClientStats }) {
+  const c = useT().clientDetail;
   return (
-    <Card title="Billing terms">
-      <Field label="Payment terms">
-        {client.paymentTermsDays !== null ? `${client.paymentTermsDays} days` : "Company default"}
+    <Card title={c.cardTerms}>
+      <Field label={c.paymentTerms}>
+        {client.paymentTermsDays !== null
+          ? format(
+              client.paymentTermsDays === 1 ? c.paymentTermsDaysOne : c.paymentTermsDaysOther,
+              { days: client.paymentTermsDays },
+            )
+          : c.companyDefault}
       </Field>
       {/* Skonto is meaningless as two separate numbers, so it is shown as the one sentence it is. */}
-      <Field label="Early payment">
+      <Field label={c.earlyPayment}>
         {client.discountDays !== null && client.discountPercent !== null
-          ? `${client.discountPercent}% within ${client.discountDays} days`
+          ? format(
+              client.discountDays === 1 ? c.earlyPaymentValueOne : c.earlyPaymentValueOther,
+              { percent: client.discountPercent, days: client.discountDays },
+            )
           : "—"}
       </Field>
-      <Field label="Standing discount">
+      <Field label={c.standingDiscount}>
         {client.customerDiscount !== null
           ? client.customerDiscountUnit === "percent"
             ? `${client.customerDiscount}%`
             : formatMoney(client.customerDiscount, stats.currency)
           : "—"}
       </Field>
-      <Field label="E-invoice">{client.einvoiceStandard ? "Required" : "Not required"}</Field>
+      <Field label={c.eInvoice}>
+        {client.einvoiceStandard ? c.required : c.notRequired}
+      </Field>
       {client.terms ? (
         <p className="mt-3 whitespace-pre-wrap border-t border-border pt-3 text-sm text-muted">
           {client.terms}
@@ -616,16 +653,17 @@ function TermsCard({ client, stats }: { client: Client; stats: ClientStats }) {
 }
 
 function TaxAndBankCard({ client }: { client: Client }) {
+  const c = useT().clientDetail;
   return (
-    <Card title="Tax and bank">
-      <Field label="VAT ID">{client.vatNumber ?? "—"}</Field>
-      <Field label="Tax number">{client.taxNumber ?? "—"}</Field>
-      <Field label="Debtor no.">{client.debtorNumber ?? "—"}</Field>
-      <Field label="Creditor no.">{client.creditorNumber ?? "—"}</Field>
-      <Field label="IBAN">
+    <Card title={c.cardTaxBank}>
+      <Field label={c.vatId}>{client.vatNumber ?? "—"}</Field>
+      <Field label={c.taxNumber}>{client.taxNumber ?? "—"}</Field>
+      <Field label={c.debtorNo}>{client.debtorNumber ?? "—"}</Field>
+      <Field label={c.creditorNo}>{client.creditorNumber ?? "—"}</Field>
+      <Field label={c.iban}>
         <span className="break-all font-mono text-xs">{client.iban ?? "—"}</span>
       </Field>
-      <Field label="BIC">
+      <Field label={c.bic}>
         <span className="font-mono text-xs">{client.bic ?? "—"}</span>
       </Field>
     </Card>

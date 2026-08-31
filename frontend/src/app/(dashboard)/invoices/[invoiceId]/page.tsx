@@ -25,18 +25,26 @@ import { InvoiceDocument } from "@/components/invoices/invoice-document";
 import { getSession } from "@/lib/auth/session";
 import { documentSenderName } from "@/lib/document-sender";
 import { daysOverdue, formatDate, formatMoney, humanizeStatus } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
 /** Statuses that still owe money, matching the list and the dashboard. */
 const OPEN_STATUSES = new Set(["sent", "unpaid", "partially_paid", "overdue"]);
 
-const FORMATS: Array<{ value: InvoiceFormat; label: string; hint: string }> = [
-  { value: "pdf", label: "PDF", hint: "The document as the customer sees it" },
-  { value: "xrechnung", label: "XRechnung (XML)", hint: "For public-sector e-invoicing" },
-  { value: "zugferd", label: "ZUGFeRD (PDF/A-3)", hint: "PDF with the XML embedded" },
-];
+/** Export formats. The stored value stays; the wording comes from the dictionary. */
+const FORMAT_VALUES = ["pdf", "xrechnung", "zugferd"] as const;
+
+const formats = (t: Dictionary["invoiceDetail"]) =>
+  FORMAT_VALUES.map((value) => ({
+    value,
+    label: t.formats[value].label,
+    hint: t.formats[value].hint,
+  }));
 
 export default function InvoiceDetailPage() {
+  const c = useT().invoiceDetail;
   const params = useParams<{ invoiceId: string }>();
   const id = params.invoiceId;
 
@@ -82,12 +90,15 @@ export default function InvoiceDetailPage() {
         if (cancelled) return;
         setFailed({
           id,
-          message: err instanceof ApiError ? err.message : "Failed to load this invoice",
+          message: err instanceof ApiError ? err.message : c.loadError,
         });
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch the invoice for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const position = useMemo(() => {
@@ -120,7 +131,7 @@ export default function InvoiceDetailPage() {
       const saved = await replaceInvoiceTags(id, next);
       setLoaded({ id, invoice: saved });
     } catch (err) {
-      setFailed({ id, message: err instanceof ApiError ? err.message : "Could not save the tags" });
+      setFailed({ id, message: err instanceof ApiError ? err.message : c.saveTagsError });
     }
   }
 
@@ -136,7 +147,7 @@ export default function InvoiceDetailPage() {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 0);
     } catch (err) {
-      setFailed({ id, message: err instanceof ApiError ? err.message : "Could not download" });
+      setFailed({ id, message: err instanceof ApiError ? err.message : c.downloadError });
     }
   }
 
@@ -144,7 +155,7 @@ export default function InvoiceDetailPage() {
     return (
       <div className="rounded-xl border border-border bg-card p-16 text-center shadow-sm">
         <p className="text-sm font-medium text-foreground">
-          {error ? "This invoice could not be loaded" : "Loading invoice…"}
+          {error ? c.notLoaded : c.loading}
         </p>
         {error ? <p className="mt-1 text-sm text-muted">{error}</p> : null}
         <Link
@@ -174,25 +185,27 @@ export default function InvoiceDetailPage() {
         <div className="flex min-w-0 gap-3">
           <Link
             href="/invoices"
-            aria-label="Back to invoices"
+            aria-label={c.backAria}
             className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 hover:text-foreground"
           >
             <ChevronLeftIcon className="size-4" />
           </Link>
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {isCreditNote ? "Credit note" : "Invoice"} no. {invoice.invoiceNumber}
+              {format(isCreditNote ? c.headingCreditNote : c.headingInvoice, {
+                number: invoice.invoiceNumber,
+              })}
             </h1>
             {invoice.sourceQuoteId ? (
               <Link
                 href={`/quotes/${invoice.sourceQuoteId}`}
                 className="mt-0.5 inline-block text-sm text-primary hover:underline"
               >
-                Show linked documents
+                {c.showLinked}
               </Link>
             ) : (
               <p className="mt-0.5 text-sm text-muted">
-                {invoice.subject || "No subject"}
+                {invoice.subject || c.noSubject}
               </p>
             )}
           </div>
@@ -206,7 +219,7 @@ export default function InvoiceDetailPage() {
               aria-expanded={menu === "more"}
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
             >
-              More
+              {c.more}
               <ChevronDownIcon className="size-4 text-muted" />
             </button>
             {menu === "more" ? (
@@ -218,29 +231,29 @@ export default function InvoiceDetailPage() {
                     guaranteed errors. */}
                 {invoice.status === "draft" ? (
                   <MenuButton
-                    onClick={() => act(markInvoiceSent, "Could not mark this invoice as sent")}
+                    onClick={() => act(markInvoiceSent, c.markSentError)}
                   >
-                    Mark as sent
+                    {c.markSent}
                   </MenuButton>
                 ) : null}
                 {!settled && invoice.status !== "cancelled" ? (
                   <>
                     <MenuButton onClick={() => { setMenu(null); setPaying(true); }}>
-                      Record a payment
+                      {c.recordPayment}
                     </MenuButton>
                     <MenuButton
-                      onClick={() => act(markInvoicePaid, "Could not mark this invoice as paid")}
+                      onClick={() => act(markInvoicePaid, c.markPaidError)}
                     >
-                      Mark as fully paid
+                      {c.markPaid}
                     </MenuButton>
                   </>
                 ) : null}
                 {invoice.status !== "cancelled" ? (
                   <MenuButton
                     tone="danger"
-                    onClick={() => act(cancelInvoice, "Could not cancel this invoice")}
+                    onClick={() => act(cancelInvoice, c.cancelError)}
                   >
-                    Cancel invoice
+                    {c.cancelInvoice}
                   </MenuButton>
                 ) : null}
               </div>
@@ -255,22 +268,22 @@ export default function InvoiceDetailPage() {
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50"
             >
               <DownloadIcon className="size-4" />
-              Download
+              {c.download}
             </button>
             {menu === "download" ? (
               <div
                 role="menu"
                 className="absolute right-0 top-11 z-30 w-64 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-lg"
               >
-                {FORMATS.map((format) => (
+                {formats(c).map((entry) => (
                   <button
-                    key={format.value}
+                    key={entry.value}
                     type="button"
-                    onClick={() => download(format.value)}
+                    onClick={() => download(entry.value)}
                     className="block w-full px-4 py-2 text-left hover:bg-slate-50"
                   >
-                    <span className="block text-sm text-foreground">{format.label}</span>
-                    <span className="block text-xs text-muted">{format.hint}</span>
+                    <span className="block text-sm text-foreground">{entry.label}</span>
+                    <span className="block text-xs text-muted">{entry.hint}</span>
                   </button>
                 ))}
               </div>
@@ -283,15 +296,15 @@ export default function InvoiceDetailPage() {
           <button
             type="button"
             disabled={busy || invoice.status !== "draft"}
-            onClick={() => act(markInvoiceSent, "Could not mark this invoice as sent")}
+            onClick={() => act(markInvoiceSent, c.markSentError)}
             title={
               invoice.status === "draft"
-                ? "Records that the invoice has gone out"
-                : "Already issued"
+                ? c.markSentHint
+                : c.alreadyIssued
             }
             className="inline-flex h-10 items-center rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Mark as sent
+            {c.markSent}
           </button>
         </div>
       </header>
@@ -342,13 +355,13 @@ export default function InvoiceDetailPage() {
               <span className="flex items-center gap-1">
                 <NavArrow
                   href={position.previous ? `/invoices/${position.previous.id}` : null}
-                  label="Previous invoice"
+                  label={c.previousInvoice}
                 >
                   <ChevronLeftIcon className="size-4" />
                 </NavArrow>
                 <NavArrow
                   href={position.next ? `/invoices/${position.next.id}` : null}
-                  label="Next invoice"
+                  label={c.nextInvoice}
                 >
                   <ChevronRightIcon className="size-4" />
                 </NavArrow>
@@ -364,7 +377,7 @@ export default function InvoiceDetailPage() {
                   className="flex items-center gap-1.5 font-medium text-foreground hover:text-primary hover:underline"
                 >
                   <span className="truncate">
-                    {invoice.recipientName ?? client?.name ?? "Unknown contact"}
+                    {invoice.recipientName ?? client?.name ?? c.unknownContact}
                   </span>
                   <LinkIcon className="size-3.5 shrink-0 text-muted" />
                 </Link>
@@ -400,10 +413,10 @@ export default function InvoiceDetailPage() {
 
           <Card>
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-foreground">Invoice details</h2>
+              <h2 className="text-base font-semibold text-foreground">{c.detailsHeading}</h2>
               <button
                 type="button"
-                aria-label="Open the document"
+                aria-label={c.openDocument}
                 onClick={() => download("pdf")}
                 className="grid size-8 place-items-center rounded-lg text-muted transition-colors hover:bg-slate-100 hover:text-foreground"
               >
@@ -412,7 +425,7 @@ export default function InvoiceDetailPage() {
             </div>
 
             <Row
-              label="Due"
+              label={c.due}
               value={formatDate(invoice.dueDate)}
               // Struck through once settled: the date is still a record, but no longer something
               // to act on.
@@ -420,20 +433,32 @@ export default function InvoiceDetailPage() {
               tone={isOverdue ? "danger" : undefined}
             />
             {isOverdue && late !== null ? (
-              <Row label="Overdue by" value={`${late} day${late === 1 ? "" : "s"}`} tone="danger" />
+              <Row
+                label={c.overdueBy}
+                value={format(late === 1 ? c.daysOne : c.daysOther, { days: late })}
+                tone="danger"
+              />
             ) : null}
 
             <Row
-              label="Payment terms"
+              label={c.paymentTerms}
               value={
                 invoice.dueDate
-                  ? `${formatDate(invoice.dueDate)} (${termDays(invoice.issueDate, invoice.dueDate)} days)`
+                  ? format(
+                      termDays(invoice.issueDate, invoice.dueDate) === 1
+                        ? c.paymentTermsValueOne
+                        : c.paymentTermsValueOther,
+                      {
+                        date: formatDate(invoice.dueDate),
+                        days: termDays(invoice.issueDate, invoice.dueDate),
+                      },
+                    )
                   : "—"
               }
             />
 
             <div className="flex items-start justify-between gap-3 border-b border-border py-3 text-sm last:border-0">
-              <span className="shrink-0 text-muted">Tags</span>
+              <span className="shrink-0 text-muted">{c.tags}</span>
               <div className="flex flex-wrap justify-end gap-1.5">
                 {invoice.tags.map((tag) => (
                   <span
@@ -476,7 +501,7 @@ export default function InvoiceDetailPage() {
                         setTagDraft("");
                       }
                     }}
-                    placeholder="Tag name"
+                    placeholder={c.tagPlaceholder}
                     className="h-6 w-28 rounded-md border border-border bg-card px-1.5 text-xs outline-none focus:border-primary"
                   />
                 ) : (
@@ -485,30 +510,30 @@ export default function InvoiceDetailPage() {
                     onClick={() => setAddingTag(true)}
                     className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-muted transition-colors hover:bg-slate-200 hover:text-foreground"
                   >
-                    Add tags
+                    {c.addTags}
                   </button>
                 )}
               </div>
             </div>
 
-            <Row label="Invoice date" value={formatDate(invoice.issueDate)} />
-            <Row label="Sent on" value={invoice.sentAt ? formatDate(invoice.sentAt) : "—"} />
+            <Row label={c.invoiceDate} value={formatDate(invoice.issueDate)} />
+            <Row label={c.sentOn} value={invoice.sentAt ? formatDate(invoice.sentAt) : "—"} />
 
             {/* Locked once issued. Not a separate flag: the update endpoint already refuses to
                 edit anything past draft, so the date it left draft is the date it froze. */}
             <Row
-              label="Recorded"
-              value={invoice.sentAt ? formatDate(invoice.sentAt) : "Not yet"}
+              label={c.recorded}
+              value={invoice.sentAt ? formatDate(invoice.sentAt) : c.notYet}
               icon={invoice.sentAt ? <LockIcon className="size-3.5" /> : undefined}
             />
 
             {/* No DATEV export exists. Reported as such, with no link, rather than offering an
                 action that would go nowhere. */}
             <div className="flex items-start justify-between gap-3 py-3 text-sm">
-              <span className="shrink-0 text-muted">DATEV export history</span>
+              <span className="shrink-0 text-muted">{c.datevHeading}</span>
               <span className="text-right">
-                <span className="block text-muted">Not exported</span>
-                <span className="block text-xs text-muted/70">Export is not built yet</span>
+                <span className="block text-muted">{c.notExported}</span>
+                <span className="block text-xs text-muted/70">{c.exportNotBuilt}</span>
               </span>
             </div>
           </Card>
@@ -580,7 +605,7 @@ export default function InvoiceDetailPage() {
             } catch (err) {
               setFailed({
                 id,
-                message: err instanceof ApiError ? err.message : "Could not record the payment",
+                message: err instanceof ApiError ? err.message : c.recordPaymentError,
               });
             } finally {
               setBusy(false);
@@ -738,6 +763,7 @@ function PaymentDialog({
   onClose: () => void;
   onRecord: (amount: number) => void;
 }) {
+  const c = useT().invoiceDetail;
   const [amount, setAmount] = useState(maxAmount.toFixed(2));
   const parsed = Number(amount.replace(",", "."));
   // The server refuses more than the balance; catching it here saves a round trip and explains
@@ -749,7 +775,7 @@ function PaymentDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
-        aria-label="Cancel"
+        aria-label={c.cancel}
         onClick={onClose}
         className="fixed inset-0 cursor-default bg-slate-900/40"
       />
@@ -758,13 +784,15 @@ function PaymentDialog({
         aria-modal="true"
         className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl"
       >
-        <h2 className="text-lg font-semibold text-foreground">Record a payment</h2>
+        <h2 className="text-lg font-semibold text-foreground">{c.paymentDialogTitle}</h2>
         <p className="mt-1 text-sm text-muted">
-          {formatMoney(maxAmount, currency)} is still outstanding.
+          {format(c.paymentOutstanding, {
+            amount: formatMoney(maxAmount, currency),
+          })}
         </p>
 
         <label className="mt-4 block">
-          <span className="mb-1 block text-sm text-foreground">Amount</span>
+          <span className="mb-1 block text-sm text-foreground">{c.paymentAmount}</span>
           <input
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
@@ -775,7 +803,9 @@ function PaymentDialog({
         </label>
         {tooMuch ? (
           <p className="mt-1 text-xs text-red-600">
-            More than the outstanding balance. Record at most {formatMoney(maxAmount, currency)}.
+            {format(c.paymentTooMuch, {
+              amount: formatMoney(maxAmount, currency),
+            })}
           </p>
         ) : null}
 
@@ -785,7 +815,7 @@ function PaymentDialog({
             onClick={onClose}
             className="h-10 rounded-lg px-4 text-sm font-medium text-foreground hover:bg-slate-100"
           >
-            Cancel
+            {c.cancel}
           </button>
           <button
             type="button"
@@ -793,7 +823,7 @@ function PaymentDialog({
             onClick={() => onRecord(parsed)}
             className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-blue-700 disabled:opacity-50"
           >
-            Record
+            {c.record}
           </button>
         </div>
       </div>

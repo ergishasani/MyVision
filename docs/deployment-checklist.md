@@ -14,8 +14,8 @@ DATABASE_URL
 DATABASE_USERNAME
 DATABASE_PASSWORD
 JWT_SECRET
-AUTH_FRONTEND_BASE_URL=https://myvision.visionbau.de
-APP_CORS_ALLOWED_ORIGINS=https://myvision.visionbau.de
+AUTH_FRONTEND_BASE_URL=https://myvision.visionbau24.de
+APP_CORS_ALLOWED_ORIGINS=https://myvision.visionbau24.de
 AUTH_RETURN_SENSITIVE_TOKENS=false
 APP_RATE_LIMIT_ENABLED=true
 APP_RATE_LIMIT_MAX_REQUESTS=120
@@ -24,7 +24,7 @@ SPRINGDOC_ENABLED=false
 SPRINGDOC_SWAGGER_UI_ENABLED=false
 SPRINGDOC_API_DOCS_ENABLED=false
 MAIL_PROVIDER=resend
-MAIL_FROM=MyVision <no-reply@myvision.visionbau.de>
+MAIL_FROM=MyVision <no-reply@myvision.visionbau24.de>
 RESEND_API_KEY
 ```
 
@@ -39,7 +39,7 @@ Never put these in frontend env vars, source code, Git, screenshots, or chat log
 
 ## Resend Domain Verification
 
-- Add and verify the sending domain in Resend, preferably `myvision.visionbau.de` or `mail.myvision.visionbau.de`.
+- Add and verify the sending domain in Resend, preferably `myvision.visionbau24.de` or `mail.myvision.visionbau24.de`.
 - Add the DNS records Resend gives you: SPF/TXT, DKIM, and any return-path/bounce records.
 - Wait until Resend marks the domain verified.
 - Send a real password-reset email from staging and confirm the link points to `AUTH_FRONTEND_BASE_URL`.

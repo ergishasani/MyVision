@@ -16,9 +16,13 @@ import {
 import type { Client, Quote, QuoteStatus } from "@/types/api";
 import { StatusPill } from "@/components/layout/page-shell";
 import { formatDate, formatMoney, humanizeStatus } from "@/lib/utils/format";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils/cn";
 
-const TABS = ["All", "Draft", "Open", "Accepted", "Rejected", "Expired", "Converted"] as const;
+/** Filter keys, deliberately not the visible labels -- those change with the language. */
+const TABS = ["all", "draft", "open", "accepted", "rejected", "expired", "converted"] as const;
 type Tab = (typeof TABS)[number];
 
 const PAGE_SIZES = [25, 50, 100];
@@ -26,22 +30,22 @@ const PAGE_SIZES = [25, 50, 100];
 /** "Open" is the operator's word for a quote that is out with the customer and still undecided. */
 function matchesTab(quote: Quote, tab: Tab) {
   switch (tab) {
-    case "All":
+    case "all":
       return true;
-    case "Draft":
+    case "draft":
       return quote.status === "draft";
-    case "Open":
+    case "open":
       // Lapsed offers are deliberately excluded, so this tab agrees with the "out with customers"
       // figure above it. A quote past its validity date is not still in play, and listing it as
       // Open while the row itself reads Expired is just a contradiction on screen.
       return quote.status === "sent" && !isLapsed(quote);
-    case "Accepted":
+    case "accepted":
       return quote.status === "accepted";
-    case "Rejected":
+    case "rejected":
       return quote.status === "rejected";
-    case "Expired":
+    case "expired":
       return quote.status === "expired" || isLapsed(quote);
-    case "Converted":
+    case "converted":
       return quote.status === "converted";
     default:
       return true;
@@ -136,17 +140,17 @@ function csvDate(iso: string | null) {
   return year && month && day ? `${day}.${month}.${year}` : iso;
 }
 
-const CSV_COLUMNS = [
-  "Status",
-  "Number",
-  "Customer",
-  "Subject",
-  "Issue date",
-  "Valid until",
-  "Net",
-  "VAT",
-  "Gross",
-  "Currency",
+const csvColumns = (t: Dictionary["quotes"]) => [
+  t.csv.status,
+  t.csv.number,
+  t.csv.customer,
+  t.csv.subject,
+  t.csv.issueDate,
+  t.csv.validUntil,
+  t.csv.net,
+  t.csv.vat,
+  t.csv.gross,
+  t.csv.currency,
 ];
 
 /**
@@ -156,7 +160,11 @@ const CSV_COLUMNS = [
  * splitting on the decimal comma instead, which turns every amount into two columns, and drops
  * the umlauts in customer names without the BOM.
  */
-function exportOffers(quotes: Quote[], clientName: (id: string) => string) {
+function exportOffers(
+  quotes: Quote[],
+  clientName: (id: string) => string,
+  columns: string[],
+) {
   const rows = quotes.map((quote) =>
     [
       humanizeStatus(effectiveStatus(quote)),
@@ -174,7 +182,7 @@ function exportOffers(quotes: Quote[], clientName: (id: string) => string) {
       .join(";"),
   );
 
-  const csv = "\ufeff" + [CSV_COLUMNS.join(";"), ...rows].join("\r\n");
+  const csv = "\ufeff" + [columns.join(";"), ...rows].join("\r\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
@@ -185,6 +193,8 @@ function exportOffers(quotes: Quote[], clientName: (id: string) => string) {
 }
 
 export default function QuotesPage() {
+  const t = useT();
+  const c = t.quotes;
   const router = useRouter();
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -193,7 +203,7 @@ export default function QuotesPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const [tab, setTab] = useState<Tab>("All");
+  const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -211,7 +221,7 @@ export default function QuotesPage() {
         setClients(clientList);
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load offers");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : c.loadError);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -219,12 +229,15 @@ export default function QuotesPage() {
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch every offer for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clientName = useMemo(() => {
     const byId = new Map(clients.map((client) => [client.id, client.name]));
-    return (id: string) => byId.get(id) ?? "Unknown contact";
-  }, [clients]);
+    return (id: string) => byId.get(id) ?? c.unknownContact;
+  }, [clients, c.unknownContact]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -290,7 +303,7 @@ export default function QuotesPage() {
       // on, and it is the only place the new number is visible.
       router.push(`/invoices/${invoice.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not convert this offer");
+      setError(err instanceof ApiError ? err.message : c.convertError);
       setBusy(null);
     }
   }
@@ -299,16 +312,20 @@ export default function QuotesPage() {
     <div className="space-y-6" onClick={() => setMenu(null)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Offers</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{c.title}</h1>
           {!loading ? (
             <p className="mt-1 text-sm font-medium text-foreground">
               {openValue > 0
-                ? `${formatMoney(openValue, currency)} out with customers`
-                : `${quotes.length} offer${quotes.length === 1 ? "" : "s"}`}
+                ? format(c.outWithCustomers, {
+                    amount: formatMoney(openValue, currency),
+                  })
+                : format(quotes.length === 1 ? c.countOne : c.countOther, {
+                    count: quotes.length,
+                  })}
             </p>
           ) : null}
           <p className="mt-1 text-sm text-muted">
-            What you have quoted, and what became an invoice.
+            {c.description}
           </p>
         </div>
 
@@ -317,14 +334,14 @@ export default function QuotesPage() {
           className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-blue-700"
         >
           <PlusIcon className="size-4" />
-          Create offer
+          {c.create}
         </Link>
       </header>
 
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <p className="text-sm font-medium text-red-700">Something went wrong</p>
+            <p className="text-sm font-medium text-red-700">{c.errorHeading}</p>
             <p className="mt-1 text-sm text-red-600">{error}</p>
           </div>
           <button
@@ -332,7 +349,7 @@ export default function QuotesPage() {
             onClick={() => setError(null)}
             className="text-sm font-medium text-red-700 hover:underline"
           >
-            Dismiss
+            {c.dismiss}
           </button>
         </div>
       ) : null}
@@ -356,7 +373,7 @@ export default function QuotesPage() {
                     : "text-muted hover:bg-slate-100 hover:text-foreground",
                 )}
               >
-                {name}
+                {c.tabs[name]}
                 <span className="ml-1.5 text-xs opacity-70">{counts[name]}</span>
               </button>
             ))}
@@ -364,7 +381,7 @@ export default function QuotesPage() {
 
           <div className="flex flex-wrap items-center gap-2">
             <label className="relative">
-              <span className="sr-only">Search offers</span>
+              <span className="sr-only">{c.searchLabel}</span>
               <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
               <input
                 value={query}
@@ -372,7 +389,7 @@ export default function QuotesPage() {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Search number, customer, subject…"
+                placeholder={c.searchPlaceholder}
                 className="h-9 w-56 rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </label>
@@ -414,16 +431,16 @@ export default function QuotesPage() {
             <button
               type="button"
               disabled={filtered.length === 0}
-              onClick={() => exportOffers(filtered, clientName)}
+              onClick={() => exportOffers(filtered, clientName, csvColumns(c))}
               title={
                 filtered.length === 0
-                  ? "Nothing to export"
-                  : `Export these ${filtered.length} offers as CSV`
+                  ? c.nothingToExport
+                  : format(c.exportHint, { count: filtered.length })
               }
               className="inline-flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm text-muted transition-colors hover:bg-slate-50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ExportIcon className="size-4" />
-              Export
+              {c.export}
             </button>
           </div>
         </div>
@@ -432,12 +449,12 @@ export default function QuotesPage() {
           <table className="w-full min-w-[820px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-slate-50/70">
-                <Th className="w-44">Status</Th>
+                <Th className="w-44">{c.colStatus}</Th>
                 <Th className="w-32">No.</Th>
-                <Th>Customer / Subject</Th>
-                <Th className="w-32">Date</Th>
-                <Th className="w-36 text-right">Amount (net)</Th>
-                <Th className="w-16 text-right">Actions</Th>
+                <Th>{c.colCustomer}</Th>
+                <Th className="w-32">{c.colDate}</Th>
+                <Th className="w-36 text-right">{c.colAmountNet}</Th>
+                <Th className="w-16 text-right">{c.colActions}</Th>
               </tr>
             </thead>
             <tbody>
@@ -450,19 +467,19 @@ export default function QuotesPage() {
                       </div>
                       <p className="mt-3 text-sm font-medium text-foreground">
                         {loading
-                          ? "Loading offers…"
+                          ? c.loadingTitle
                           : quotes.length === 0
-                            ? "No offers yet"
-                            : "Nothing matches those filters"}
+                            ? c.emptyTitle
+                            : c.filteredTitle}
                       </p>
                       <p className="mt-1 text-sm text-muted">
                         {loading
-                          ? "Fetching from the API."
+                          ? c.loadingHint
                           : quotes.length === 0
-                            ? "An offer is a price you put to a customer. Accepted ones convert straight into invoices."
+                            ? c.emptyHint
                             : filterCount > 0
-                              ? "No offers match the filters. Clear them, or try a different tab."
-                              : "Try a different tab or clear the search."}
+                              ? c.filteredHintFilters
+                              : c.filteredHintSearch}
                       </p>
                     </div>
                   </td>
@@ -553,7 +570,7 @@ export default function QuotesPage() {
                 setPageSize(Number(event.target.value));
                 setPage(1);
               }}
-              aria-label="Rows per page"
+              aria-label={c.rowsPerPage}
               className="h-8 rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
             >
               {PAGE_SIZES.map((size) => (
@@ -564,19 +581,19 @@ export default function QuotesPage() {
             </select>
             <p className="text-sm text-muted">
               {filtered.length === 0
-                ? "No entries"
+                ? t.table.noEntries
                 : `Showing ${firstRow} – ${lastRow} of ${filtered.length} entries`}
             </p>
           </div>
 
           <div className="flex items-center gap-1">
-            <PageBtn label="First" disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
-            <PageBtn label="Previous" disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
+            <PageBtn label={c.first} disabled={current === 1} onClick={() => setPage(1)}>«</PageBtn>
+            <PageBtn label={t.table.previous} disabled={current === 1} onClick={() => setPage(current - 1)}>‹</PageBtn>
             <span className="px-2 text-sm text-muted">
               {current} / {pageCount}
             </span>
-            <PageBtn label="Next" disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
-            <PageBtn label="Last" disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
+            <PageBtn label={t.table.next} disabled={current === pageCount} onClick={() => setPage(current + 1)}>›</PageBtn>
+            <PageBtn label={c.last} disabled={current === pageCount} onClick={() => setPage(pageCount)}>»</PageBtn>
           </div>
         </div>
       </section>
@@ -595,37 +612,37 @@ export default function QuotesPage() {
                   style={{ top: menu.top, right: menu.right }}
                   className="fixed z-50 w-56 overflow-hidden rounded-xl border border-border bg-card py-1 text-left shadow-lg"
                 >
-                  <MenuLink href={`/quotes/${quote.id}`}>View offer</MenuLink>
+                  <MenuLink href={`/quotes/${quote.id}`}>{c.view}</MenuLink>
                   {status === "draft" ? (
-                    <MenuLink href={`/quotes/${quote.id}/edit`}>Edit offer</MenuLink>
+                    <MenuLink href={`/quotes/${quote.id}/edit`}>{c.edit}</MenuLink>
                   ) : null}
 
                   {/* Only the transitions the server will actually accept are offered. Showing
                       the rest would just be a menu of guaranteed errors. */}
                   {status === "draft" ? (
                     <MenuButton
-                      onClick={() => act(quote, sendQuote, "Could not mark this offer as sent")}
+                      onClick={() => act(quote, sendQuote, c.markSentError)}
                     >
-                      Mark as sent
+                      {c.markSent}
                     </MenuButton>
                   ) : null}
                   {status === "sent" ? (
                     <>
                       <MenuButton
-                        onClick={() => act(quote, acceptQuote, "Could not accept this offer")}
+                        onClick={() => act(quote, acceptQuote, c.acceptError)}
                       >
-                        Record as accepted
+                        {c.recordAccepted}
                       </MenuButton>
                       <MenuButton
                         tone="danger"
-                        onClick={() => act(quote, rejectQuote, "Could not reject this offer")}
+                        onClick={() => act(quote, rejectQuote, c.rejectError)}
                       >
-                        Record as rejected
+                        {c.recordRejected}
                       </MenuButton>
                     </>
                   ) : null}
                   {status === "accepted" ? (
-                    <MenuButton onClick={() => convert(quote)}>Convert to invoice</MenuButton>
+                    <MenuButton onClick={() => convert(quote)}>{c.convertToInvoice}</MenuButton>
                   ) : null}
                 </div>
               );
@@ -655,33 +672,34 @@ function FilterPanel({
   onChange: (filters: Filters) => void;
   onClose: () => void;
 }) {
+  const c = useT().quotes;
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
 
   return (
     <div
       role="dialog"
-      aria-label="Filter offers"
+      aria-label={c.filterAria}
       className="absolute right-0 top-11 z-40 w-80 rounded-xl border border-border bg-card p-4 shadow-lg"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">Filter</h2>
+        <h2 className="text-sm font-semibold text-foreground">{c.filterHeading}</h2>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close filters"
+          aria-label={c.closeFilters}
           className="rounded-md p-1 text-muted hover:bg-slate-100 hover:text-foreground"
         >
           <CloseIcon className="size-4" />
         </button>
       </div>
 
-      <Field label="Customer">
+      <Field label={c.filterCustomer}>
         <select
           value={filters.clientId}
           onChange={(event) => set({ clientId: event.target.value })}
           className="h-9 w-full rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
         >
-          <option value="">All customers</option>
+          <option value="">{c.allCustomers}</option>
           {clients.map((client) => (
             <option key={client.id} value={client.id}>
               {client.name}
@@ -690,7 +708,7 @@ function FilterPanel({
         </select>
       </Field>
 
-      <Field label="Issued between">
+      <Field label={c.issuedBetween}>
         <div className="flex items-center gap-2">
           <input
             type="date"
@@ -710,12 +728,12 @@ function FilterPanel({
         </div>
       </Field>
 
-      <Field label="Net amount">
+      <Field label={c.netAmount}>
         <div className="flex items-center gap-2">
           <input
             type="number"
             inputMode="decimal"
-            placeholder="Min"
+            placeholder={c.min}
             value={filters.minNet}
             onChange={(event) => set({ minNet: event.target.value })}
             className="h-9 w-full rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
@@ -724,7 +742,7 @@ function FilterPanel({
           <input
             type="number"
             inputMode="decimal"
-            placeholder="Max"
+            placeholder={c.max}
             value={filters.maxNet}
             onChange={(event) => set({ maxNet: event.target.value })}
             className="h-9 w-full rounded-lg border border-border bg-card px-2 text-sm outline-none focus:border-primary"
@@ -738,14 +756,14 @@ function FilterPanel({
           onClick={() => onChange(NO_FILTERS)}
           className="text-sm font-medium text-muted hover:text-foreground"
         >
-          Clear all
+          {c.clearAll}
         </button>
         <button
           type="button"
           onClick={onClose}
           className="text-sm font-medium text-primary hover:underline"
         >
-          Done
+          {c.done}
         </button>
       </div>
     </div>

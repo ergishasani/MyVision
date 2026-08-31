@@ -22,6 +22,8 @@ import {
   isUntouchedDefault,
   type DocumentLanguage,
 } from "@/lib/invoice-document-strings";
+import { useT } from "@/components/providers/locale-provider";
+import { format } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils/cn";
 import { InvoicePreview } from "@/components/invoices/invoice-preview";
 import { InvoiceAttachments } from "@/components/invoices/invoice-attachments";
@@ -30,11 +32,7 @@ const TAX_RATES = [19, 7, 0];
 const UNITS = ["pcs", "hour", "day", "sqm", "meter", "kg", "tonne", "litre", "lump_sum"];
 
 /** Where a reference number came from. XRechnung distinguishes these. */
-const REFERENCE_KINDS = [
-  { value: "own", label: "Own" },
-  { value: "buyer_reference", label: "Buyer reference (Leitweg-ID)" },
-  { value: "order_number", label: "Order number" },
-];
+const REFERENCE_KINDS = ["own", "buyer_reference", "order_number"] as const;
 
 /**
  * The VAT treatments, and the note each one obliges the document to carry.
@@ -50,50 +48,46 @@ const REFERENCE_KINDS = [
 const TAX_SCHEMES = [
   {
     value: "domestic_taxable",
-    group: "In Germany",
-    label: "Taxable supply",
+    group: "domestic",
     noteDe: null,
     noteEn: null,
   },
   {
     value: "domestic_exempt",
-    group: "In Germany",
-    label: "Exempt supply (Sec. 4 UStG)",
+    group: "domestic",
     noteDe: "Steuerfreie Leistung nach § 4 UStG.",
     noteEn: "Exempt from VAT under § 4 UStG.",
   },
   {
     value: "reverse_charge_13b",
-    group: "In Germany",
-    label: "Reverse charge (Sec. 13b UStG)",
+    group: "domestic",
     noteDe: "Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG).",
     noteEn: "Reverse charge — the recipient is liable for the VAT (§ 13b UStG).",
   },
   {
     value: "eu_b2b",
-    group: "Elsewhere in the EU",
-    label: "Intra-community supply",
+    group: "eu",
     noteDe: "Steuerfreie innergemeinschaftliche Lieferung (§ 4 Nr. 1b i.V.m. § 6a UStG).",
     noteEn:
       "Zero-rated intra-community supply (§ 4 Nr. 1b in conjunction with § 6a UStG).",
   },
   {
     value: "export_non_eu",
-    group: "Outside the EU",
-    label: "Export",
+    group: "nonEu",
     noteDe: "Steuerfreie Ausfuhrlieferung (§ 4 Nr. 1a i.V.m. § 6 UStG).",
     noteEn: "Zero-rated export (§ 4 Nr. 1a in conjunction with § 6 UStG).",
   },
 ] as const;
 
+/** Stored payment methods. Their wording is shared with company settings. */
 const PAYMENT_METHODS = [
-  { value: "bank_transfer", label: "Bank transfer" },
-  { value: "cash", label: "Cash" },
-  { value: "card", label: "Card" },
-  { value: "paypal", label: "PayPal" },
-  { value: "stripe", label: "Stripe" },
-  { value: "other", label: "Other" },
-];
+  "bank_transfer",
+  "cash",
+  "card",
+  "paypal",
+  "stripe",
+  "other",
+] as const;
 
 export type Line = {
   description: string;
@@ -144,6 +138,8 @@ function daysBetween(from: string, to: string) {
 }
 
 export default function NewInvoicePage() {
+  const t = useT();
+  const c = t.invoiceEditor;
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = getSession();
@@ -176,7 +172,7 @@ export default function NewInvoicePage() {
   const [costCentre, setCostCentre] = useState("");
   // Which VAT-treatment panel is open. Matches the reference: home country expanded, the two
   // cross-border ones folded away until needed.
-  const [openScheme, setOpenScheme] = useState<string | null>("In Germany");
+  const [openScheme, setOpenScheme] = useState<string | null>("domestic");
   const [savedInvoiceId, setSavedInvoiceId] = useState<string | null>(null);
 
   const [subject, setSubject] = useState("");
@@ -237,11 +233,14 @@ export default function NewInvoicePage() {
         }
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Failed to load contacts");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : c.loadContactsError);
       });
     return () => {
       cancelled = true;
     };
+    // The dictionary is only read for the failure message; re-running on a language switch
+    // would refetch contacts and reseed the editor for no reason.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const client = clients.find((c) => c.id === clientId) ?? null;
@@ -387,7 +386,7 @@ export default function NewInvoicePage() {
       setSavedInvoiceId(created.id);
       setSaving(false);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not save this invoice");
+      setError(err instanceof ApiError ? err.message : c.saveError);
       setSaving(false);
     }
   }
@@ -426,13 +425,13 @@ export default function NewInvoicePage() {
         <div className="flex items-center gap-4">
           <Link
             href="/invoices"
-            aria-label="Back to invoices"
+            aria-label={c.backAria}
             className="grid size-9 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 hover:text-foreground"
           >
             <ChevronLeftIcon className="size-4" />
           </Link>
           <h1 className="text-lg font-semibold text-foreground">
-            {eInvoice ? "Create e-invoice" : "Create invoice"}
+            {eInvoice ? c.createEInvoice : c.createInvoice}
           </h1>
 
           <label className="ml-2 flex items-center gap-2 border-l border-border pl-4">
@@ -453,7 +452,7 @@ export default function NewInvoicePage() {
                 )}
               />
             </button>
-            <span className="text-sm text-foreground">E-invoice</span>
+            <span className="text-sm text-foreground">{c.eInvoice}</span>
           </label>
         </div>
 
@@ -463,11 +462,11 @@ export default function NewInvoicePage() {
             className="hidden h-9 items-center gap-1.5 rounded-lg bg-slate-100 px-3 text-sm text-muted transition-colors hover:bg-slate-200 sm:inline-flex"
           >
             <ClockIcon className="size-4" />
-            Old version
+            {c.oldVersion}
           </Link>
           <Link
             href="/settings/accounting"
-            aria-label="Document settings"
+            aria-label={c.documentSettings}
             className="grid size-9 place-items-center rounded-lg border border-border text-muted transition-colors hover:bg-slate-50 hover:text-foreground"
           >
             <GearIcon className="size-4" />
@@ -478,7 +477,7 @@ export default function NewInvoicePage() {
             onClick={() => save(false)}
             className="inline-flex h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save draft"}
+            {saving ? c.saving : c.saveDraft}
           </button>
           <button
             type="button"
@@ -527,7 +526,7 @@ export default function NewInvoicePage() {
 
             {error ? (
               <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
-                <p className="text-sm font-medium text-red-700">Could not save</p>
+                <p className="text-sm font-medium text-red-700">{c.saveErrorHeading}</p>
                 <p className="mt-1 text-sm text-red-600">{error}</p>
               </div>
             ) : null}
@@ -537,9 +536,9 @@ export default function NewInvoicePage() {
             ) : (
               <div className="space-y-10 pb-16 pt-8">
                 {/* --- recipient ------------------------------------------- */}
-                <Section title="Recipient">
+                <Section title={c.recipient}>
                   <div className="flex items-baseline justify-between">
-                    <Label required={eInvoice}>Contact</Label>
+                    <Label required={eInvoice}>{c.contact}</Label>
                     <Link href="/clients" className="text-sm text-primary hover:underline">
                       Create new contact
                     </Link>
@@ -555,7 +554,7 @@ export default function NewInvoicePage() {
                       const match = clients.find((c) => c.name === value);
                       setClientId(match ? match.id : "");
                     }}
-                    placeholder="Person or organisation"
+                    placeholder={c.contactPlaceholder}
                     className={inputClass}
                   />
                   <datalist id="invoice-contacts">
@@ -570,7 +569,7 @@ export default function NewInvoicePage() {
                   ) : null}
 
                   <div className="mt-5 flex items-baseline justify-between">
-                    <Label>Address</Label>
+                    <Label>{c.address}</Label>
                     {!addressTouched ? (
                       <button
                         type="button"
@@ -598,7 +597,7 @@ export default function NewInvoicePage() {
                     onChange={(event) =>
                       setAddress({ ...effectiveAddress, line1: event.target.value })
                     }
-                    placeholder="Street and number"
+                    placeholder={c.phStreet}
                     className={cn(inputClass, !addressTouched && inheritedClass)}
                   />
                   <div className="mt-2 flex gap-2">
@@ -608,7 +607,7 @@ export default function NewInvoicePage() {
                       onChange={(event) =>
                         setAddress({ ...effectiveAddress, postalCode: event.target.value })
                       }
-                      placeholder="Postcode"
+                      placeholder={c.phPostcode}
                       className={cn(inputClass, "w-36", !addressTouched && inheritedClass)}
                     />
                     <input
@@ -617,7 +616,7 @@ export default function NewInvoicePage() {
                       onChange={(event) =>
                         setAddress({ ...effectiveAddress, city: event.target.value })
                       }
-                      placeholder="City"
+                      placeholder={c.phCity}
                       className={cn(inputClass, "flex-1", !addressTouched && inheritedClass)}
                     />
                   </div>
@@ -629,7 +628,7 @@ export default function NewInvoicePage() {
                     }
                     className={cn(inputClass, "mt-2", !addressTouched && inheritedClass)}
                   >
-                    <option value="">No country</option>
+                    <option value="">{c.noCountry}</option>
                     {countries.map((country) => (
                       <option key={country.code} value={country.code}>
                         {country.name}
@@ -654,12 +653,12 @@ export default function NewInvoicePage() {
                       without an address to deliver it to. */}
                   {eInvoice ? (
                     <div className="mt-5">
-                      <Label required>Email address</Label>
+                      <Label required>{c.emailAddress}</Label>
                       <input
                         type="email"
                         value={recipientEmail || client?.email || ""}
                         onChange={(event) => setRecipientEmail(event.target.value)}
-                        placeholder="mail@company.de"
+                        placeholder={c.phEmail}
                         className={inputClass}
                       />
                       {!effectiveEmail ? (
@@ -672,9 +671,9 @@ export default function NewInvoicePage() {
                 </Section>
 
                 {/* --- invoice information --------------------------------- */}
-                <Section title="Invoice information">
+                <Section title={c.invoiceInformation}>
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Invoice date" required>
+                    <Field label={c.invoiceDate} required>
                       <input
                         type="date"
                         value={issueDate}
@@ -685,13 +684,13 @@ export default function NewInvoicePage() {
 
                     <div>
                       <div className="flex items-baseline justify-between">
-                        <Label required>{usePeriod ? "Service period" : "Delivery date"}</Label>
+                        <Label required>{usePeriod ? c.servicePeriod : c.deliveryDate}</Label>
                         <button
                           type="button"
                           onClick={() => setUsePeriod((on) => !on)}
                           className="text-sm text-primary hover:underline"
                         >
-                          {usePeriod ? "Single date" : "Period"}
+                          {usePeriod ? c.singleDate : c.period}
                         </button>
                       </div>
                       {usePeriod ? (
@@ -724,7 +723,7 @@ export default function NewInvoicePage() {
                       </p>
                     </div>
 
-                    <Field label="Invoice number" required>
+                    <Field label={c.invoiceNumber} required>
                       <div className="relative">
                         <input
                           value={nextNumber ?? "assigned on save"}
@@ -733,7 +732,7 @@ export default function NewInvoicePage() {
                         />
                         <Link
                           href="/settings/accounting"
-                          aria-label="Numbering settings"
+                          aria-label={c.numberingSettings}
                           className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted hover:bg-slate-100"
                         >
                           <GearIcon className="size-4" />
@@ -742,7 +741,7 @@ export default function NewInvoicePage() {
                     </Field>
 
                     <div>
-                      <Label>Reference number</Label>
+                      <Label>{c.referenceNumber}</Label>
                       {/* XRechnung distinguishes what a reference is — a buyer's Leitweg-ID is
                           not the same field as your own order number — so the kind is only asked
                           for when it actually changes the export. */}
@@ -754,8 +753,8 @@ export default function NewInvoicePage() {
                             className={cn(inputClass, "w-44")}
                           >
                             {REFERENCE_KINDS.map((kind) => (
-                              <option key={kind.value} value={kind.value}>
-                                {kind.label}
+                              <option key={kind} value={kind}>
+                                {c.referenceKinds[kind]}
                               </option>
                             ))}
                           </select>
@@ -775,7 +774,7 @@ export default function NewInvoicePage() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <Label required={eInvoice}>Payment due</Label>
+                      <Label required={eInvoice}>{c.paymentDue}</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="date"
@@ -783,26 +782,26 @@ export default function NewInvoicePage() {
                           onChange={(event) => setDueDate(event.target.value)}
                           className={cn(inputClass, "max-w-xs")}
                         />
-                        <span className="text-sm text-muted">in</span>
+                        <span className="text-sm text-muted">{c.inWord}</span>
                         <input
                           value={paymentTermDays}
                           onChange={(event) => setTermDays(Number(event.target.value))}
                           inputMode="numeric"
                           className="h-10 w-16 rounded-lg border border-border bg-card px-2 text-center text-sm outline-none focus:border-primary"
                         />
-                        <span className="text-sm text-muted">days</span>
+                        <span className="text-sm text-muted">{c.daysWord}</span>
                       </div>
                     </div>
                   </div>
                 </Section>
 
                 {/* --- header text ----------------------------------------- */}
-                <Section title="Header text">
-                  <Field label="Subject" required>
+                <Section title={c.headerText}>
+                  <Field label={c.subject} required>
                     <input
                       value={subject}
                       onChange={(event) => setSubject(event.target.value)}
-                      placeholder="Invoice"
+                      placeholder={c.subjectPlaceholder}
                       className={inputClass}
                     />
                   </Field>
@@ -816,12 +815,12 @@ export default function NewInvoicePage() {
 
                 {/* --- items ------------------------------------------------ */}
                 <Section
-                  title="Items"
+                  title={c.items}
                   aside={
                     <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs">
                       {[
-                        { value: true, label: "Gross" },
-                        { value: false, label: "Net" },
+                        { value: true, label: c.gross },
+                        { value: false, label: c.net },
                       ].map((mode) => (
                         <button
                           key={mode.label}
@@ -852,13 +851,14 @@ export default function NewInvoicePage() {
                       <thead>
                         <tr className="border-b border-border text-left text-[0.7rem] uppercase tracking-wide text-muted">
                           <th className="w-8 pb-2">#</th>
-                          <th className="pb-2">Product or service</th>
+                          <th className="pb-2">{c.colProductOrService}</th>
                           <th className="w-32 pb-2">
-                            Price <span className="font-normal opacity-70">net</span>
+                            {c.colPrice}{" "}
+                            <span className="font-normal opacity-70">{c.colPriceNetSuffix}</span>
                           </th>
-                          <th className="w-36 pb-2">Qty</th>
-                          <th className="w-20 pb-2">VAT</th>
-                          <th className="w-28 pb-2 text-right">Amount</th>
+                          <th className="w-36 pb-2">{c.colQty}</th>
+                          <th className="w-20 pb-2">{c.colVat}</th>
+                          <th className="w-28 pb-2 text-right">{c.colAmount}</th>
                           <th className="w-8" />
                         </tr>
                       </thead>
@@ -872,7 +872,7 @@ export default function NewInvoicePage() {
                                 onChange={(event) =>
                                   updateLine(index, { description: event.target.value })
                                 }
-                                placeholder="Product or service"
+                                placeholder={c.phProductOrService}
                                 className={smallInput}
                               />
                               <input
@@ -880,7 +880,7 @@ export default function NewInvoicePage() {
                                 onChange={(event) =>
                                   updateLine(index, { detail: event.target.value })
                                 }
-                                placeholder="Add a description"
+                                placeholder={c.phAddDescription}
                                 className={cn(smallInput, "mt-1.5 text-xs")}
                               />
                             </td>
@@ -937,7 +937,7 @@ export default function NewInvoicePage() {
                                 }
                                 title={
                                   taxScheme !== "domestic_taxable"
-                                    ? "This VAT treatment charges no tax"
+                                    ? c.noTaxHint
                                     : undefined
                                 }
                                 className={cn(smallInput, "disabled:opacity-50")}
@@ -1015,7 +1015,7 @@ export default function NewInvoicePage() {
                       </div>
                     ) : null}
                     <div className="flex justify-between text-muted">
-                      <span>Total net (incl. discounts / surcharges)</span>
+                      <span>{c.totalNet}</span>
                       <span className="tabular-nums">
                         {formatMoney(totals.subtotal - totals.discount, currency)}
                       </span>
@@ -1023,18 +1023,18 @@ export default function NewInvoicePage() {
                     {/* The rate is part of the label, as on the form: "VAT" alone does not say
                         which rate produced the figure when lines mix 19 and 7. */}
                     <div className="flex justify-between text-muted">
-                      <span>VAT {vatRateLabel}</span>
+                      <span>{format(c.vatWithRate, { rate: vatRateLabel })}</span>
                       <span className="tabular-nums">{formatMoney(totals.tax, currency)}</span>
                     </div>
                     <div className="flex justify-between border-t border-border pt-4 text-lg font-semibold text-foreground">
-                      <span>Total</span>
+                      <span>{c.total}</span>
                       <span className="tabular-nums">{formatMoney(totals.total, currency)}</span>
                     </div>
                   </div>
                 </Section>
 
                 {/* --- footer text ------------------------------------------ */}
-                <Section title="Footer text">
+                <Section title={c.footerText}>
                   <textarea
                     value={terms}
                     onChange={(event) => setTerms(event.target.value)}
@@ -1048,9 +1048,9 @@ export default function NewInvoicePage() {
                 </Section>
 
                 {/* --- further options -------------------------------------- */}
-                <Section title="Further options">
+                <Section title={c.furtherOptions}>
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Currency">
+                    <Field label={c.currency}>
                       <select
                         value={currency}
                         onChange={(event) => setCurrency(event.target.value)}
@@ -1064,7 +1064,7 @@ export default function NewInvoicePage() {
                       </select>
                     </Field>
 
-                    <Field label="Internal contact">
+                    <Field label={c.internalContact}>
                       <select
                         value={session?.user.id ?? ""}
                         onChange={() => {
@@ -1079,7 +1079,7 @@ export default function NewInvoicePage() {
                       </select>
                     </Field>
 
-                    <Field label="Language">
+                    <Field label={c.language}>
                       <select
                         value={language}
                         onChange={(event) =>
@@ -1087,36 +1087,36 @@ export default function NewInvoicePage() {
                         }
                         className={inputClass}
                       >
-                        <option value="en">English</option>
-                        <option value="de">German</option>
+                        <option value="en">{c.languageEnglish}</option>
+                        <option value="de">{c.languageGerman}</option>
                       </select>
                     </Field>
 
-                    <Field label="Cost centre">
+                    <Field label={c.costCentre}>
                       <input
                         value={costCentre}
                         onChange={(event) => setCostCentre(event.target.value)}
-                        placeholder="None"
+                        placeholder={c.costCentrePlaceholder}
                         className={inputClass}
                       />
                     </Field>
 
-                    <Field label="Payment method" required>
+                    <Field label={c.paymentMethod} required>
                       <select
                         value={paymentMethod}
                         onChange={(event) => setPaymentMethod(event.target.value)}
                         className={inputClass}
                       >
                         {PAYMENT_METHODS.map((method) => (
-                          <option key={method.value} value={method.value}>
-                            {method.label}
+                          <option key={method} value={method}>
+                            {t.settings.company.paymentMethods[method]}
                           </option>
                         ))}
                       </select>
                     </Field>
 
                     <div className="sm:col-span-2">
-                      <Label>Issued by</Label>
+                      <Label>{c.issuedBy}</Label>
                       {/* The name itself is not optional — Sec. 14 UStG requires the supplier's
                           full name — so this picks which name the document carries. */}
                       <label className="flex items-center gap-3 py-1.5">
@@ -1138,18 +1138,20 @@ export default function NewInvoicePage() {
                           />
                         </button>
                         <span className="text-sm text-foreground">
-                          Show company name
+                          {c.showCompanyName}
                           <span className="ml-2 text-xs text-muted">
                             {showCompanyName
-                              ? "Invoicing as a business"
-                              : `Invoicing as ${session?.user.fullName ?? "yourself"}`}
+                              ? c.invoicingAsBusiness
+                              : format(c.invoicingAsPerson, {
+                                  name: session?.user.fullName ?? c.yourself,
+                                })}
                           </span>
                         </span>
                       </label>
                     </div>
 
                     <div className="sm:col-span-2">
-                      <Label>Early payment discount (Skonto)</Label>
+                      <Label>{c.skonto}</Label>
                       {/* Units sit inside the fields, as on the reference. */}
                       <div className="flex items-center gap-3">
                         <div className="relative flex-1">
@@ -1186,9 +1188,9 @@ export default function NewInvoicePage() {
                 </Section>
 
                 {/* --- VAT treatment ---------------------------------------- */}
-                <Section title="VAT treatment">
+                <Section title={c.vatTreatment}>
                   <div className="space-y-3">
-                    {["In Germany", "Elsewhere in the EU", "Outside the EU"].map((groupName) => {
+                    {(["domestic", "eu", "nonEu"] as const).map((groupName) => {
                       const open = openScheme === groupName;
                       return (
                         <div key={groupName} className="overflow-hidden rounded-lg bg-slate-50">
@@ -1198,7 +1200,7 @@ export default function NewInvoicePage() {
                             onClick={() => setOpenScheme(open ? null : groupName)}
                             className="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-foreground"
                           >
-                            {groupName}
+                            {c.schemeGroups[groupName]}
                             <ChevronDownIcon
                               className={cn(
                                 "size-4 text-muted transition-transform",
@@ -1222,7 +1224,7 @@ export default function NewInvoicePage() {
                                     className="mt-0.5"
                                   />
                                   <span className="flex items-start gap-1.5">
-                                    <span className="text-foreground">{option.label}</span>
+                                    <span className="text-foreground">{c.schemeLabels[option.value]}</span>
                                     {option.noteDe ? (
                                       <InfoDot
                                         text={language === "de" ? option.noteDe : option.noteEn}
@@ -1246,10 +1248,9 @@ export default function NewInvoicePage() {
                   ) : null}
                 </Section>
                 {/* --- attachments ------------------------------------------ */}
-                <Section title="Add documents">
+                <Section title={c.addDocuments}>
                   <p className="-mt-2 mb-4 text-sm text-muted">
-                    Extra documents, such as delivery notes, are stored against the invoice and
-                    travel with it.
+                    {c.addDocumentsHint}
                   </p>
                   <InvoiceAttachments invoiceId={savedInvoiceId} />
                 </Section>
@@ -1272,12 +1273,12 @@ export default function NewInvoicePage() {
 /* --- the design tab ------------------------------------------------------- */
 
 function DesignTab() {
+  const c = useT().invoiceEditor;
   return (
     <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center">
-      <p className="text-sm font-medium text-foreground">Document design lives in settings</p>
+      <p className="text-sm font-medium text-foreground">{c.designTitle}</p>
       <p className="mx-auto mt-1 max-w-md text-sm text-muted">
-        Logo, colours and the letterhead are set once for every document rather than per invoice,
-        so they stay consistent across everything you send.
+        {c.designBody}
       </p>
       <Link
         href="/settings/stationery"
