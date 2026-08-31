@@ -22,33 +22,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthGuard>
-      {/* The shell is exactly one viewport tall and never scrolls itself, so the sidebar stays put
-          however long the page is — `min-h-screen` let the whole window scroll instead, carrying
-          the nav off the top of a tall page. Bounding the height here is also what finally lets the
-          sidebar's own overflow work: a flex child can only scroll inside a parent with a height.
-          `dvh` rather than `vh` so mobile browser chrome does not push the bottom out of reach. */}
-      <div className="flex h-dvh overflow-hidden bg-background">
+      {/* The document itself scrolls here: no viewport-height wrapper, no nested scroll container.
+          That is the whole point of this arrangement. Mobile Safari only collapses its toolbar on
+          scroll, and only lets content run underneath it, when the *page* is what scrolled —
+          scrolling inside a child element leaves the browser chrome sitting at full height
+          forever, eating the bottom of the screen.
+
+          The sidebar can still hold its position through all of that because it is `fixed` at
+          every width; the content column is inset by its width from `lg` up rather than sitting
+          beside it in a flex row. */}
+      <div className="bg-background">
         <SidebarNav open={navOpen} onClose={() => setNavOpen(false)} />
 
-        {/* `min-w-0` so a wide table can scroll inside itself instead of stretching this column
-            past the viewport: a flex child defaults to min-width:auto, which on a phone was enough
-            to push the page sideways. */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="lg:pl-[250px]">
           <MobileTopBar onOpen={() => setNavOpen(true)} />
 
           {/* `relative` is load-bearing, not decoration. Tailwind's `sr-only` is position:absolute,
-              and without a positioned ancestor its containing block is the initial containing block —
-              so `overflow-y-auto` here could not clip it, and every off-screen screen-reader label
-              stretched <html> past the viewport. That gave the document a second scrollbar and left a
-              band of empty background under the shell. Making this the containing block clips them. */}
-          <main className="relative flex-1 overflow-y-auto">
-            {/* Near full width. The cap only bites on ultrawide displays, where a table
-                stretched across 3000px becomes hard to read across a row. The bottom inset adds to
-                the padding rather than replacing it, so the last row of a table clears the home
-                indicator instead of sitting under it. */}
-            <div className="mx-auto w-full max-w-[1800px] px-6 pt-7 pb-[calc(1.75rem_+_env(safe-area-inset-bottom))] xl:px-8">
-              {children}
-            </div>
+              and without a positioned ancestor its containing block is the initial containing
+              block, which drops every off-screen screen-reader label at the page origin and
+              stretches the document out from under itself.
+
+              Near full width. The cap only bites on ultrawide displays, where a table stretched
+              across 3000px becomes hard to read across a row. The bottom inset adds to the padding
+              rather than replacing it, so the last row of a table clears the home indicator
+              instead of sitting under it. */}
+          <main className="relative mx-auto w-full max-w-[1800px] px-6 pt-7 pb-[calc(1.75rem_+_env(safe-area-inset-bottom))] xl:px-8">
+            {children}
           </main>
         </div>
       </div>

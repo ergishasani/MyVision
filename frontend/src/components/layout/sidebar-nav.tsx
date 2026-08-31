@@ -193,6 +193,12 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
   useEffect(() => {
     if (!open) return;
 
+    // The page behind the drawer used to be unscrollable for nothing, back when the shell was a
+    // viewport-tall box with its overflow hidden. Now that the document scrolls, a drag on the
+    // backdrop would carry the page along underneath it.
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+
     previouslyFocused.current = document.activeElement as HTMLElement | null;
     // preventScroll: focusing inside a panel that is still sliding in makes the browser try to
     // scroll it into view, which fights the transform.
@@ -207,6 +213,7 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = overflow;
       // Back to the button that opened it, which is otherwise gone from the page.
       previouslyFocused.current?.focus();
     };
@@ -386,7 +393,7 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
         ref={asideRef}
         id="app-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[250px] shrink-0 flex-col border-r border-border bg-sidebar",
+          "fixed inset-y-0 left-0 z-40 flex w-[250px] flex-col border-r border-border bg-sidebar",
           // The panel runs the full height of the screen, so its own background fills the notch
           // and home-indicator bands while the padding keeps the brand and the account row clear
           // of them. Both insets are 0 everywhere except iOS, so the desktop column is untouched.
@@ -399,7 +406,11 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
           // CSS `translate` property, so a transform transition here animates nothing and the
           // panel simply appears.
           "transition-[translate,visibility,box-shadow] ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
-          "lg:static lg:visible lg:translate-x-0 lg:shadow-none",
+          // Stays `fixed` at every width rather than rejoining the flow at `lg`. The shell used
+          // to be a viewport-tall box so that the sidebar could not scroll away; now that the
+          // document scrolls, being fixed is what keeps it still, and the content column is simply
+          // inset by its width instead.
+          "lg:visible lg:translate-x-0 lg:shadow-none",
           open
             ? "visible translate-x-0 shadow-xl duration-300"
             : "invisible -translate-x-full duration-200",
@@ -549,9 +560,13 @@ export function SidebarNav({ open, onClose }: { open: boolean; onClose: () => vo
 export function MobileTopBar({ onOpen }: { onOpen: () => void }) {
   const t = useT();
   return (
+    // `sticky` rather than a row in a fixed column: the document scrolls now, so the bar would
+    // otherwise leave with it. Below the drawer and its backdrop in the stack, so an open menu
+    // still covers it.
+    //
     // The bar keeps its 3.5rem of content and grows by the top inset, rather than having the
     // notch eat into it — padding alone against a fixed height would squash the row.
-    <header className="flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 items-center gap-2 border-b border-border bg-sidebar px-4 pt-[env(safe-area-inset-top)] lg:hidden">
+    <header className="sticky top-0 z-20 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] items-center gap-2 border-b border-border bg-sidebar px-4 pt-[env(safe-area-inset-top)] lg:hidden">
       <button
         type="button"
         onClick={onOpen}
