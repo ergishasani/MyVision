@@ -1840,6 +1840,8 @@ const en = {
 
     search: "Search",
     signOut: "Sign out",
+    openMenu: "Open navigation",
+    closeMenu: "Close navigation",
   },
 
   settings: {
@@ -3946,6 +3948,8 @@ const de: Dictionary = {
 
     search: "Suchen",
     signOut: "Abmelden",
+    openMenu: "Navigation öffnen",
+    closeMenu: "Navigation schließen",
   },
 
   settings: {
