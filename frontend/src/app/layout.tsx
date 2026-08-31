@@ -21,8 +21,23 @@ export const viewport: Viewport = {
   // rest. Everything pinned to an edge pads itself back out with env(safe-area-inset-*), so no
   // content ends up under the notch or the home indicator.
   viewportFit: "cover",
-  // Matches --background, so Safari tints its own chrome to the page instead of guessing at it.
-  themeColor: "#f8fafc",
+  /*
+   * The colour Safari tints its own status bar and toolbar with — the two bands the page cannot
+   * paint itself.
+   *
+   * White rather than --background: the band at the top sits directly against the mobile top bar,
+   * which is --sidebar (#fff), so matching the page background instead left a visible seam between
+   * the two. The content behind the bottom band is --background, near enough to white that one
+   * value serves both ends.
+   *
+   * Declared for both schemes on purpose. Given a single light-only theme colour, Safari on a
+   * phone set to Dark Mode discards it and falls back to its default grey chrome, which is the
+   * band this is meant to remove. Repeating the same colour opts out of that.
+   */
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#ffffff" },
+  ],
 };
 
 export default function RootLayout({
